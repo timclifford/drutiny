@@ -33,7 +33,7 @@ use Drutiny\Annotation\Token;
  * @Param(
  *  name = "default_value",
  *  description = "If no SQL result set is returned, what should the default value of the field be?",
- *  type = "string"
+ *  type = "string",
  *  default = ""
  * )
  * @Token(
