@@ -20,31 +20,31 @@ use Drutiny\Annotation\Token;
  *  name = "exclude",
  *  description = "Absolute filepaths to directories omit from scanning",
  *  type = "array",
- *  default = "[]"
+ *  default = {}
  * )
  * @Param(
  *  name = "filetypes",
  *  description = "file extensions to include in the scan",
  *  type = "array",
- *  default = "['php']"
+ *  default = {}
  * )
  * @Param(
  *   name = "patterns",
  *   description = "patterns to run over each matching file.",
  *   type = "array",
- *   default = "[]"
+ *   default = {}
  * )
  * @Param(
  *   name = "whitelist",
  *   description = "Whitelist patterns which the 'patterns' parameter may yield false positives from",
  *   type = "array",
- *   default = "[]"
+ *   default = {}
  * )
  * @Token(
  *   name = "results",
  *   description = "An array of results matching the scan criteria. Each match is an assoc array with the following keys: filepath, line, code, basename.",
  *   type = "array",
- *   default = "[]"
+ *   default = {}
  * )
  */
 class CodeScan extends Audit {
@@ -59,9 +59,14 @@ class CodeScan extends Audit {
     $directory =  strtr($directory, $stat['%paths']);
 
 
-    $command = ['find', $stat['%paths']['%root'], '-regex'];
+    $command = ['find', $stat['%paths']['%root']];
 
-    $command[] = "'.*\.\(" . implode('\|', $sandbox->getParameter('filetypes', ['php'])) . "\)'";
+    $types = $sandbox->getParameter('filetypes', []);
+
+    if (!empty($types)) {
+      $command[] = '-regex';
+      $command[] = "'.*\.\(" . implode('\|', $sandbox->getParameter('filetypes', ['php'])) . "\)'";
+    }
 
     foreach ($sandbox->getParameter('exclude', []) as $filepath) {
       $filepath = strtr($filepath, $stat['%paths']);
@@ -69,7 +74,7 @@ class CodeScan extends Audit {
     }
 
     $command[] = '| xargs grep -nE';
-    $command[] = "'" . implode('|', array_map('addslashes', $sandbox->getParameter('patterns', []))) . "'";
+    $command[] = '"' . implode('|', $sandbox->getParameter('patterns', [])) . '" || exit 0';
 
     $whitelist = $sandbox->getParameter('whitelist', []);
     if (!empty($whitelist)) {
