@@ -28,6 +28,13 @@ use Drutiny\Annotation\Token;
  *  name = "comp_type",
  *  description = "The comparison operator to use for the comparison.",
  *  type = "string"
+ *  default = "="
+ * )
+ * @Param(
+ *  name = "default_value",
+ *  description = "If no SQL result set is returned, what should the default value of the field be?",
+ *  type = "string"
+ *  default = ""
  * )
  * @Token(
  *  name = "result",
@@ -68,9 +75,14 @@ class SqlResultAudit extends AbstractComparison {
       }
     }
 
+    $field = $sandbox->getParameter('field');
+
     if (empty($results)) {
-      return FALSE;
+      $results[] = [
+        $field => $sandbox->getParameter('default_value'),
+      ];
     }
+
     $row = array_shift($results);
 
     $field = $sandbox->getParameter('field');
