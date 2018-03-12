@@ -27,7 +27,7 @@ use Drutiny\Annotation\Token;
  * @Param(
  *  name = "comp_type",
  *  description = "The comparison operator to use for the comparison.",
- *  type = "string"
+ *  type = "string",
  *  default = "="
  * )
  * @Param(
