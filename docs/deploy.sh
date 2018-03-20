@@ -10,7 +10,7 @@ sudo pip install -r docs/requirements.txt
 composer config minimum-stability dev
 composer require --prefer-stable  drutiny/plugin-distro-common drutiny/acquia drutiny/sumologic drutiny/http drutiny/plugin-drupal-7 drutiny/plugin-drupal-8 drutiny/cloudflare
 
-./bin/build_docs 2>/dev/null
+./bin/build_docs
 mkdocs build --clean
 
 if [ -d ghp ]; then
