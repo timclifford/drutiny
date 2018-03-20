@@ -1,10 +1,12 @@
 #!/bin/bash -ex
 
+openssl aes-256-cbc -K $encrypted_9472126ed793_key -iv $encrypted_9472126ed793_iv -in docs/ghp-id_rsa.enc -out ghp-id_rsa -d
+
 ssh-add ghp-id_rsa
 
-# sudo pip install -r docs/requirements.txt
-# composer config minimum-stability dev
-# composer require --prefer-stable  drutiny/plugin-distro-common drutiny/acquia drutiny/sumologic drutiny/http drutiny/plugin-drupal-7 drutiny/plugin-drupal-8 drutiny/cloudflare
+sudo pip install -r docs/requirements.txt
+composer config minimum-stability dev
+composer require --prefer-stable  drutiny/plugin-distro-common drutiny/acquia drutiny/sumologic drutiny/http drutiny/plugin-drupal-7 drutiny/plugin-drupal-8 drutiny/cloudflare
 
 ./bin/build_docs
 mkdocs build --clean
