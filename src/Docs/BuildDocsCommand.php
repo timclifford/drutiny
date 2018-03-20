@@ -25,15 +25,14 @@ class BuildDocsCommand extends Command {
    * @inheritdoc
    */
   protected function execute(InputInterface $input, OutputInterface $output) {
+    $this->clean()
+         ->setup()
+         ->buildPolicyLibrary($output);
+  }
+
+  protected function buildPolicyLibrary(OutputInterface $output)
+  {
     $policies = (new \Drutiny\Registry())->policies();
-
-    file_exists('docs/index.md') || copy('README.md', 'docs/index.md');
-
-    if (file_exists('docs/policies')) {
-      exec('rm -rf docs/policies');
-    }
-
-    mkdir('docs/policies');
 
     $toc = [];
     $pages = [];
@@ -41,10 +40,8 @@ class BuildDocsCommand extends Command {
     foreach ($policies as $policy) {
       $package = $this->findPackage($policy);
 
-
-
       $md = [];
-      $md[] = $link = strtr('## title (name)', [
+      $md[] = $link = strtr('## title', [
         'title' => $policy->get('title'),
         'name' => $policy->get('name'),
       ]);
@@ -56,12 +53,21 @@ class BuildDocsCommand extends Command {
         'link' => str_replace(' ', '-', trim(preg_replace('/[^a-z0-9 \-]/', '', strtolower($link)))),
       ];
 
+      $md[] = "**Name**: `" . $policy->get('name') . "`  ";
       $md[] = "**Package**: `$package`  ";
       $md[] = "**Class**: `" . $policy->get('class') . "`";
       $md[] = '';
       $md[] = $policy->get('description');
 
+      $audit = (new \Drutiny\Registry)->getAuditMedtadata($policy->get('class'));
+
       $params = $policy->get('parameters');
+      foreach ($audit->params as $param) {
+        if (isset($params[$param->name])) {
+          $params[$param->name] = array_merge($param->toArray(), $params[$param->name]);
+        }
+      }
+
       if (!empty($params)) {
         $md[] = '';
         $md[] = '### Parameters';
@@ -69,11 +75,18 @@ class BuildDocsCommand extends Command {
         $md[] = '-- | -- | -- | --';
 
         foreach ($params as $name => $param) {
+          // $params may not correctly conform so this it just to prevent the
+          // php notices.
+          $param = array_merge([
+            'type' => '',
+            'description' => '',
+            'default' => '',
+          ], $param);
           $md[] = strtr('Name | Type | Description | Default', [
             'Name' => $name,
             'Type' => $param['type'],
             'Description' => $param['description'],
-            'Default' => $param['default'],
+            'Default' => str_replace(PHP_EOL, '<br>', Yaml::dump($param['default'])),
           ]);
         }
       }
@@ -123,6 +136,29 @@ class BuildDocsCommand extends Command {
     $mkdocs['pages'][3] = ['Policy Library' => $nav];
     file_put_contents('mkdocs.yml', Yaml::dump($mkdocs, 6));
     $output->writeln("Updated mkdocs.yml");
+  }
+
+  protected function clean()
+  {
+    $paths = array_filter([
+      'docs/policies',
+      'docs/img',
+      'docs/index.md'
+    ], 'file_exists');
+
+    foreach ($paths as $path) {
+      exec('rm -rf ' . $path);
+    }
+    return $this;
+  }
+
+  protected function setup()
+  {
+    copy('README.md', 'docs/index.md');
+    mkdir('docs/policies');
+    mkdir('docs/img');
+    copy('assets/favicon.ico', 'docs/img/favicon.ico');
+    return $this;
   }
 
   protected function findPackage($policy)
