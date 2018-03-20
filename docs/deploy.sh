@@ -1,4 +1,5 @@
 #!/bin/bash -ex
+git checkout $TRAVIS_BRANCH
 
 openssl aes-256-cbc -K $encrypted_9472126ed793_key -iv $encrypted_9472126ed793_iv -in docs/ghp-id_rsa.enc -out ghp-id_rsa -d
 
