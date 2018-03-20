@@ -1,29 +1,43 @@
 language: php
-sudo: false
+sudo: required
 dist: trusty
 php:
-  - '5.6'
-  - '7.0'
-  - '7.1'
-
+- '5.6'
+- '7.0'
+- '7.1'
+env: BUILD_DOCS=no
+matrix:
+  include:
+    php: '7.1'
+    env: BUILD_DOCS=yes
 before_script:
-  - sudo rm -f /etc/localtime
-  - sudo ln -s /usr/share/zoneinfo/UTC /etc/localtime
-
+- sudo rm -f /etc/localtime
+- sudo ln -s /usr/share/zoneinfo/UTC /etc/localtime
 install:
-  - travis_retry composer install --no-interaction
-  - composer require drush/drush:^8.1.0
-  - composer info -i
-
+- travis_retry composer install --no-interaction
+- composer require drush/drush:^8.1.0
+- composer info -i
 script:
-  - export PATH="$PATH:$PWD/vendor/bin"
-  - ./vendor/bin/phpunit
-  - ./bin/drutiny policy:list
-  - ./bin/drutiny profile:run test @none
-  - ./bin/drutiny profile:run test @none --uri=site1.test --uri=site2.test -f html -o multisite.test
-
-# Configure email notifications
+- export PATH="$PATH:$PWD/vendor/bin"
+- "./vendor/bin/phpunit"
+- "./bin/drutiny policy:list"
+- "./bin/drutiny profile:run test @none"
+- "./bin/drutiny profile:run test @none --uri=site1.test --uri=site2.test -f html
+  -o multisite.test"
+deploy:
+- provider: script
+  script:
+  - openssl aes-256-cbc -K $encrypted_9472126ed793_key -iv $encrypted_9472126ed793_iv
+    -in docs/ghp-id_rsa.enc -out ghp-id_rsa -d
+  - "./docs/deploy.sh"
+  skip_cleanup: true
+  on:
+    branch: 2.x
+    php: 7.1
 notifications:
   email:
     on_success: never
     on_failure: always
+before_install:
+- openssl aes-256-cbc -K $encrypted_9472126ed793_key -iv $encrypted_9472126ed793_iv
+  -in ghp-id_rsa.enc -out docs/ghp-id_rsa -d
