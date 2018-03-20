@@ -2,7 +2,8 @@
 
 openssl aes-256-cbc -K $encrypted_9472126ed793_key -iv $encrypted_9472126ed793_iv -in docs/ghp-id_rsa.enc -out ghp-id_rsa -d
 
-ssh-add ghp-id_rsa
+export GIT_SSH_COMMAND='ssh -i ghp-id_rsa'
+#ssh-add ghp-id_rsa
 
 sudo pip install -r docs/requirements.txt
 composer config minimum-stability dev
