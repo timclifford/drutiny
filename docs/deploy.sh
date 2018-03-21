@@ -23,6 +23,11 @@ rsync -av docs_html/ ghp/
 cd ghp
 git config user.name "Travis CI"
 git config user.email "drutiny@travis.ci"
-git add .
-git commit -m "Deploy from Travis CI"
-git push
+
+UPDATES=`git status --porcelain`
+
+if [ "$UPDATES" != "" ]; then
+	git add .
+	git commit -m "Deploy from Travis CI"
+	git push
+fi
