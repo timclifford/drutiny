@@ -28,7 +28,7 @@ cd ghp
 git config user.name "Travis CI"
 git config user.email "drutiny@travis.ci"
 
-UPDATES=`git status --porcelaini $TRAVIS_BRANCH/`
+UPDATES=`git status --porcelain $TRAVIS_BRANCH/`
 
 if [ "$UPDATES" != "" ]; then
 	git add $TRAVIS_BRANCH/
