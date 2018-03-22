@@ -18,16 +18,20 @@ if [ -d ghp ]; then
 fi
 
 git clone git@github.com:drutiny/drutiny.github.io.git ghp
-rsync -av docs_html/ ghp/
+if [ -d "ghp/$TRAVIS_BRANCH" ]; then
+	rm -rf "ghp/$TRAVIS_BRANCH"
+fi
+mkdir -p ghp/$TRAVIS_BRANCH
+rsync -av docs_html/ ghp/$TRAVIS_BRANCH/
 
 cd ghp
 git config user.name "Travis CI"
 git config user.email "drutiny@travis.ci"
 
-UPDATES=`git status --porcelain`
+UPDATES=`git status --porcelaini $TRAVIS_BRANCH/`
 
 if [ "$UPDATES" != "" ]; then
-	git add .
+	git add $TRAVIS_BRANCH/
 	git commit -m "Deploy from Travis CI"
 	git push
 fi
