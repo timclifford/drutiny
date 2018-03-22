@@ -10,5 +10,6 @@ Command:
   - Drutiny\Command\ProfileGenerateCommand
   - Drutiny\Command\ProfileListCommand
   - Drutiny\Command\ProfileRunCommand
+  - Drutiny\Command\AuthenticateCommand
 Template:
   - src/Report/templates

@@ -61,6 +61,8 @@ class Registry {
     return (object) $config;
   }
 
+
+
   protected function loadClassInfo($class, $type) {
     $reflect = new \ReflectionClass($class);
     $reader = new AnnotationReader();
@@ -179,6 +181,11 @@ class Registry {
       $registry[$profile['name']] = new ProfileInformation($profile);
     }
     return $registry;
+  }
+
+  public function credentials()
+  {
+    return $this->config()->CredentialSchema;
   }
 
 }
