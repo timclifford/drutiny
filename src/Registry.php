@@ -185,7 +185,9 @@ class Registry {
 
   public function credentials()
   {
-    return $this->config()->CredentialSchema;
+    $config = $this->config();
+    $schema = isset($config->CredentialSchema) ? $config->CredentialSchema : [];
+    return $schema;
   }
 
 }
