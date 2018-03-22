@@ -40,7 +40,7 @@ class PolicyInfoCommand extends Command {
 
     $check_name = $input->getArgument('policy');
     if (!isset($checks[$check_name])) {
-      throw new InvalidArgumentException("$check is not a valid policy.");
+      throw new InvalidArgumentException("$check_name is not a valid policy.");
     }
 
     $info = $checks[$check_name];
