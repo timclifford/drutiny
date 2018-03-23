@@ -9,18 +9,18 @@ use Drutiny\Annotation\Param;
 /**
  * Evaluate a PHP ini setting.
  * @Param(
- *  name = "setting"
- *  description = "The name of the ini setting to check."
+ *  name = "setting",
+ *  description = "The name of the ini setting to check.",
  *  type = "string"
  * )
  * @Param(
- *  name = "value"
- *  description = "The local value of the ini setting to compare for."
+ *  name = "value",
+ *  description = "The local value of the ini setting to compare for.",
  *  type = "mixed"
  * )
  * @Param(
- *  name = "comp_type"
- *  description = "The comparison operator to use for the comparison."
+ *  name = "comp_type",
+ *  description = "The comparison operator to use for the comparison.",
  *  type = "string"
  * )
  */

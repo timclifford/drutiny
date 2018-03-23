@@ -6,6 +6,8 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Drutiny\Registry;
+use Symfony\Component\Finder\Finder;
 
 /**
  * Helper for building checks.
@@ -27,7 +29,127 @@ class BuildDocsCommand extends Command {
   protected function execute(InputInterface $input, OutputInterface $output) {
     $this->clean()
          ->setup()
-         ->buildPolicyLibrary($output);
+         ->buildPolicyLibrary($output)
+         ->buildAuditLibrary($output);
+  }
+
+  protected function buildAuditLibrary(OutputInterface $output)
+  {
+    $registry = new Registry();
+    $finder = new Finder();
+    $finder->files()
+      ->in('.')
+      ->path('/\/Audit\//')
+      ->files()
+      ->name('*.php');
+
+    foreach ($finder as $file) {
+      require_once $file->getPathname();
+    }
+
+    $auditors = array_filter(get_declared_classes(), function ($class) {
+      return is_subclass_of($class, '\Drutiny\Audit');
+    });
+
+    $pages = [];
+    foreach ($auditors as $class) {
+      $metadata = $registry->getAuditMedtadata($class);
+
+      $md = ['## ' . $metadata->class];
+      $md[] = '';
+
+      $policies = array_filter($registry->policies(), function ($policy) use ($metadata) {
+        $class = $policy->get('class');
+        if (strpos($class, '\\') === 0) {
+          $class = substr($class, 1);
+        }
+        return $class == $metadata->class;
+      });
+
+      if (!empty($policies)) {
+        $md[] = '### Policies';
+        $md[] = 'These are the policies that use this class:';
+        $md[] = '';
+        $md[] = 'Name | Title';
+        $md[] = '-- | --';
+        foreach ($policies as $policy) {
+          $md[] = strtr('name | title', [
+            'name' => $policy->get('name'),
+            'title' => $policy->get('title'),
+          ]);
+        }
+
+      }
+
+      if (!empty($metadata->params)) {
+        $md[] = '';
+        $md[] = '### Parameters';
+        $md[] = 'Name | Type | Description | Default';
+        $md[] = '-- | -- | -- | --';
+
+        foreach ($metadata->params as $name => $param) {
+          // $params may not correctly conform so this it just to prevent the
+          // php notices.
+          $param = array_merge([
+            'type' => '',
+            'description' => '',
+            'default' => '',
+          ], (array) $param);
+
+          $md[] = strtr('Name | Type | Description | Default', [
+            'Name' => $name,
+            'Type' => $param['type'],
+            'Description' => $param['description'],
+            'Default' => str_replace(PHP_EOL, '<br>', Yaml::dump($param['default'])),
+          ]);
+        }
+      }
+
+      if (!empty($metadata->tokens)) {
+        $md[] = '';
+        $md[] = '### Tokens';
+        $md[] = 'Name | Type | Description | Default';
+        $md[] = '-- | -- | -- | --';
+
+        foreach ($metadata->tokens as $name => $param) {
+          // $params may not correctly conform so this it just to prevent the
+          // php notices.
+          $param = array_merge([
+            'type' => '',
+            'description' => '',
+            'default' => '',
+          ], (array) $param);
+
+          $md[] = strtr('Name | Type | Description | Default', [
+            'Name' => $name,
+            'Type' => $param['type'],
+            'Description' => $param['description'],
+            'Default' => str_replace(PHP_EOL, '<br>', Yaml::dump($param['default'])),
+          ]);
+        }
+      }
+
+      $namespace = explode('\\', $metadata->class);
+      array_pop($namespace);
+      $namespace = implode('\\', $namespace);
+      $pages[$namespace][$metadata->class] = implode(PHP_EOL, $md);
+    }
+
+    $nav = [];
+    foreach ($pages as $namespace => $list) {
+      ksort($list);
+      $filepath = 'audits/' . str_replace('\\', '', $namespace) . '.md';
+      $nav[] = [$namespace => $filepath];
+      file_put_contents("docs/$filepath", implode("\n\n", $list));
+      $output->writeln("Written docs/$filepath.");
+    }
+
+    $mkdocs = Yaml::parse(file_get_contents('mkdocs.yml'));
+    $mkdocs['pages'][4] = ['Audit Library' => $nav];
+    file_put_contents('mkdocs.yml', Yaml::dump($mkdocs, 6));
+    $output->writeln("Updated mkdocs.yml");
+
+    return $this;
   }
 
   protected function buildPolicyLibrary(OutputInterface $output)
@@ -94,7 +216,7 @@ class BuildDocsCommand extends Command {
       $tokens = $policy->get('tokens');
       if (!empty($tokens)) {
         $md[] = '';
-        $md[] = '### Parameters';
+        $md[] = '### Tokens';
         $md[] = 'Name | Type | Description | Default';
         $md[] = '-- | -- | -- | --';
 
@@ -136,12 +258,14 @@ class BuildDocsCommand extends Command {
     $mkdocs['pages'][3] = ['Policy Library' => $nav];
     file_put_contents('mkdocs.yml', Yaml::dump($mkdocs, 6));
     $output->writeln("Updated mkdocs.yml");
+    return $this;
   }
 
   protected function clean()
   {
     $paths = array_filter([
       'docs/policies',
+      'docs/audits',
       'docs/img',
       'docs/index.md'
     ], 'file_exists');
@@ -156,6 +280,7 @@ class BuildDocsCommand extends Command {
   {
     copy('README.md', 'docs/index.md');
     mkdir('docs/policies');
+    mkdir('docs/audits');
     mkdir('docs/img');
     copy('assets/favicon.ico', 'docs/img/favicon.ico');
     return $this;

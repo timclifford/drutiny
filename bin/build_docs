@@ -5,6 +5,8 @@ use Symfony\Component\Console\Application;
 use Composer\Autoload\ClassLoader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 
+
+
 // Set the timezone to the local OS if supported.
 if (file_exists('/etc/localtime')) {
   $systemZoneName = readlink('/etc/localtime');

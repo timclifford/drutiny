@@ -47,3 +47,31 @@ pages:
                 drutiny/cloudflare: policies/drutiny-cloudflare.md
             -
                 drutiny/http: policies/drutiny-http.md
+    -
+        'Audit Library':
+            -
+                Drutiny\Audit: audits/DrutinyAudit.md
+            -
+                Drutiny\Audit\Drupal: audits/DrutinyAuditDrupal.md
+            -
+                Drutiny\Audit\Filesystem: audits/DrutinyAuditFilesystem.md
+            -
+                Drutiny\Audit\Database: audits/DrutinyAuditDatabase.md
+            -
+                Drutiny\Audit\Apache: audits/DrutinyAuditApache.md
+            -
+                Drutiny\Acquia\Audit: audits/DrutinyAcquiaAudit.md
+            -
+                Drutiny\Plugin\Drupal8\Audit: audits/DrutinyPluginDrupal8Audit.md
+            -
+                Drutiny\Http\Audit: audits/DrutinyHttpAudit.md
+            -
+                Drutiny\Plugin\Drupal7\Audit: audits/DrutinyPluginDrupal7Audit.md
+            -
+                Drutiny\Plugin\Drupal7\Audit\Security: audits/DrutinyPluginDrupal7AuditSecurity.md
+            -
+                Drutiny\Cloudflare\Audit: audits/DrutinyCloudflareAudit.md
+            -
+                Drutiny\SumoLogic\Audit: audits/DrutinySumoLogicAudit.md
+            -
+                Drutiny\Audit\DNS: audits/DrutinyAuditDNS.md
