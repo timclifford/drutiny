@@ -54,14 +54,25 @@ class BuildDocsCommand extends Command {
     $pages = [];
     foreach ($auditors as $class) {
       $metadata = $registry->getAuditMedtadata($class);
-
-      if ($metadata->reflect->getMethod('audit')->isAbstract()) {
-        continue;
-      }
+      $package = $this->findPackage($metadata->filename);
 
       $md = ['## ' . $metadata->class];
       $md[] = $metadata->description;
       $md[] = '';
+      $md[] = 'Extends: `' . $metadata->extends . '`  ';
+      $md[] = 'Package: `' . $package . '`';
+      $md[] = '';
+
+
+      if ($metadata->remediable) {
+        $md[] = 'This class can **remediate** failed audits.';
+        $md[] = '';
+      }
+
+      if ($metadata->isAbstract || $metadata->reflect->getMethod('audit')->isAbstract()) {
+        $md[] = '**NOTE**: This Audit is **abstract** and cannot be used directly by a policy.';
+        $md[] = '';
+      }
 
 
       $policies = array_filter($registry->policies(), function ($policy) use ($metadata) {
@@ -135,11 +146,13 @@ class BuildDocsCommand extends Command {
         }
       }
 
-      $md[] = '';
-      $md[] = '#### Source';
-      $md[] = '```php';
-      $md[] = $metadata->source;
-      $md[] = '```';
+      if ($metadata->source) {
+        $md[] = '';
+        $md[] = '#### Source';
+        $md[] = '```php';
+        $md[] = $metadata->source;
+        $md[] = '```';
+      }
 
       $namespace = explode('\\', $metadata->class);
       array_pop($namespace);
@@ -172,7 +185,8 @@ class BuildDocsCommand extends Command {
     $pages = [];
 
     foreach ($policies as $policy) {
-      $package = $this->findPackage($policy);
+      $filepath = $policy->get('filepath');
+      $package = $this->findPackage($filepath);
 
       $md = [];
       $md[] = $link = strtr('## title', [
@@ -298,9 +312,8 @@ class BuildDocsCommand extends Command {
     return $this;
   }
 
-  protected function findPackage($policy)
+  protected function findPackage($filepath)
   {
-      $filepath = $policy->get('filepath');
       $composer = FALSE;
       while ($filepath) {
         $filepath = dirname($filepath);
