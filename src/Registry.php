@@ -86,10 +86,30 @@ class Registry {
       throw new \InvalidArgumentException("$class is not of type \Drutiny\Audit.");
     }
     $annotations = $reader->getClassAnnotations($reflect);
+    $comment = explode(PHP_EOL, $reflect->getDocComment());
+
     $info = new \StdClass;
+    $info->description = '';
+
+    if (isset($comment[1])) {
+      $desc = trim(substr(trim($comment[1]), 1));
+      if (!empty($desc) && (strpos($desc, '@') !== 0)) {
+        $info->description = $desc;
+      }
+    }
+
+    $info->filename = $reflect->getFilename();
+    $info->isAbstract = $reflect->isAbstract();
+    $info->remediable = $reflect->implementsInterface('Drutiny\RemediableInterface');
+    $info->namespace = $reflect->getNamespaceName();
+    $method = $reflect->getMethod('audit');
+    $info->source = array_slice(file($reflect->getFilename()), $method->getStartLine() - 1, $method->getEndLine() - $method->getStartLine() + 1);
+    $info->source = implode('', $info->source);
+
     $info->params = [];
     $info->tokens = [];
     $info->class = $class;
+    $info->reflect = $reflect;
 
     foreach ($annotations as $annotation) {
       if ($annotation instanceof \Drutiny\Annotation\Token) {

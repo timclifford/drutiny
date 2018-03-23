@@ -55,8 +55,14 @@ class BuildDocsCommand extends Command {
     foreach ($auditors as $class) {
       $metadata = $registry->getAuditMedtadata($class);
 
+      if ($metadata->reflect->getMethod('audit')->isAbstract()) {
+        continue;
+      }
+
       $md = ['## ' . $metadata->class];
+      $md[] = $metadata->description;
       $md[] = '';
+
 
       $policies = array_filter($registry->policies(), function ($policy) use ($metadata) {
         $class = $policy->get('class');
@@ -128,6 +134,12 @@ class BuildDocsCommand extends Command {
           ]);
         }
       }
+
+      $md[] = '';
+      $md[] = '#### Source';
+      $md[] = '```php';
+      $md[] = $metadata->source;
+      $md[] = '```';
 
       $namespace = explode('\\', $metadata->class);
       array_pop($namespace);
