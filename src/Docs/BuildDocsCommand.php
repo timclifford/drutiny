@@ -161,6 +161,7 @@ class BuildDocsCommand extends Command {
     }
 
     $nav = [];
+    ksort($pages);
     foreach ($pages as $namespace => $list) {
       ksort($list);
       $filepath = 'audits/' . str_replace('\\', '', $namespace) . '.md';
