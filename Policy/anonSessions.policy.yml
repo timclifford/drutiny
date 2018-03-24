@@ -1,5 +1,5 @@
 title: Anonymous sessions
-class: \Drutiny\Audit\Drupal\SessionsAnon
+class: Drutiny\Audit\Drupal\SqlResultAudit
 name: Drupal:AnonSession
 tags:
   - Performance
@@ -11,5 +11,16 @@ remediation: |
   Find out what modules are causing the sessions, and look to remove them.
 success: There are no anonymous sessions.
 failure: |
-  There **{{prefix}} {{sessions}}** anonymous session{{plural}}.
+  Anonymous sessions were detected in the sessions table. Found {{count}} sessions.
 exception: Could not determine the amount of anonymous sessions.
+parameters:
+  field:
+    default: count
+  value:
+    default: 0
+  query:
+    default: |
+      SELECT COUNT(*) as count FROM sessions
+      WHERE uid = 0
+        AND session NOT LIKE 'openid%'
+        AND session NOT LIKE '%Access denied%';
