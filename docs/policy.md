@@ -4,6 +4,8 @@ Policies are structured YAML files that provide the human readable context for
 an audit. Drutiny scans for these files and looks for files ending in `.policy.yml`.
 The convention is to store these files in a directory called `Policy`.
 
+[View list of policies](policy-library) managed under the Drutiny project.
+
 ## Policy structure
 
 ### title (required)

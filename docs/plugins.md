@@ -10,9 +10,15 @@ composer search drutiny
 ### Available Druitiny plugins
 
 
-Plugin Name | Documentation | Description
---|--|--
-Acquia | xxx | xxx
+Plugin Name | Description
+--|--
+[drutiny/plugin-drupal-7](https://packagist.org/packages/drutiny/plugin-drupal-7) | Drupal 7 plugin for Drutiny
+[drutiny/plugin-drupal-8](https://packagist.org/packages/drutiny/plugin-drupal-8) | Drupal 8 plugin for Drutiny
+[drutiny/plugin-distro-common](https://packagist.org/packages/drutiny/plugin-distro-common) | Common Drutiny policies for Drupal distributions
+[drutiny/cloudflare](https://packagist.org/packages/drutiny/cloudflare) | Integration with Cloudflare
+[drutiny/acquia](https://packagist.org/packages/drutiny/acquia) | Acquia support for the Drutiny audit checker
+[drutiny/http](https://packagist.org/packages/drutiny/http) | Drutiny auditing and policies on HTTP requests
+[drutiny/sumologic](https://packagist.org/packages/drutiny/sumologic)| Integration with SumoLogic
 
 ## Install plugins
 
@@ -27,7 +33,7 @@ composer require drutiny/acquia 2.x-dev
 If you want extend Drutiny with some private features, you may want host this without composer and include a VCS repository directly.
 <a href="https://getcomposer.org/doc/05-repositories.md#loading-a-package-from-a-vcs-repository">Read composer docs</a>
 
-To do so, update the Drutiny composer.json and add your repository. 
+To do so, update the Drutiny composer.json and add your repository.
 
 ```
 {
@@ -68,7 +74,7 @@ As the minimum requirement for an plugin, we need a folder with the name of the 
         "symfony/yaml": "^3.2"
     },
 }
-``` 
+```
 
 #### Create custom commands and configuration
 Drutiny is extensible through a config file where you can add commands,
@@ -83,12 +89,10 @@ Command:
   - Drutiny\Acquia\Command\SiteFactoryProfileRunCommand
 ```
 
-Example for a new target:
-```
-```
-
 Example for adding a template directory:
 ```
 Template:
   - my-templates
 ```
+
+See [documentation on profiles](profiles) for more information about templates.
