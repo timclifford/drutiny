@@ -9,7 +9,7 @@ use Drutiny\Annotation\Param;
 use Drutiny\Annotation\Token;
 
 /**
- * Large files
+ * Identify files larger than a specfied size. Pass if no matching files found.
  * @Param(
  *  name = "max_size",
  *  description = "Report files larger than this value measured in megabytes.",

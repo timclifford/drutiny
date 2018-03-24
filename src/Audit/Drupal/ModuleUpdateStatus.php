@@ -4,9 +4,15 @@ namespace Drutiny\Audit\Drupal;
 
 use Drutiny\Audit;
 use Drutiny\Sandbox\Sandbox;
+use Drutiny\Annotation\Token;
 
 /**
- * Database updates
+ * Look for modules with available updates.
+ * @Token(
+ *  name = "updates",
+ *  type = "array",
+ *  description = "Description of module updates available."
+ * )
  */
 class ModuleUpdateStatus extends Audit {
 

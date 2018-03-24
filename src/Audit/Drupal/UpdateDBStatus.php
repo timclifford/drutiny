@@ -6,7 +6,7 @@ use Drutiny\Audit;
 use Drutiny\Sandbox\Sandbox;
 
 /**
- * Database updates
+ * Ensure all module updates have been applied.
  */
 class UpdateDBStatus extends Audit {
 

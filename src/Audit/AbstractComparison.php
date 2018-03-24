@@ -4,7 +4,11 @@ namespace Drutiny\Audit;
 
 use Drutiny\Audit;
 use Drutiny\Sandbox\Sandbox;
+use Drutiny\Annotation\Param;
 
+/**
+ * Comparatively evaluate two values.
+ */
 abstract class AbstractComparison extends Audit {
 
   protected function compare($reading, $value, Sandbox $sandbox) {

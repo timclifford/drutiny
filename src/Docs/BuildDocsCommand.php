@@ -54,11 +54,23 @@ class BuildDocsCommand extends Command {
     $pages = [];
     foreach ($auditors as $class) {
       $metadata = $registry->getAuditMedtadata($class);
+      $metadata->source = FALSE;
+      if ($metadata->reflect->hasMethod('audit')) {
+        $method = $metadata->reflect->getMethod('audit');
+        if ($method->getStartLine() != $method->getEndLine()) {
+          $metadata->source = array_slice(file($method->getFilename()), $method->getStartLine() - 1, $method->getEndLine() - $method->getStartLine() + 1);
+          $metadata->source = implode('', $metadata->source);
+        }
+      }
+
       $package = $this->findPackage($metadata->filename);
 
-      $md = ['## ' . $metadata->class];
+      $names = explode('\\', $metadata->class);
+
+      $md = ['## ' . array_pop($names)];
       $md[] = $metadata->description;
       $md[] = '';
+      $md[] = 'Class: `' . $metadata->class . '`  ';
       $md[] = 'Extends: `' . $metadata->extends . '`  ';
       $md[] = 'Package: `' . $package . '`';
       $md[] = '';
@@ -165,7 +177,16 @@ class BuildDocsCommand extends Command {
     foreach ($pages as $namespace => $list) {
       ksort($list);
       $filepath = 'audits/' . str_replace('\\', '', $namespace) . '.md';
-      $nav[] = [$namespace => $filepath];
+      $nav_item = strtr($namespace, [
+        'Drutiny\\' => '',
+        'Audit\\' => '',
+        'Audit' => '',
+        '\\' => ' '
+      ]);
+      if (trim($nav_item) == '') {
+        $nav_item = 'General';
+      }
+      $nav[] = [$nav_item => $filepath];
       file_put_contents("docs/$filepath", implode("\n\n", $list));
       $output->writeln("Written docs/$filepath.");
     }

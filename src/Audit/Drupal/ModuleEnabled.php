@@ -8,7 +8,7 @@ use Drutiny\RemediableInterface;
 use Drutiny\Annotation\Param;
 
 /**
- * Generic module is disabled check.
+ * Generic module is enabled check.
  *
  * @Param(
  *  name = "module",

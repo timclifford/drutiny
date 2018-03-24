@@ -103,14 +103,6 @@ class Registry {
     $info->remediable = $reflect->implementsInterface('Drutiny\RemediableInterface');
     $info->namespace = $reflect->getNamespaceName();
     $info->extends = $reflect->getParentClass()->getName();
-    $info->source = FALSE;
-
-    if ($reflect->hasMethod('audit')) {
-      $method = $reflect->getMethod('audit');
-      $info->source = array_slice(file($reflect->getFilename()), $method->getStartLine() - 1, $method->getEndLine() - $method->getStartLine() + 1);
-      $info->source = implode('', $info->source);
-    }
-
     $info->params = [];
     $info->tokens = [];
     $info->class = $class;

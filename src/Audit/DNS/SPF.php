@@ -7,6 +7,7 @@ use Drutiny\Sandbox\Sandbox;
 use Drutiny\Annotation\Param;
 
 /**
+ * Assert a value is present in the DNS record of the zone.
  * @Param(
  *  name = "type",
  *  description = "The type of DNS record to lookup",
@@ -20,7 +21,7 @@ use Drutiny\Annotation\Param;
  * )
  * @Param(
  *  name = "matching_value",
- *  description = "A value that should be present the queried DNS record.",
+ *  description = "A value that should be present in the queried DNS record.",
  *  type = "string"
  * )
  */
