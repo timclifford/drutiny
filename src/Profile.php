@@ -87,9 +87,8 @@ class Profile {
     }
 
     if (isset($info['policies'])) {
-      $weight = array_search($profile->getName(), array_keys($info['policies']));
-
       foreach ($info['policies'] as $name => $metadata) {
+        $weight = array_search($name, array_keys($info['policies']));
         $profile->addPolicyDefinition(PolicyDefinition::createFromProfile($name, $weight, $metadata));
       }
     }
@@ -149,17 +148,37 @@ class Profile {
    */
   public function getAllPolicyDefinitions()
   {
-    // Sort the policies by weight.
-    uasort($this->policies, function (PolicyDefinition $a, PolicyDefinition $b) {
-      // If the weights are equal, sort by name.
-      if ($a->getWeight() == $b->getWeight()) {
+    // Pull the dependencies into the main list.
+    foreach ($this->policies as $policyDefinition) {
+      foreach ($policyDefinition->getDependencyPolicyDefinitions() as $definition) {
+        if (isset($this->policies[$definition->getName()])) {
+          continue;
+        }
+        $this->addPolicyDefinition($definition);
+      }
+    }
 
+    // Sort $policies
+    // 1. By dependency. Ensure dependencies are weighted first.
+    // 2. By weight. Lighter policies float to the top.
+    // 3. By name, alphabetical sorting.
+    uasort($this->policies, function (PolicyDefinition $a, PolicyDefinition $b) {
+      // 1. By dependency. Ensure dependencies are weighted first.
+      if (in_array($b->getName(), array_keys($a->getDependencyPolicyDefinitions()))) {
+        return 1;
+      }
+      if (in_array($a->getName(), array_keys($b->getDependencyPolicyDefinitions()))) {
+        return -1;
+      }
+
+      // 2. By weight. Lighter policies float to the top.
+      if ($a->getWeight() == $b->getWeight()) {
         $alpha = [$a->getName(), $b->getName()];
         sort($alpha);
-
+        // 3. By name, alphabetical sorting.
         return $alpha[0] == $a->getName() ? -1 : 1;
       }
-      return $a->getWeight() > $b->getWeight() ? -1 : 1;
+      return $a->getWeight() > $b->getWeight() ? 1 : -1;
     });
     return $this->policies;
   }
