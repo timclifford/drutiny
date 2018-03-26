@@ -16,6 +16,7 @@ class AlwaysNotice extends Audit {
 
   public function audit(Sandbox $sandbox)
   {
+    sleep(1);
     return Audit::NOTICE;
   }
 }

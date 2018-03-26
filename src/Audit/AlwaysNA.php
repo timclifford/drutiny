@@ -17,6 +17,7 @@ class AlwaysNA extends Audit {
 
   public function audit(Sandbox $sandbox)
   {
+    sleep(1);
     // This should never trigger.
     return Audit::FAIL;
   }

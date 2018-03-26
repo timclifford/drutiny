@@ -16,6 +16,7 @@ class AlwaysFail extends Audit {
 
   public function audit(Sandbox $sandbox)
   {
+    sleep(1);
     return FALSE;
   }
 }
