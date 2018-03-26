@@ -3,6 +3,7 @@
 namespace Drutiny;
 
 use Drutiny\Profile\PolicyDefinition;
+use Drutiny\Profile\Registry;
 use Drutiny\Report\FormatOptions;
 use Symfony\Component\Yaml\Yaml;
 
