@@ -21,10 +21,6 @@ use Drutiny\Target\Target;
  */
 class ProfileRunCommand extends Command {
 
-  const EMOJI_REMEDIATION = "\xE2\x9A\xA0";
-
-  protected $progressBar;
-
   /**
    * @inheritdoc
    */
@@ -40,13 +36,13 @@ class ProfileRunCommand extends Command {
       ->addArgument(
         'target',
         InputArgument::REQUIRED,
-        'The target to run the checks against.'
+        'The target to run the policy collection against.'
       )
       ->addOption(
         'remediate',
         'r',
         InputOption::VALUE_NONE,
-        'Allow failed checks to remediate themselves if available.'
+        'Allow failed policy aduits to remediate themselves if available.'
       )
       ->addOption(
         'format',
@@ -68,6 +64,13 @@ class ProfileRunCommand extends Command {
         InputOption::VALUE_OPTIONAL,
         'For json and html formats, use this option to write report to file. Defaults to stdout.',
         'stdout'
+      )
+      ->addOption(
+        'exclude-policy',
+        'e',
+        InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
+        'Specify policy names to exclude from the profile that are normally listed.',
+        []
       );
   }
 
@@ -87,7 +90,13 @@ class ProfileRunCommand extends Command {
       'input' => $input
     ]);
 
-    $policyDefinitions = $profile->getAllPolicyDefinitions();
+    // Allow command line omission of policies highlighted in the profile.
+    // WARNING: This may remove policy dependants which may make polices behave
+    // in strange ways.
+    $excluded_policies = $input->getOption('exclude-policy');
+    $policyDefinitions = array_filter($profile->getAllPolicyDefinitions(), function ($policy) use ($excluded_policies) {
+      return !in_array($policy->getName(), $excluded_policies);
+    });
 
     // Get the URLs.
     $uris = $input->getOption('uri');
@@ -116,7 +125,7 @@ class ProfileRunCommand extends Command {
 
         // Attempt remediation.
         if (!$response->isSuccessful() && $input->getOption('remediate')) {
-          ($progress->log)(self::EMOJI_REMEDIATION . " Remediating " . $policyDefinition->getTitle());
+          ($progress->log)("\xE2\x9A\xA0 Remediating " . $policy->get('title'));
           $response = $sandbox->remediate();
         }
         $results[$uri][$policyDefinition->getName()] = $response;
