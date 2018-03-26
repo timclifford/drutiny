@@ -31,6 +31,12 @@ deploy:
   on:
     tags: true
     php: 7.1
+- provider: script
+  script: ./docs/deploy.sh
+  skip_cleanup: true
+  on:
+    branch: 2.0.x
+    php: 7.1
 notifications:
   email:
     on_success: never
