@@ -16,6 +16,11 @@ class PolicyDefinition {
   protected $policy;
 
   /**
+   * @bool Severity.
+   */
+  protected $severity;
+
+  /**
    * Name of the poilcy.
    *
    * @var string
@@ -31,13 +36,6 @@ class PolicyDefinition {
 
   /**
    * A list of PolicyDefinition objects that should be ordered before this one.
-   *
-   * @var array
-   */
-  protected $positionAfter = [];
-
-  /**
-   * A list of PolicyDefinition objects that should be ordered after this one.
    *
    * @var array
    */
@@ -58,19 +56,30 @@ class PolicyDefinition {
    */
   public static function createFromProfile($name, $weight = 0, $definition = [])
   {
-    $policy = new static();
-    $policy->setName($name)
-           ->setWeight($weight);
+    $policyDefinition = new static();
+    $policyDefinition->setName($name)
+                     ->setWeight($weight);
 
     if (isset($definition['parameters'])) {
-      $policy->setParameters($definition['parameters']);
+      $policyDefinition->setParameters($definition['parameters']);
     }
+
+    // Load a policy to get defaults.
+    $policy = $policyDefinition->getPolicy();
 
     if (isset($definition['severity'])) {
-      $policy->setSeverity($definition['severity']);
+      $policyDefinition->setSeverity($definition['severity']);
+    }
+    else {
+      $policyDefinition->setSeverity($policy->getSeverity());
     }
 
-    return $policy;
+    // Track policies that are depended on.
+    foreach ((array) $policy->get('depends') as $name) {
+      $policyDefinition->setDependencyPolicyName($name);
+    }
+
+    return $policyDefinition;
   }
 
   /**
@@ -116,7 +125,9 @@ class PolicyDefinition {
       return $this->policy;
     }
     $this->policy = (new GlobalRegistry)->getPolicy($this->getName());
-    $this->policy->setSeverity($this->getSeverity());
+    if ($this->getSeverity() !== NULL) {
+      $this->policy->setSeverity($this->getSeverity());
+    }
 
     foreach ($this->parameters as $param => $value) {
       $info = ['default' => $value];
@@ -125,6 +136,22 @@ class PolicyDefinition {
     return $this->policy;
   }
 
+  /**
+   * Track a policy dependency as a policy definition.
+   */
+  public function setDependencyPolicyName($name)
+  {
+    $this->positionBefore[$name] = self::createFromProfile($name, $this->getWeight());
+    return $this;
+  }
+
+  /**
+   * Get all dependencies.
+   */
+  public function getDependencyPolicyDefinitions()
+  {
+    return $this->positionBefore;
+  }
 }
 
  ?>
