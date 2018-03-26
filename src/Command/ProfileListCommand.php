@@ -5,9 +5,9 @@ namespace Drutiny\Command;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Helper\TableSeparator;
-use Drutiny\Registry;
+use Symfony\Component\Console\Style\SymfonyStyle;
+use Drutiny\Profile\Registry;
+use Drutiny\Profile;
 
 /**
  *
@@ -27,31 +27,15 @@ class ProfileListCommand extends Command {
    * @inheritdoc
    */
   protected function execute(InputInterface $input, OutputInterface $output) {
-    $profiles = (new Registry())->profiles();
+    $render = new SymfonyStyle($input, $output);
 
-    $rows = array();
-    foreach ($profiles as $name => $info) {
-      $checks = array_keys($info->getPolicies());
-      $checks = implode(', ', $checks);
-      $checks = wordwrap($checks, 80);
-      $rows[] = [
-        $name,
-        '<options=bold>' . wordwrap($info->get('title'), 50) . '</>',
-        $checks,
-      ];
-      $rows[] = new TableSeparator();
-    }
+    $profiles = Registry::getAllProfiles();
 
-    $table = new Table($output);
-    $table
-      ->setHeaders(array('Name', 'Title', 'Checks'))
-      ->setRows($rows)
-      ->getStyle()
-      ->setVerticalBorderChar(' ')
-      ->setHorizontalBorderChar(' ')
-      ->setCrossingChar('');
+    $render->table(['Profile', 'Name'], array_map(function ($profile) {
+      return [$profile->getTitle(), $profile->getName()];
+    }, $profiles));
 
-    $table->render();
+    $render->note("Use drutiny profile:info to view more information about a profile.");
   }
 
 }

@@ -9,6 +9,7 @@ Command:
   - Drutiny\Command\PolicyListCommand
   - Drutiny\Command\ProfileGenerateCommand
   - Drutiny\Command\ProfileListCommand
+  - Drutiny\Command\ProfileInfoCommand
   - Drutiny\Command\ProfileRunCommand
   - Drutiny\Command\AuthenticateCommand
 Template:

@@ -12,6 +12,18 @@ use Symfony\Component\Yaml\Yaml;
  */
 class Registry {
 
+  protected static $registry;
+
+  public static function add($namespace, $data)
+  {
+    self::$registry[$namespace] = $data;
+  }
+
+  public static function get($namespace)
+  {
+    return isset(self::$registry[$namespace]) ? self::$registry[$namespace] : [];
+  }
+
   /**
    *
    */
