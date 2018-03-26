@@ -1,15 +1,8 @@
 <?php
 
-namespace Drutiny\Report;
+namespace Drutiny\Report\Format;
 
-class FormatOptions {
-
-  /**
-   * The format the object applies to.
-   *
-   * @var string
-   */
-  protected $format;
+class HTML extends JSON {
 
   /**
    * The content to use when rendering HTML.
@@ -25,34 +18,16 @@ class FormatOptions {
    */
   protected $template = 'site';
 
-  public static function create($format, $options)
+  public function __construct($options)
   {
-    $object = new static();
-    $object->setFormat($format);
+    parent::__construct($options);
+    $this->setFormat('html');
     if (isset($options['template'])) {
-      $object->setTemplate($options['template']);
+      $this->setTemplate($options['template']);
     }
     if (isset($options['content'])) {
-      $object->setContent($options['content']);
+      $this->setContent($options['content']);
     }
-    return $object;
-  }
-
-  /**
-   * Get the profile title.
-   */
-  public function getFormat()
-  {
-    return $this->format;
-  }
-
-  /**
-   * Set the title of the profile.
-   */
-  public function setFormat($format)
-  {
-    $this->format = $format;
-    return $this;
   }
 
   /**
@@ -87,6 +62,13 @@ class FormatOptions {
   {
     $this->content = $content;
     return $this;
+  }
+
+
+  public function render($profile, $target, $result)
+  {
+    $report = new ProfileRunHtmlReport($profile, $target, $result);
+    $report->render();
   }
 }
 

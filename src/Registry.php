@@ -45,6 +45,34 @@ class Registry {
     return $targets[$name]->class;
   }
 
+  public static function getConfig()
+  {
+    if ($config = self::get('drutiny.config')) {
+      return $config;
+    }
+    $finder = new Finder();
+    $finder->files()
+      ->in('.')
+      ->name('drutiny.config.yml');
+
+    $config = [];
+    foreach ($finder as $file) {
+      $conf = Yaml::parseFile($file->getPathname());
+
+      // Templates are in filepaths which need to be translated into absolute filepaths.
+      if (isset($conf['Template'])) {
+        foreach ($conf['Template'] as &$directory) {
+          $directory = dirname($file->getRealPath()) . '/' . $directory;
+        }
+      }
+
+      $config[] = $conf;
+    }
+    $config = call_user_func_array('array_merge_recursive', $config);
+    self::add('drutiny.config', (object) $config);
+    return self::get('drutiny.config');
+  }
+
   protected function config() {
     static $config;
 

@@ -4,7 +4,7 @@ namespace Drutiny;
 
 use Drutiny\Profile\PolicyDefinition;
 use Drutiny\Profile\Registry;
-use Drutiny\Report\FormatOptions;
+use Drutiny\Report\Format;
 use Symfony\Component\Yaml\Yaml;
 
 class Profile {
@@ -103,7 +103,7 @@ class Profile {
 
     if (isset($info['format'])) {
       foreach ($info['format'] as $format => $options) {
-        $profile->addFormatOptions(FormatOptions::create($name, $options));
+        $profile->addFormatOptions(Format::create($name, $options));
       }
     }
 
@@ -113,10 +113,18 @@ class Profile {
   /**
    * Add a FormatOptions to the profile.
    */
-  public function addFormatOptions(FormatOptions $options)
+  public function addFormatOptions(Format $options)
   {
     $this->format[$options->getFormat()] = $options;
     return $this;
+  }
+
+  /**
+   * Add a FormatOptions to the profile.
+   */
+  public function getFormatOption($format, $options = [])
+  {
+    return isset($this->format[$format]) ?  $this->format[$format] : Format::create($format, $options);
   }
 
   /**

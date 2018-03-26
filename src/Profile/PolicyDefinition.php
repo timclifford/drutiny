@@ -3,7 +3,7 @@
 namespace Drutiny\Profile;
 
 use Drutiny\Policy;
-use Drutiny\Registry as GlobalRegisry;
+use Drutiny\Registry as GlobalRegistry;
 
 class PolicyDefinition {
   use \Drutiny\Item\ContentSeverityTrait;
@@ -115,7 +115,7 @@ class PolicyDefinition {
     if (isset($this->policy)) {
       return $this->policy;
     }
-    $this->policy = (new GlobalRegisry)->getPolicy($this->getName());
+    $this->policy = (new GlobalRegistry)->getPolicy($this->getName());
     $this->policy->setSeverity($this->getSeverity());
 
     foreach ($this->parameters as $param => $value) {
