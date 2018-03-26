@@ -52,6 +52,12 @@ class DrushTarget extends Target implements DrushInterface, ExecInterface {
     return $this->getGlobalDefaultOption('uri') ? $this->getGlobalDefaultOption('uri') : 'default';
   }
 
+  public function setUri($uri)
+  {
+    $this->setGlobalDefaultOption('uri', $uri);
+    return parent::setUri($uri);
+  }
+
   /**
    * @inheritdoc
    * Overrides DrushTrait::runCommand().

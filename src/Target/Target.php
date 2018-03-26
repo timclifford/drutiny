@@ -9,12 +9,13 @@ use Drutiny\Sandbox\Sandbox;
  */
 abstract class Target {
   private $sandbox;
+  private $_data;
+  protected $uri;
 
-  /**
-   *
-   */
-  public function __construct(Sandbox $sandbox) {
-    $this->sandbox = $sandbox;
+  public function __construct($target_data)
+  {
+    // Store target data to be used later when the sandbox is loaded.
+    $this->_data = $target_data;
   }
 
   /**
@@ -34,7 +35,25 @@ abstract class Target {
   /**
    *
    */
-  abstract public function uri();
+  public function setSandbox(Sandbox $sandbox) {
+    $this->sandbox = $sandbox;
+    $this->parse($this->_data);
+    return $this;
+  }
+
+  /**
+   *
+   */
+  public function uri()
+  {
+    return $this->uri;
+  }
+
+  public function setUri($uri)
+  {
+    $this->uri = $uri;
+    return $this;
+  }
 
   /**
    * Parse a target argument into the target driver and data.

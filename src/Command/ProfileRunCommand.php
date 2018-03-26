@@ -7,13 +7,14 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Exception\InvalidArgumentException;
-use Drutiny\Registry;
+use Symfony\Component\Console\Helper\ProgressBar;
+use Drutiny\Profile\Registry as ProfileRegistry;
+use Drutiny\Target\Registry as TargetRegistry;
 use Drutiny\Sandbox\Sandbox;
 use Drutiny\Logger\ConsoleLogger;
 use Drutiny\Report;
 use Drutiny\Target\Target;
-use Symfony\Component\Console\Helper\ProgressBar;
+
 
 /**
  *
@@ -21,6 +22,8 @@ use Symfony\Component\Console\Helper\ProgressBar;
 class ProfileRunCommand extends Command {
 
   const EMOJI_REMEDIATION = "\xE2\x9A\xA0";
+
+  protected $progressBar;
 
   /**
    * @inheritdoc
@@ -56,7 +59,8 @@ class ProfileRunCommand extends Command {
         'uri',
         'l',
         InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
-        'Provide URLs to run against the target. Useful for multisite installs. Accepts multiple arguments.'
+        'Provide URLs to run against the target. Useful for multisite installs. Accepts multiple arguments.',
+        ['default']
       )
       ->addOption(
         'report-filename',
@@ -71,119 +75,100 @@ class ProfileRunCommand extends Command {
    * @inheritdoc
    */
   protected function execute(InputInterface $input, OutputInterface $output) {
-    $registry = new Registry();
 
     // Setup the check.
-    $profile = $input->getArgument('profile');
-    $profiles = $registry->profiles();
-    if (!isset($profiles[$profile])) {
-      throw new InvalidArgumentException("$profile is not a valid profile.");
-    }
+    $profile = ProfileRegistry::getProfile($input->getArgument('profile'));
+
+    $filepath = $input->getOption('report-filename');
 
     // Setup the reporting format.
-    $format = $input->getOption('format');
-    if (!in_array($format, ['console', 'json', 'html'])) {
-      throw new InvalidArgumentException("Reporting format '$format' is not supported.");
-    }
+    $format = $profile->getFormatOption($input->getOption('format'), [
+      'output' => $filepath != 'stdout' ? $filepath : $output,
+      'input' => $input
+    ]);
+
+    $policyDefinitions = $profile->getAllPolicyDefinitions();
 
     // Get the URLs.
     $uris = $input->getOption('uri');
-    if (empty($uris)) {
-      $uris = ['default'];
-    }
 
-    $checks = $registry->policies();
+    // Setup the progress bar to log updates.
+    $steps = count($policyDefinitions) * count($uris);
+    $progress = $this->getProgressBar($output, $steps);
+
+    // Setup the target.
+    $target = TargetRegistry::loadTarget($input->getArgument('target'));
+
     $results = [];
 
-    $progress_bar_enabled = TRUE;
+    foreach ($uris as $uri) {
+      $target->setUri($uri);
+      foreach ($policyDefinitions as $policyDefinition) {
+        $policy = $policyDefinition->getPolicy();
 
-    // Disable progress bar when expecting raw json or html output.
-    if (($input->getOption('report-filename') == 'stdout') && in_array($format, ['json', 'html'])) {
-      $progress_bar_enabled = FALSE;
-    }
-    // Do not use progress bar when verbosity is in debug mode.
-    if ($output->getVerbosity() > OutputInterface::VERBOSITY_VERY_VERBOSE) {
-      $progress_bar_enabled = FALSE;
+        ($progress->log)("[$uri] " . $policy->get('title'));
+
+        // Setup the sandbox to run the assessment.
+        $sandbox = new Sandbox($target, $policy);
+        $sandbox->setLogger(new ConsoleLogger($output));
+
+        $response = $sandbox->run();
+
+        // Attempt remediation.
+        if (!$response->isSuccessful() && $input->getOption('remediate')) {
+          ($progress->log)(self::EMOJI_REMEDIATION . " Remediating " . $policyDefinition->getTitle());
+          $response = $sandbox->remediate();
+        }
+        $results[$uri][$policyDefinition->getName()] = $response;
+        ($progress->advance)();
+      }
     }
 
-    // Establish a progress bar for reporting since this can take sometime.
-    $progress = new ProgressBar($output, count($profiles[$profile]->getPolicies()) * count($uris));
+    ($progress->finish)();
+
+    if (count($results) == 1) {
+      $result = current($results);
+      $format->render($profile, $target, $result);
+    }
+    else {
+      $format->renderMultiple($profile, $target, $results);
+    }
+  }
+
+  protected function getProgressBar(OutputInterface $output, $steps)
+  {
+    $progress = new ProgressBar($output, $steps);
     $progress->setFormatDefinition('custom', " <comment>%message%</comment>\n %current%/%max% <info>[%bar%]</info> %percent:3s%% %memory:6s%");
     $progress->setFormat('custom');
     $progress->setMessage("Starting...");
     $progress->setBarWidth(80);
-    $progress_bar_enabled && $progress->start();
 
-    // Setup the target.
-    list($target_name, $target_data) = Target::parseTarget($input->getArgument('target'));
-    $target_class = $registry->getTargetClass($target_name);
-
-    foreach ($uris as $uri) {
-      foreach ($profiles[$profile]->getPolicies() as $name => $parameters) {
-        $progress_bar_enabled && $progress->setMessage("[$uri] " . $checks[$name]->get('title'));
-        $sandbox = new Sandbox($target_class, $checks[$name]);
-        $sandbox->setParameters($parameters)
-          ->setLogger(new ConsoleLogger($output))
-          ->getTarget()
-          ->parse($target_data);
-
-        if ($uri != 'default') {
-          $sandbox->drush()->setGlobalDefaultOption('uri', $uri);
-        }
-
-        $response = $sandbox->run();
-
-        // Attempt remeidation.
-        if (!$response->isSuccessful() && $input->getOption('remediate')) {
-          $progress_bar_enabled && $progress->setMessage(self::EMOJI_REMEDIATION . "   Remediating " . $checks[$name]->get('title'));
-          $response = $sandbox->remediate();
-        }
-        $result[$uri][$name] = $response;
-        $progress_bar_enabled && $progress->advance();
-      }
-    }
-
-    if ($progress_bar_enabled) {
-      $progress->setMessage("Done");
-      $progress->finish();
-      $output->writeln('');
-    }
-
-    if (count($uris) == 1) {
-      switch ($format) {
-        case 'json':
-          $report = new Report\ProfileRunJsonReport($profiles[$profile], $sandbox->getTarget(), current($result));
-          break;
-
-        case 'html':
-          $report = new Report\ProfileRunHtmlReport($profiles[$profile], $sandbox->getTarget(), current($result));
-          break;
-
-        case 'console':
-        default:
-          $report = new Report\ProfileRunReport($profiles[$profile], $sandbox->getTarget(), current($result));
-          break;
-      }
-      $report->render($input, $output);
+    if ($output->getVerbosity() > OutputInterface::VERBOSITY_VERY_VERBOSE) {
+      $progress = FALSE;
     }
     else {
-      switch ($format) {
-        // case 'json':
-        //   $report = new Report\ProfileRunJsonReport($profiles[$profile], $sandbox->getTarget(), current($result));
-        //   break;
-
-        case 'html':
-          $report = new Report\ProfileRunMultisiteHTMLReport($profiles[$profile], $sandbox->getTarget(), $result);
-          break;
-
-        case 'console':
-        default:
-          $report = new Report\ProfileRunMultisiteReport($profiles[$profile], $sandbox->getTarget(), $result);
-          break;
-      }
-
-      $report->render($input, $output);
+      $progress->start();
     }
+
+    $logger = new \stdClass;
+    $logger->log = function ($msg) use ($progress)
+    {
+      $progress && $progress->setMessage($msg);
+    };
+
+    $logger->advance = function () use ($progress)
+    {
+      $progress && $progress->advance();
+    };
+
+    $logger->finish = function () use ($progress, $output)
+    {
+      $progress && $progress->setMessage("Done");
+      $progress && $progress->finish();
+      $progress && $output->writeln('');
+    };
+
+    return $logger;
   }
 
 }

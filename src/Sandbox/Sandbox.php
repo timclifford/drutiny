@@ -46,19 +46,15 @@ class Sandbox {
    *
    * @throws \Exception
    */
-  public function __construct($target, Policy $policy) {
-    $object = new $target($this);
-    if (!$object instanceof Target) {
-      throw new \InvalidArgumentException("$target is not a valid class for Target.");
-    }
-    $this->target = $object;
+  public function __construct(Target $target, Policy $policy) {
+    $this->target = $target->setSandbox($this);
 
     $class = $policy->get('class');
-    $object = new $class($this);
-    if (!$object instanceof AuditInterface) {
+    $audit = new $class($this);
+    if (!$audit instanceof AuditInterface) {
       throw new \InvalidArgumentException("$class is not a valid Audit class.");
     }
-    $this->audit = $object;
+    $this->audit = $audit;
     $this->policy = $policy;
   }
 

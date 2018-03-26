@@ -2,7 +2,7 @@
 
 namespace Drutiny\Report;
 
-use Drutiny\ProfileInformation;
+use Drutiny\Profile;
 use Drutiny\Target\Target;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -23,9 +23,9 @@ class ProfileRunReport implements ProfileRunReportInterface {
   const EMOJI_WARN = "⚠️";
 
   /**
-   * @var \Drutiny\ProfileInformation
+   * @var \Drutiny\Profile
    */
-  protected $info;
+  protected $profile;
 
   /**
    * @var \Drutiny\Target\Target
@@ -40,8 +40,8 @@ class ProfileRunReport implements ProfileRunReportInterface {
   /**
    * @inheritdoc
    */
-  public function __construct(ProfileInformation $info, Target $target, array $result_set) {
-    $this->info = $info;
+  public function __construct(Profile $profile, Target $target, array $result_set) {
+    $this->profile = $profile;
     $this->resultSet = $result_set;
     $this->target = $target;
   }
@@ -66,7 +66,7 @@ class ProfileRunReport implements ProfileRunReportInterface {
   public function render(InputInterface $input, OutputInterface $output) {
     usort($this->resultSet, [$this, 'usort']);
     $io = new SymfonyStyle($input, $output);
-    $io->title($this->info->get('title'));
+    $io->title($this->profile->getTitle());
 
     $table_rows = [];
     $pass = [];
