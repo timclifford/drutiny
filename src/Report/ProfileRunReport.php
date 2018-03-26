@@ -46,25 +46,10 @@ class ProfileRunReport implements ProfileRunReportInterface {
     $this->target = $target;
   }
 
-  public function usort(\Drutiny\AuditResponse\AuditResponse $a, \Drutiny\AuditResponse\AuditResponse $b)
-  {
-    if ($a->isSuccessful() && !$b->isSuccessful()) {
-      return 1;
-    }
-    elseif (!$a->isSuccessful() && $b->isSuccessful()) {
-      return -1;
-    }
-    elseif ($a->getSeverity() == $a->getSeverity()) {
-      return 0;
-    }
-    return $a->getSeverityCode() > $b->getSeverityCode() ? 1 : 0;
-  }
-
   /**
    * @inheritdoc
    */
   public function render(InputInterface $input, OutputInterface $output) {
-    usort($this->resultSet, [$this, 'usort']);
     $io = new SymfonyStyle($input, $output);
     $io->title($this->profile->getTitle());
 
