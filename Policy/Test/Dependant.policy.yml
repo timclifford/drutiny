@@ -1,6 +1,6 @@
-title: Always pass test policy
+title: Always pass dependant test policy
 class: \Drutiny\Audit\AlwaysPass
-name: Test:Pass
+name: Test:PassDependant
 tags:
   - test
 description: |
@@ -17,5 +17,3 @@ description: |
   belly. Thundercats microdosing taxidermy try-hard +1 ennui photo booth 8-bit.
 success: policy succeeded
 failure: policy failed. This means there is a problem with the Drutiny framework.
-depends:
-  - Test:PassDependant
