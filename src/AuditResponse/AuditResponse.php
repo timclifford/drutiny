@@ -12,7 +12,7 @@ use Drutiny\Audit;
  */
 class AuditResponse {
 
-  protected $info;
+  protected $policy;
 
   protected $state = Audit::NOT_APPLICABLE;
 
@@ -25,11 +25,11 @@ class AuditResponse {
   /**
    * AuditResponse constructor.
    *
-   * @param Policy $info
+   * @param Policy $policy
    *   A policy object of type Drutiny\Policy.
    */
-  public function __construct(Policy $info) {
-    $this->info = $info;
+  public function __construct(Policy $policy) {
+    $this->policy = $policy;
   }
 
   /**
@@ -74,7 +74,7 @@ class AuditResponse {
    *   The policy name.
    */
   public function getName() {
-    return $this->info->get('name', $this->tokens);
+    return $this->policy->get('name', $this->tokens);
   }
 
   /**
@@ -84,7 +84,7 @@ class AuditResponse {
    *   The checks title.
    */
   public function getTitle() {
-    return $this->info->get('title', $this->tokens);
+    return $this->policy->get('title', $this->tokens);
   }
 
   /**
@@ -94,7 +94,7 @@ class AuditResponse {
    *   Translated description.
    */
   public function getDescription() {
-    return $this->info->get('description', $this->tokens);
+    return $this->policy->get('description', $this->tokens);
   }
 
   /**
@@ -102,7 +102,7 @@ class AuditResponse {
    */
   public function getType()
   {
-    $policy_type = $this->info->get('type');
+    $policy_type = $this->policy->get('type');
     if ($policy_type == 'data') {
       return $policy_type;
     }
@@ -128,7 +128,7 @@ class AuditResponse {
    *   Translated description.
    */
   public function getRemediation() {
-    return $this->info->has('remediation') ? $this->info->get('remediation', $this->tokens) : '';
+    return $this->policy->has('remediation') ? $this->policy->get('remediation', $this->tokens) : '';
   }
 
   /**
@@ -138,7 +138,7 @@ class AuditResponse {
    *   Translated description.
    */
   public function getFailure() {
-    return $this->info->has('failure') ? $this->info->get('failure', $this->tokens) : '';
+    return $this->policy->has('failure') ? $this->policy->get('failure', $this->tokens) : '';
   }
 
   /**
@@ -148,7 +148,7 @@ class AuditResponse {
    *   Translated description.
    */
   public function getSuccess() {
-    return $this->info->get('success', $this->tokens);
+    return $this->policy->get('success', $this->tokens);
   }
 
   /**
@@ -158,7 +158,7 @@ class AuditResponse {
    *   Translated description.
    */
   public function getWarning() {
-    return $this->hasWarning() ? $this->info->get('warning', $this->tokens) : '';
+    return $this->hasWarning() ? $this->policy->get('warning', $this->tokens) : '';
   }
 
   /**
@@ -202,12 +202,12 @@ class AuditResponse {
 
   public function getSeverity()
   {
-    return $this->info->getSeverityName();
+    return $this->policy->getSeverityName();
   }
 
   public function getSeverityCode()
   {
-    return $this->info->getSeverity();
+    return $this->policy->getSeverity();
   }
 
   /**
