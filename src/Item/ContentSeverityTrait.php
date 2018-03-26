@@ -11,27 +11,27 @@ trait ContentSeverityTrait {
   public function setSeverity($sev = 0)
   {
     switch (TRUE) {
-      case $sev === self::SEVERITY_NONE:
+      case $sev === Item::SEVERITY_NONE:
       case $sev === 'none':
         $this->severity = Item::SEVERITY_NONE;
         break;
 
-      case $sev === self::SEVERITY_LOW:
+      case $sev === Item::SEVERITY_LOW:
       case $sev === 'low':
         $this->severity = Item::SEVERITY_LOW;
         break;
 
-      case $sev === self::SEVERITY_NORMAL:
+      case $sev === Item::SEVERITY_NORMAL:
       case $sev === 'normal':
         $this->severity = Item::SEVERITY_NORMAL;
         break;
 
-      case $sev === self::SEVERITY_HIGH:
+      case $sev === Item::SEVERITY_HIGH:
       case $sev === 'high':
         $this->severity = Item::SEVERITY_HIGH;
         break;
 
-      case $sev === self::SEVERITY_CRITICAL:
+      case $sev === Item::SEVERITY_CRITICAL:
       case $sev === 'critical':
         $this->severity = Item::SEVERITY_CRITICAL;
         break;
