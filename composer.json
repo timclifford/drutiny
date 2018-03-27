@@ -13,14 +13,14 @@
         "source": "https://github.com/drutiny/drutiny"
     },
     "require": {
-        "symfony/console": "^3.1",
-        "symfony/yaml": "^3.2",
+        "symfony/console": "^3.4",
+        "symfony/yaml": "^3.4",
         "symfony/class-loader": "^3.1",
         "doctrine/annotations": "^1.2",
         "paragonie/random_compat": "^2.0",
-        "symfony/process": "^3.2",
-        "symfony/finder": "^3.2",
-        "symfony/validator": "^3.2",
+        "symfony/process": "^3.4",
+        "symfony/finder": "^3.4",
+        "symfony/validator": "^3.4",
         "mustache/mustache": "^2.11",
         "erusev/parsedown": "^1.6.3",
         "twig/twig": "~1.0"

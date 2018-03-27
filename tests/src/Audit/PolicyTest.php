@@ -4,6 +4,7 @@ namespace DrutinyTests\Audit;
 
 use PHPUnit\Framework\TestCase;
 use Drutiny\Sandbox\Sandbox;
+use Drutiny\Target\Registry as TargetRegistry;
 use Psr\Log\NullLogger;
 
 class PolicyTest extends TestCase {
@@ -14,7 +15,7 @@ class PolicyTest extends TestCase {
   public function __construct()
   {
     $this->registry = new \Drutiny\Registry();
-    $this->target = $this->registry->getTargetClass('none');
+    $this->target = TargetRegistry::getTarget('none', '');
     parent::__construct();
   }
 
