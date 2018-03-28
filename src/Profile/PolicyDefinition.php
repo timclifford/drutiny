@@ -9,13 +9,6 @@ class PolicyDefinition {
   use \Drutiny\Item\ContentSeverityTrait;
 
   /**
-   * The Policy object once instansiated.
-   *
-   * @var object Drutiny\Policy.
-   */
-  protected $policy;
-
-  /**
    * @bool Severity.
    */
   protected $severity;
@@ -116,24 +109,26 @@ class PolicyDefinition {
     return $this;
   }
 
+  public function setParameters(Array $params)
+  {
+    $this->parameters = $params;
+  }
+
   /**
    * Get the singleton policy for the profile.
    */
   public function getPolicy()
   {
-    if (isset($this->policy)) {
-      return $this->policy;
-    }
-    $this->policy = (new GlobalRegistry)->getPolicy($this->getName());
+    $policy = (new GlobalRegistry)->getPolicy($this->getName());
     if ($this->getSeverity() !== NULL) {
-      $this->policy->setSeverity($this->getSeverity());
+      $policy->setSeverity($this->getSeverity());
     }
 
     foreach ($this->parameters as $param => $value) {
       $info = ['default' => $value];
-      $this->policy->addParameter($param, $info);
+      $policy->addParameter($param, $info);
     }
-    return $this->policy;
+    return $policy;
   }
 
   /**
