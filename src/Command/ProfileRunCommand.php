@@ -8,6 +8,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Drutiny\Profile\Registry as ProfileRegistry;
 use Drutiny\Target\Registry as TargetRegistry;
 use Drutiny\Sandbox\Sandbox;
@@ -103,7 +104,7 @@ class ProfileRunCommand extends Command {
 
     // Setup the progress bar to log updates.
     $steps = count($policyDefinitions) * count($uris);
-    $progress = $this->getProgressBar($output, $steps);
+    $progress = $this->getProgressBar($output, $steps, $filepath == 'stdout');
 
     // Setup the target.
     $target = TargetRegistry::loadTarget($input->getArgument('target'));
@@ -137,14 +138,28 @@ class ProfileRunCommand extends Command {
 
     if (count($results) == 1) {
       $result = current($results);
-      $format->render($profile, $target, $result);
+      $render = $format->render($profile, $target, $result);
     }
     else {
-      $format->renderMultiple($profile, $target, $results);
+      $render = $format->renderMultiple($profile, $target, $results);
+    }
+
+    $render = is_string($render) ? $render : json_encode($render);
+
+    if ($filepath == 'stdout') {
+      echo $render;
+      return;
+    }
+    $console = new SymfonyStyle($input, $output);
+    if (file_put_contents($filepath, $render)) {
+      $console->success('Report written to ' . $filepath);
+    }
+    else {
+      $console->error("Could not write report to file: " . $filepath);
     }
   }
 
-  protected function getProgressBar(OutputInterface $output, $steps)
+  protected function getProgressBar(OutputInterface $output, $steps, $no_console = FALSE)
   {
     $progress = new ProgressBar($output, $steps);
     $progress->setFormatDefinition('custom', " <comment>%message%</comment>\n %current%/%max% <info>[%bar%]</info> %percent:3s%% %memory:6s%");
@@ -153,6 +168,9 @@ class ProfileRunCommand extends Command {
     $progress->setBarWidth(80);
 
     if ($output->getVerbosity() > OutputInterface::VERBOSITY_VERY_VERBOSE) {
+      $progress = FALSE;
+    }
+    elseif ($no_console) {
       $progress = FALSE;
     }
     else {
