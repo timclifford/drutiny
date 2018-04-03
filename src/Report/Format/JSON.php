@@ -2,9 +2,11 @@
 
 namespace Drutiny\Report\Format;
 
+use Drutiny\Profile;
 use Drutiny\Report\Format;
-use Symfony\Component\Console\Output\OutputInterface;
+use Drutiny\Target\Target;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class JSON extends Format {
 
@@ -42,7 +44,7 @@ class JSON extends Format {
     return $this;
   }
 
-  public function render($profile, $target, $result)
+  public function render(Profile $profile, Target $target, array $result)
   {
     $schema = [
       'notices' => 0,
@@ -151,6 +153,50 @@ class JSON extends Format {
     }
 
     return $schema;
+  }
+
+  public function renderMultiple(Profile $profile, Target $target, array $results)
+  {
+    $report = [
+      'by_site' => [],
+      'by_policy' => [],
+      'sites' => []
+    ];
+    $resultsByPolicy = [];
+    foreach ($results as $uri => $siteReport) {
+      $report['sites'][] = $uri;
+      foreach ($siteReport as $response) {
+        $policy = [
+          'isSuccessful' => $response->isSuccessful(),
+          'hasWarning' => $response->hasWarning(),
+          'message' => $response->getSummary(),
+        ];
+        if (!isset($report['by_policy'][$response->getName()])) {
+          $report['by_policy'][$response->getName()] = [
+            'sites' => [],
+            'total' => 0,
+            'success' => 0,
+            'failure' => 0,
+            'title' => $response->getTitle(),
+            'description' => $response->getDescription(),
+            'type' => $response->getType(),
+            'name' => $response->getName(),
+          ];
+        }
+        $report['by_policy'][$response->getName()]['sites'][$uri] = $policy;
+        $report['by_policy'][$response->getName()]['total']++;
+        $report['by_policy'][$response->getName()]['success'] += $policy['isSuccessful'] ? 1 : 0;
+        $report['by_policy'][$response->getName()]['failure'] += $policy['isSuccessful'] ? 0 : 1;
+        $report['by_site'][$uri][$response->getName()] = $policy['isSuccessful'];
+      }
+    }
+
+    foreach ($report['by_policy'] as &$result) {
+      $result['success_rate'] = round($result['success'] / $result['total'] * 100, 2);
+      $result['failure_rate'] = round($result['failure'] / $result['total'] * 100, 2);
+    }
+
+    return $report;
   }
 }
 

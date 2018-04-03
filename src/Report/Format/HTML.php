@@ -3,9 +3,12 @@
 namespace Drutiny\Report\Format;
 
 use Drutiny\Registry;
+use Drutiny\Profile;
+use Drutiny\Target\Target;
 use TOC\MarkupFixer;
 use TOC\TocGenerator;
 use Symfony\Component\Yaml\Yaml;
+
 
 class HTML extends JSON {
 
@@ -72,7 +75,7 @@ class HTML extends JSON {
   }
 
 
-  public function render($profile, $target, $result)
+  public function render(Profile $profile, Target $target, array $result)
   {
     $render = parent::render($profile, $target, $result);
     $parsedown = new \Parsedown();
@@ -116,10 +119,29 @@ class HTML extends JSON {
     $markupFixer  = new MarkupFixer();
     $tocGenerator = new TocGenerator();
 
+    return $this->processRender(self::renderTemplate('site', $render), $render);
+  }
+
+  public function renderMultiple(Profile $profile, Target $target, array $results)
+  {
+    $vars = parent::renderMultiple($profile, $target, $results);
+    $render = [
+      'title' => $profile->getTitle(),
+      'description' => $profile->getDescription(),
+      'summary' => 'Report audits policies over ' . count($results) . ' sites.',
+      'domain' => 'Multisite report'
+    ];
+    return $this->processRender(self::renderTemplate('multisite', $vars), $render);
+  }
+
+  protected function processRender($content, $render)
+  {
+    // Preperation to generate Toc
+    $markupFixer  = new MarkupFixer();
+    $tocGenerator = new TocGenerator();
+
     // Render the site report.
-    $content = $markupFixer->fix(
-      self::renderTemplate('site', $render)
-    );
+    $content = $markupFixer->fix($content);
 
     // Table of Contents.
     $toc = self::renderTemplate('toc', [

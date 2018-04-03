@@ -2,6 +2,9 @@
 
 namespace Drutiny\Report;
 
+use Drutiny\Profile;
+use Drutiny\Target\Target;
+
 abstract class Format {
 
   /**
@@ -51,7 +54,9 @@ abstract class Format {
     return $this;
   }
 
-  abstract public function render($profile, $target, $result);
+  abstract public function render(Profile $profile, Target $target, array $result);
+
+  abstract public function renderMultiple(Profile $profile, Target $target, array $results);
 }
 
  ?>

@@ -1,4 +1,4 @@
-<div class="container">
+  <div class="container">
   <!-- Example row of columns -->
   <div class="row">
 
@@ -9,14 +9,16 @@
         <thead>
           <tr>
             <th>Policy</th>
+            <th>Success Rate</th>
             <th>Result</th>
           </tr>
         </thead>
         <tbody>
-          {% for policy_results in results %}
+          {% for policy_name, policy_results in by_policy %}
             <tr>
-              <td><a href="#{{ policy_results.id }}">{{ policy_results.title }}</a></td>
-              <td>{{ policy_results.pass }} of {{ policy_results.total }} sites passed</td>
+              <td><a href="#{{ policy_results.name }}">{{ policy_results.title }}</a></td>
+              <td>{{ policy_results.success_rate }}%</td>
+              <td>{{ policy_results.success }} of {{ policy_results.total }} sites passed</td>
             </tr>
           {% endfor %}
         </tbody>
@@ -25,32 +27,35 @@
   </div>
 
   <div class="row">
-    <div class="col-sm-12">
+    <div class="col-sm-10">
       <h2>Site results by policy</h2>
-      {% for policy_results in results %}
-      <h3 id="{{ policy_results.id }}">{{ policy_results.title }}</h3>
+      {% for policy_name, policy_results in by_policy %}
+      <h3 id="{{ policy_results.name }}">{{ policy_results.title }}</h3>
       <div>{{ policy_results.description | raw }}</div>
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th>Site</th>
-            <th>Result</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for uri, site in policy_results.sites %}
+
+      {% if policy_results.success == policy_results.total %}
+      <div class="alert alert-success" role="alert">All sites passed this policy.</div>
+      {% else %}
+        <h4>Policy failures by site</h4>
+        <table class="table table-bordered">
+          <thead>
             <tr>
-              <td>{{ uri }}</td>
-              <td>
-                {% if site.has_warning %}
-                <div class="alert alert-warning" role="alert">{{ site.warning | raw }}</div>
-                {% endif %}
-                {{ site.summary | raw }}
-              </td>
+              <th>Site</th>
+              <th>Result</th>
             </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {% for uri, site in policy_results.sites if site.isSuccessful == false %}
+              <tr>
+                <td>{{ uri }}</td>
+                <td>
+                  {{ site.message | raw }}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
       {% endfor %}
     </div>
   </div>

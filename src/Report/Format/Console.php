@@ -2,13 +2,16 @@
 
 namespace Drutiny\Report\Format;
 
-use Drutiny\Report\Format;
 use Drutiny\AuditResponse\AuditResponse;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Input\InputInterface;
+use Drutiny\Profile;
+use Drutiny\Report\Format;
+use Drutiny\Target\Target;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
-use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Console\Helper\TableCell;
 use Symfony\Component\Console\Helper\TableSeparator;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 
 class Console extends Format {
@@ -54,7 +57,7 @@ class Console extends Format {
     return $this->output;
   }
 
-  public function render($profile, $target, $result)
+  public function render(Profile $profile, Target $target, array $result)
   {
     $io = new SymfonyStyle($this->input, $this->output);
     $io->title($profile->getTitle());
@@ -100,6 +103,53 @@ class Console extends Format {
     $total_pass = count(array_filter($pass));
     $table_rows[] = ['', "$total_pass/$total_tests passed", ''];
     $io->table(['', 'Policy', 'Severity', 'Summary'], $table_rows);
+    return '';
+  }
+
+  public function renderMultiple(Profile $profile, Target $target, array $results)
+  {
+    $io = new SymfonyStyle($this->input, $this->output);
+
+    // Set results by policy rather than by site.
+    $resultsByPolicy = [];
+    foreach ($results as $uri => $siteReport) {
+      foreach ($siteReport as $response) {
+        $resultsByPolicy[$response->getName()][$uri] = $response;
+      }
+    }
+
+    $table_rows = [];
+
+    foreach ($resultsByPolicy as $policy => $results) {
+      $failed = array_filter($results, function (AuditResponse $response) {
+        return !$response->isSuccessful();
+      });
+
+      $pass = bcsub(count($results), count($failed));
+      $pass_rate = round(bcdiv($pass, count($results)) * 100);
+
+      $policyInfo = reset($results);
+      $table_rows[] = [
+        '<options=bold>' . $policyInfo->getTitle() . '</>',
+        $pass_rate . '% passed'
+      ];
+      $table_rows[] = [new TableCell($policyInfo->getDescription(), [
+        'rowspan' => 2
+        ])];
+
+      foreach ($failed as $uri => $response) {
+        $table_rows[] = ['- ' . $uri, ''];
+      }
+
+      $table_rows[] = new TableSeparator();
+    }
+
+    // Remove last table seperator
+    array_pop($table_rows);
+
+    $io->title($profile->getTitle());
+    $io->table([], $table_rows);
+    return '';
   }
 
   protected function getIcon(AuditResponse $response)
