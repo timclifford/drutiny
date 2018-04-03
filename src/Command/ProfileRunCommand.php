@@ -104,7 +104,8 @@ class ProfileRunCommand extends Command {
 
     // Setup the progress bar to log updates.
     $steps = count($policyDefinitions) * count($uris);
-    $progress = $this->getProgressBar($output, $steps, $filepath == 'stdout');
+
+    $progress = new _CommandProgressBar($output, $steps, $filepath != 'stdout' || $format->getFormat() == 'console');
 
     // Setup the target.
     $target = TargetRegistry::loadTarget($input->getArgument('target'));
@@ -116,7 +117,7 @@ class ProfileRunCommand extends Command {
       foreach ($policyDefinitions as $policyDefinition) {
         $policy = $policyDefinition->getPolicy();
 
-        ($progress->log)("[$uri] " . $policy->get('title'));
+        $progress->log("[$uri] " . $policy->get('title'));
 
         // Setup the sandbox to run the assessment.
         $sandbox = new Sandbox($target, $policy);
@@ -126,15 +127,15 @@ class ProfileRunCommand extends Command {
 
         // Attempt remediation.
         if (!$response->isSuccessful() && $input->getOption('remediate')) {
-          ($progress->log)("\xE2\x9A\xA0 Remediating " . $policy->get('title'));
+          $progress->log("\xE2\x9A\xA0 Remediating " . $policy->get('title'));
           $response = $sandbox->remediate();
         }
         $results[$uri][$policyDefinition->getName()] = $response;
-        ($progress->advance)();
+        $progress->advance();
       }
     }
 
-    ($progress->finish)();
+    $progress->finish();
 
     if (count($results) == 1) {
       $result = current($results);
@@ -158,44 +159,43 @@ class ProfileRunCommand extends Command {
       $console->error("Could not write report to file: " . $filepath);
     }
   }
+}
 
-  protected function getProgressBar(OutputInterface $output, $steps, $no_console = FALSE)
+Class _CommandProgressBar {
+  protected $status = TRUE;
+  protected $bar;
+
+  public function __construct($output, $steps, $enabled = TRUE)
   {
+    $this->status = $enabled;
     $progress = new ProgressBar($output, $steps);
     $progress->setFormatDefinition('custom', " <comment>%message%</comment>\n %current%/%max% <info>[%bar%]</info> %percent:3s%% %memory:6s%");
     $progress->setFormat('custom');
     $progress->setMessage("Starting...");
     $progress->setBarWidth(80);
-
-    if ($output->getVerbosity() > OutputInterface::VERBOSITY_VERY_VERBOSE) {
-      $progress = FALSE;
-    }
-    elseif ($no_console) {
-      $progress = FALSE;
-    }
-    else {
-      $progress->start();
-    }
-
-    $logger = new \stdClass;
-    $logger->log = function ($msg) use ($progress)
-    {
-      $progress && $progress->setMessage($msg);
-    };
-
-    $logger->advance = function () use ($progress)
-    {
-      $progress && $progress->advance();
-    };
-
-    $logger->finish = function () use ($progress, $output)
-    {
-      $progress && $progress->setMessage("Done");
-      $progress && $progress->finish();
-      $progress && $output->writeln('');
-    };
-
-    return $logger;
+    $this->bar = $progress;
   }
 
+  public function log($message)
+  {
+    if ($this->status) {
+      $this->bar->setMessage($message);
+    }
+  }
+
+  public function advance()
+  {
+    if ($this->status) {
+      $this->bar->advance();
+    }
+  }
+
+  public function finish()
+  {
+    if ($this->status) {
+      $this->bar->setMessage("Done");
+      $this->bar->finish();
+      echo '';
+    }
+  }
 }
