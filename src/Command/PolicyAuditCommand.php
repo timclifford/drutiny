@@ -2,23 +2,21 @@
 
 namespace Drutiny\Command;
 
+use Drutiny\Logger\ConsoleLogger;
+use Drutiny\Profile;
+use Drutiny\Profile\PolicyDefinition;
+use Drutiny\RemediableInterface;
+use Drutiny\Report\ProfileRunReport;
+use Drutiny\Sandbox\Sandbox;
+use Drutiny\Target\Registry as TargetRegistry;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Yaml\Yaml;
-use Drutiny\Registry;
-use Drutiny\PolicyChain;
-use Drutiny\Sandbox\Sandbox;
-use Drutiny\Logger\ConsoleLogger;
-use Drutiny\Target\Target;
-use Drutiny\RemediableInterface;
-use Drutiny\Report\ProfileRunReport;
-use Drutiny\ProfileInformation;
-use Drutiny\AuditResponse\AuditResponse;
 
 
 /**
@@ -69,19 +67,6 @@ class PolicyAuditCommand extends Command {
    */
   protected function execute(InputInterface $input, OutputInterface $output) {
 
-    $registry = new Registry();
-
-    // Setup the check.
-    $policy = $input->getArgument('policy');
-    $policies = $registry->policies();
-    if (!isset($policies[$policy])) {
-      throw new \InvalidArgumentException("$policy is not a valid check.");
-    }
-
-    // Policy chain ensures policy dependents are included in the audit.
-    $chain = new PolicyChain();
-    $chain->add($policies[$policy]);
-
     // Setup any parameters for the check.
     $parameters = [];
     foreach ($input->getOption('set-parameter') as $option) {
@@ -90,30 +75,27 @@ class PolicyAuditCommand extends Command {
       $parameters[$key] = Yaml::parse($value);
     }
 
-    // Setup the target which is usually something like a drush aliases (@sitename.env).
-    list($target_name, $target_data) = Target::parseTarget($input->getArgument('target'));
-    $target_class = $registry->getTargetClass($target_name);
+    $name = $input->getArgument('policy');
+    $profile = new Profile();
+    $profile->setTitle('Policy Audit: ' . $name)
+            ->setName($name)
+            ->setFilepath('/dev/null')
+            ->addPolicyDefinition(
+              PolicyDefinition::createFromProfile($name, 0, [
+                'parameters' => $parameters
+              ])
+            );
 
+    // Setup the target.
+    $target = TargetRegistry::loadTarget($input->getArgument('target'));
     $result = [];
-    $failure = FALSE;
 
-    foreach ($chain->getPolicies() as $policy) {
-      if ($failure) {
-        $result[$policy->get('name')] = new AuditResponse($policy);
-        $result[$policy->get('name')]->set(FALSE, $policy->getParameterDefaults());
-        continue;
-      }
+    foreach ($profile->getAllPolicyDefinitions() as $definition) {
+      $policy = $definition->getPolicy();
+
       // Generate the sandbox to execute the check.
-      $sandbox = new Sandbox($target_class, $policy);
-
-      // For the policy that
-      if ($policy->get('name') == $input->getArgument('policy')) {
-        $sandbox->setParameters($parameters);
-      }
-      $sandbox
-        ->setLogger(new ConsoleLogger($output))
-        ->getTarget()
-        ->parse($target_data);
+      $sandbox = new Sandbox($target, $policy);
+      $sandbox->setLogger(new ConsoleLogger($output));
 
       if ($uri = $input->getOption('uri')) {
         $sandbox->drush()->setGlobalDefaultOption('uri', $uri);
@@ -127,17 +109,7 @@ class PolicyAuditCommand extends Command {
       }
 
       $result[$policy->get('name')] = $response;
-
-      // Dependencies are broken, cannot progress.
-      if (!$response->isSuccessful()) {
-        $failure = TRUE;
-      }
     }
-
-    // Generate a profile so we can use the profile reporting tools.
-    $profile = new ProfileInformation([
-      'title' => 'Policy Audit: ' . $policies[$input->getArgument('policy')]->get('name'),
-    ]);
 
     $report = new ProfileRunReport($profile, $sandbox->getTarget(), $result);
     $report->render($input, $output);

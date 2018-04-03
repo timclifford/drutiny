@@ -6,8 +6,6 @@ use Drutiny\AuditResponse\AuditResponse;
 use Drutiny\Logger\ConsoleLogger;
 use Drutiny\Policy;
 use Drutiny\Profile;
-use Drutiny\Profile\Registry as ProfileRegistry;
-use Drutiny\Registry;
 use Drutiny\RemediableInterface;
 use Drutiny\Report\ProfileRunReport;
 use Drutiny\Sandbox\Sandbox;
@@ -19,7 +17,6 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Yaml\Yaml;
 
 
@@ -82,8 +79,6 @@ class AuditRunCommand extends Command {
       'failure' => 'failure',
       'warning' => 'warning',
     ]);
-
-    $registry = new Registry();
 
     // Setup any parameters for the check.
     foreach ($input->getOption('set-parameter') as $option) {
