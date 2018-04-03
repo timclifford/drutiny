@@ -2,23 +2,25 @@
 
 namespace Drutiny\Command;
 
+use Drutiny\AuditResponse\AuditResponse;
+use Drutiny\Logger\ConsoleLogger;
+use Drutiny\Policy;
+use Drutiny\Profile;
+use Drutiny\Profile\Registry as ProfileRegistry;
+use Drutiny\Registry;
+use Drutiny\RemediableInterface;
+use Drutiny\Report\ProfileRunReport;
+use Drutiny\Sandbox\Sandbox;
+use Drutiny\Target\Registry as TargetRegistry;
+use Drutiny\Target\Target;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Yaml\Yaml;
-use Drutiny\Registry;
-use Drutiny\Policy;
-use Drutiny\Sandbox\Sandbox;
-use Drutiny\Logger\ConsoleLogger;
-use Drutiny\Target\Target;
-use Drutiny\RemediableInterface;
-use Drutiny\Report\ProfileRunReport;
-use Drutiny\ProfileInformation;
-use Drutiny\AuditResponse\AuditResponse;
 
 
 /**
@@ -84,27 +86,22 @@ class AuditRunCommand extends Command {
     $registry = new Registry();
 
     // Setup any parameters for the check.
-    $parameters = [];
     foreach ($input->getOption('set-parameter') as $option) {
       list($key, $value) = explode('=', $option, 2);
-      // Using Yaml::parse to ensure datatype is correct.
-      $parameters[$key] = Yaml::parse($value);
+
+      $info = ['default' => Yaml::parse($value)];
+      $policy->addParameter($key, $info);
     }
 
-    // Setup the target which is usually something like a drush aliases (@sitename.env).
-    list($target_name, $target_data) = Target::parseTarget($input->getArgument('target'));
-    $target_class = $registry->getTargetClass($target_name);
+    // Setup the target.
+    $target = TargetRegistry::loadTarget($input->getArgument('target'));
 
     $result = new AuditResponse($policy);
     $result->set(FALSE, $policy->getParameterDefaults());
 
     // Generate the sandbox to execute the check.
-    $sandbox = new Sandbox($target_class, $policy);
-    $sandbox
-      ->setParameters($parameters)
-      ->setLogger(new ConsoleLogger($output))
-      ->getTarget()
-      ->parse($target_data);
+    $sandbox = new Sandbox($target, $policy);
+    $sandbox->setLogger(new ConsoleLogger($output));
 
     if ($uri = $input->getOption('uri')) {
       $sandbox->drush()->setGlobalDefaultOption('uri', $uri);
@@ -118,13 +115,14 @@ class AuditRunCommand extends Command {
     }
 
     // Generate a profile so we can use the profile reporting tools.
-    $profile = new ProfileInformation([
-      'title' => $policy->get('title'),
-    ]);
+    $profile = new Profile();
+    $profile->setTitle('Audit Run')
+            ->setName('audit:run')
+            ->setFilepath('/dev/null');
 
     $report = new ProfileRunReport($profile, $sandbox->getTarget(), [$response]);
     $report->render($input, $output);
-    
+
     if ($output->getVerbosity() >= $output::VERBOSITY_VERBOSE) {
       $output->writeln(Yaml::dump($sandbox->getParameterTokens()));
     }
