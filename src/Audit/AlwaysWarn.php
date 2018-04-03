@@ -16,7 +16,6 @@ class AlwaysWarn extends Audit {
 
   public function audit(Sandbox $sandbox)
   {
-    sleep(1);
     return Audit::WARNING;
   }
 }
