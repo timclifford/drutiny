@@ -3,7 +3,7 @@
 namespace Drutiny;
 
 use Drutiny\Profile\PolicyDefinition;
-use Drutiny\Profile\Registry;
+use Drutiny\Profile\Registry as ProfileRegistry;
 use Drutiny\Report\Format;
 use Symfony\Component\Yaml\Yaml;
 
@@ -100,7 +100,7 @@ class Profile {
 
     if (isset($info['include'])) {
       foreach ($info['include'] as $name) {
-        $include = self::loadFromFile(Registry::locateProfile($name));
+        $include = self::loadFromFile(ProfileRegistry::locateProfile($name));
         $profile->addInclude($include);
       }
     }
