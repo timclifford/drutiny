@@ -40,6 +40,20 @@ policies:
   Drupal-7:PhpModuleDisabled: {}
 ```
 
+Policy definitions can contain profile specific overrides for parameters passed
+to the policy as well as the severity of the policy in context to the profile.
+
+```yaml
+policies:
+  Database:Size:
+    parameters:
+      max_size: 900
+    severity: critical
+```
+
+**Note:** This is a change from the 2.0.x profile format. Older profiles that
+provided default parameters will error.
+
 ### include
 The include directive allows profiles to be build on top of collections or other
 profiles. Each include name should be the machine name of another available profile.
@@ -50,7 +64,29 @@ include:
   - d8
 ```
 
-### template
+
+### format
+
+The `format` declaration allows a profile to specify options specific to the
+export format of the report (console, HTML or JSON). Based on the format,
+the options vary.
+
+Right now there are no specific options for `console` or `json` formats. Only HTML.
+
+```
+format:
+  html:
+    template: my-page
+    content:
+      - heading: My custom section
+        body: |
+          This is a multiline field that can contain mustache and markdown syntax.
+          There are also a variety of variables available to dynamically render
+          results.....
+```
+
+### format.html.template
+
 The template to use to theme an HTML report. Defaults to `page` which is the option
 provided by default. To add your own template you need to register a template
 directory and add a template [twig](https://twig.symfony.com/) file.
@@ -65,7 +101,9 @@ Template:
 > < profile >.profile.yml:
 
 ```yaml
-template: my-page
+format:
+  html:
+    template: my-page
 ```
 
 The configuration example above will register the `my_templates_dir` directory
@@ -74,42 +112,46 @@ Drutiny will look inside `my_templates_dir` among other registered template dire
 for a template called `my-page.html.twig`. Note that multiple template directories
 can be registered.
 
-### content
+### format.html.content
 
-The `content` declaration allows a profile to specify the content displayed in an
+Specify the content displayed in an
 HTML report and the order that it displays in. By default, Drutiny will load in
-the contents from [content.default.yml](https://github.com/drutiny/drutiny/blob/2.x/Profiles/content.default.yml).
+the contents from [content.default.yml](https://github.com/drutiny/drutiny/blob/2.1.x/Profiles/content.default.yml).
 
 The content property is an array of sections. Each section specifies a `heading`
 and `body`. Each section will roll up into a Table of Contents in the report.
 
 ```yaml
-content:
-  - heading: My custom section
-    body: |
-      This is a multiline field that can contain mustache and markdown syntax.
-      There are also a variety of variables available to dynamically render
-      results.
+format:
+  html:
+    content:
+      - heading: My custom section
+        body: |
+          This is a multiline field that can contain mustache and markdown syntax.
+          There are also a variety of variables available to dynamically render
+          results.
 
-      ### Summary
-      {{{ summary_table }}}
+          ### Summary
+          {{{ summary_table }}}
 
-      {{ #failures }}
-        ### Issues
-        {{# output_failure }}
-          {{{.}}}
-        {{/ output_failure }}
-      {{ /failures }}
+          {{ #failures }}
+            ### Issues
+            {{# output_failure }}
+              {{{.}}}
+            {{/ output_failure }}
+          {{ /failures }}
 
-      {{ #warnings }}
-        ### Warnings
-        {{# output_warning }}
-          {{{.}}}
-        {{/ output_warning }}
-      {{ /warnings }}
+          {{ #warnings }}
+            ### Warnings
+            {{# output_warning }}
+              {{{.}}}
+            {{/ output_warning }}
+          {{ /warnings }}
 ```
 
 #### Content Variables
+
+These are the variables available to the `format.html.content` template.
 
 Variable | Type | description
 --|--|--
