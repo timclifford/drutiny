@@ -105,7 +105,7 @@ class ProfileRunCommand extends Command {
     // Setup the progress bar to log updates.
     $steps = count($policyDefinitions) * count($uris);
 
-    $progress = new _CommandProgressBar($output, $steps, $filepath != 'stdout' || $format->getFormat() == 'console');
+    $progress = new _CommandProgressBar($output, $steps, ($filepath != 'stdout' || $format->getFormat() == 'console') && $output->getVerbosity() < OutputInterface::VERBOSITY_VERY_VERBOSE);
 
     // Setup the target.
     $target = TargetRegistry::loadTarget($input->getArgument('target'));
