@@ -107,7 +107,7 @@ class Profile {
 
     if (isset($info['format'])) {
       foreach ($info['format'] as $format => $options) {
-        $profile->addFormatOptions(Format::create($name, $options));
+        $profile->addFormatOptions(Format::create($format, $options));
       }
     }
 
