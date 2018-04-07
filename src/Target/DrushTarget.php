@@ -33,7 +33,8 @@ class DrushTarget extends Target implements DrushInterface, ExecInterface {
     $key = str_replace('@', '', $target_data);
     $this->options = isset($options[$key]) ? $options[$key] : array_shift($options);
 
-    if (isset($this->options['uri'])) {
+    // Set the URI from the Drush alias if it hasn't been manually set already.
+    if (!isset($this->uri) && isset($this->options['uri'])) {
       $this->setGlobalDefaultOption('uri', $this->options['uri']);
     }
 
