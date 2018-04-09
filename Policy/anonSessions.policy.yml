@@ -23,4 +23,4 @@ parameters:
       SELECT COUNT(*) as count FROM sessions
       WHERE uid = 0
         AND session NOT LIKE 'openid%'
-        AND session NOT LIKE '%Access denied%';
+        AND session NOT LIKE '%Access denied%'
