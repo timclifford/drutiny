@@ -36,17 +36,17 @@ class FileStore {
     $filepath = $this->findCredentialFile();
 
     if (!file_exists($filepath)) {
-      throw new CredentialsUnavailableException("Cannot find stored credentials for {$this->namespace}.");
+      throw new CredentialsUnavailableException("Cannot find stored credentials for {$this->namespace}. Please run `plugin:setup {$this->namespace}`.");
     }
     if (!$content = file_get_contents($filepath)) {
-      throw new CredentialsUnavailableException("Cannot retrieve stored credentials for {$this->namespace} from $fiepath.");
+      throw new CredentialsUnavailableException("Cannot retrieve stored credentials for {$this->namespace} from $filepath. Please run `plugin:setup {$this->namespace}`.");
     }
     if (!$creds = Yaml::parse($content)) {
-      throw new CredentialsUnavailableException("Cannot parse stored credentials for {$this->namespace} in $filepath.");
+      throw new CredentialsUnavailableException("Cannot parse stored credentials for {$this->namespace} in $filepath. Please run `plugin:setup {$this->namespace}`.");
     }
 
     if (!isset($creds[$this->namespace])) {
-      throw new CredentialsUnavailableException("Cannot find stored credentials for {$this->namespace} in $filepath.");
+      throw new CredentialsUnavailableException("Cannot find stored credentials for {$this->namespace} in $filepath. Please run `plugin:setup {$this->namespace}`.");
     }
     return $creds[$this->namespace];
   }
