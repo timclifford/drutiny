@@ -34,49 +34,25 @@ pages:
                 Policy: policy.md
             -
                 Profile: profiles.md
+            -
+                'Credential Manager': creds.md
     -
         'Policy Library':
             -
                 Overview: policy-library.md
             -
                 drutiny/drutiny: policies/drutiny-drutiny.md
-            -
-                drutiny/acquia: policies/drutiny-acquia.md
-            -
-                drutiny/plugin-drupal-8: policies/drutiny-plugin-drupal-8.md
-            -
-                drutiny/plugin-drupal-7: policies/drutiny-plugin-drupal-7.md
-            -
-                drutiny/plugin-distro-common: policies/drutiny-plugin-distro-common.md
-            -
-                drutiny/cloudflare: policies/drutiny-cloudflare.md
-            -
-                drutiny/http: policies/drutiny-http.md
     -
         'Audit Library':
             -
-                Drutiny\Audit: audits/DrutinyAudit.md
+                General: audits/DrutinyAudit.md
             -
-                Drutiny\Audit\Drupal: audits/DrutinyAuditDrupal.md
+                Apache: audits/DrutinyAuditApache.md
             -
-                Drutiny\Audit\Filesystem: audits/DrutinyAuditFilesystem.md
+                DNS: audits/DrutinyAuditDNS.md
             -
-                Drutiny\Audit\Database: audits/DrutinyAuditDatabase.md
+                Database: audits/DrutinyAuditDatabase.md
             -
-                Drutiny\Audit\Apache: audits/DrutinyAuditApache.md
+                Drupal: audits/DrutinyAuditDrupal.md
             -
-                Drutiny\Acquia\Audit: audits/DrutinyAcquiaAudit.md
-            -
-                Drutiny\Plugin\Drupal8\Audit: audits/DrutinyPluginDrupal8Audit.md
-            -
-                Drutiny\Http\Audit: audits/DrutinyHttpAudit.md
-            -
-                Drutiny\Plugin\Drupal7\Audit: audits/DrutinyPluginDrupal7Audit.md
-            -
-                Drutiny\Plugin\Drupal7\Audit\Security: audits/DrutinyPluginDrupal7AuditSecurity.md
-            -
-                Drutiny\Cloudflare\Audit: audits/DrutinyCloudflareAudit.md
-            -
-                Drutiny\SumoLogic\Audit: audits/DrutinySumoLogicAudit.md
-            -
-                Drutiny\Audit\DNS: audits/DrutinyAuditDNS.md
+                Filesystem: audits/DrutinyAuditFilesystem.md
