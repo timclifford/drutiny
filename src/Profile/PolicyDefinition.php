@@ -9,11 +9,6 @@ class PolicyDefinition {
   use \Drutiny\Item\ContentSeverityTrait;
 
   /**
-   * @bool Severity.
-   */
-  protected $severity;
-
-  /**
    * Name of the poilcy.
    *
    * @var string
