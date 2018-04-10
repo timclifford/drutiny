@@ -2,8 +2,10 @@
 
 namespace Drutiny\Credential;
 
-class CredentialsUnavailableException extends \Exception {
-  
+use Drutiny\AuditValidationException;
+
+class CredentialsUnavailableException extends AuditValidationException {
+
 }
 
  ?>

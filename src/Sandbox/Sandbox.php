@@ -74,6 +74,7 @@ class Sandbox {
     }
     catch (AuditValidationException $e) {
       $this->setParameter('exception', $e->getMessage());
+      $this->logger()->warning($e->getMessage());
       $response->set(Audit::NOT_APPLICABLE, $this->getParameterTokens());
     }
     catch (\Exception $e) {
