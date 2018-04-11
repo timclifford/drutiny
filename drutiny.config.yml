@@ -3,14 +3,16 @@ Target:
   - Drutiny\Target\TargetNone
 Command:
   - Drutiny\Command\AuditGenerateCommand
+  - Drutiny\Command\AuditInfoCommand
+  - Drutiny\Command\AuditListCommand
   - Drutiny\Command\AuditRunCommand
+  - Drutiny\Command\AuthenticateCommand
   - Drutiny\Command\PolicyAuditCommand
   - Drutiny\Command\PolicyInfoCommand
   - Drutiny\Command\PolicyListCommand
   - Drutiny\Command\ProfileGenerateCommand
-  - Drutiny\Command\ProfileListCommand
   - Drutiny\Command\ProfileInfoCommand
+  - Drutiny\Command\ProfileListCommand
   - Drutiny\Command\ProfileRunCommand
-  - Drutiny\Command\AuthenticateCommand
 Template:
   - src/Report/templates
