@@ -15,6 +15,8 @@ abstract class Format {
    */
   protected $format;
 
+  protected $output = 'stdout';
+
   abstract public function __construct($options);
 
   public static function create($format, $options)

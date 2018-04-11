@@ -16,7 +16,7 @@ class HTML extends Markdown {
   public function __construct($options)
   {
     if (!isset($options['content'])) {
-      $options['content'] = Yaml::parseFile(dirname(__FILE__) . '/../../../Profiles/content.default.yml');
+      $options['content'] = Yaml::parseFile(dirname(__DIR__) . '/templates/content/profile.html.yml');
     }
 
     parent::__construct($options);

@@ -6,6 +6,7 @@ use Drutiny\Logger\ConsoleLogger;
 use Drutiny\Profile;
 use Drutiny\Profile\PolicyDefinition;
 use Drutiny\RemediableInterface;
+use Drutiny\Report\Format;
 use Drutiny\Report\ProfileRunReport;
 use Drutiny\Sandbox\Sandbox;
 use Drutiny\Target\Registry as TargetRegistry;
@@ -84,7 +85,11 @@ class PolicyAuditCommand extends Command {
               PolicyDefinition::createFromProfile($name, 0, [
                 'parameters' => $parameters
               ])
-            );
+            )
+            ->addFormatOptions(Format::create('terminal', [
+              'content' => Yaml::parseFile(dirname(__DIR__) . '/Report/templates/content/policy.markdown.yml'),
+              'output' => $output,
+            ]));
 
     // Setup the target.
     $target = TargetRegistry::loadTarget($input->getArgument('target'));
@@ -111,8 +116,11 @@ class PolicyAuditCommand extends Command {
       $result[$policy->get('name')] = $response;
     }
 
-    $report = new ProfileRunReport($profile, $sandbox->getTarget(), $result);
-    $report->render($input, $output);
+    $profile->getFormatOption('markdown')
+            ->render($profile, $sandbox->getTarget(), [$result]);
+
+    // $report = new ProfileRunReport($profile, $sandbox->getTarget(), $result);
+    // $report->render($input, $output);
   }
 
 }

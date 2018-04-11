@@ -9,15 +9,16 @@ use Fiasco\SymfonyConsoleStyleMarkdown\Renderer;
 use Symfony\Component\Yaml\Yaml;
 
 class Terminal extends Markdown {
-  public function render(Profile $profile, Target $target, array $result)
+
+  public function renderResult(array $variables)
   {
-    $markdown = parent::render($profile, $target, $result);
+    $markdown = parent::renderResult($variables);
     return (string) Renderer::createFromMarkdown($markdown);
   }
 
-  public function renderMultiple(Profile $profile, Target $target, array $results)
+  public function renderMultiResult(array $variables)
   {
-    $markdown = parent::renderMultiple($profile, $target, $results);
+    $markdown = parent::renderMultiResult($variables);
     return (string) Renderer::createFromMarkdown($markdown);
   }
 }

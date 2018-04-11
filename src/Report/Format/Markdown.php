@@ -32,7 +32,7 @@ class Markdown extends JSON {
     $this->setTemplate(isset($options['template']) ? $options['template'] : 'page');
 
     if (!isset($options['content'])) {
-      $options['content'] = Yaml::parseFile(dirname(__FILE__) . '/../../../Profiles/content.markdown.yml');
+      $options['content'] = Yaml::parseFile(dirname(__DIR__) . '/templates/content/profile.markdown.yml');
     }
     $this->setContent($options['content']);
   }
