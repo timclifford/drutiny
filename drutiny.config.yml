@@ -15,4 +15,5 @@ Command:
   - Drutiny\Command\ProfileListCommand
   - Drutiny\Command\ProfileRunCommand
 Template:
-  - src/Report/templates
+  - src/Report/templates/html
+  - src/Report/templates/markdown

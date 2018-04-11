@@ -24,27 +24,7 @@ class JSON extends Format {
     }
   }
 
-  /**
-   * Get the profile title.
-   */
-  public function getOutput()
-  {
-    return $this->output;
-  }
-
-  /**
-   * Set the title of the profile.
-   */
-  protected function setOutput($filepath = 'stdout')
-  {
-    if ($filepath != 'stdout' && !($filepath instanceof OutputInterface) && !file_exists(dirname($filepath))) {
-      throw new \InvalidArgumentException("Cannot write to $filepath. Parent directory doesn't exist.");
-    }
-    $this->output = $filepath;
-    return $this;
-  }
-
-  public function render(Profile $profile, Target $target, array $result)
+  protected function preprocessResult(Profile $profile, Target $target, array $result)
   {
     $schema = [
       'notices' => 0,
@@ -155,7 +135,12 @@ class JSON extends Format {
     return $schema;
   }
 
-  public function renderMultiple(Profile $profile, Target $target, array $results)
+  protected function renderResult(array $variables)
+  {
+    return json_encode($variables);
+  }
+
+  protected function preprocessMultiResult(Profile $profile, Target $target, array $results)
   {
     $report = [
       'by_site' => [],
@@ -197,6 +182,11 @@ class JSON extends Format {
     }
 
     return $report;
+  }
+
+  protected function renderMultiResult(array $variables)
+  {
+    return $this->renderResult($variables);
   }
 }
 

@@ -1,0 +1,9 @@
+### {{ result.title }} ({{ result.status_title }})
+{{ result.description }}
+
+{{ result.success }}
+
+{% if result.has_warning %}
+#### Warning
+{{ result.warning | raw }}
+{% endif %}

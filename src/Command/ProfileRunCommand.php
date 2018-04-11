@@ -137,26 +137,11 @@ class ProfileRunCommand extends Command {
 
     $progress->finish();
 
-    if (count($results) == 1) {
-      $result = current($results);
-      $render = $format->render($profile, $target, $result);
-    }
-    else {
-      $render = $format->renderMultiple($profile, $target, $results);
-    }
+    $format->render($profile, $target, $results);
 
-    $render = is_string($render) ? $render : json_encode($render);
-
-    if ($filepath == 'stdout') {
-      echo $render;
-      return;
-    }
-    $console = new SymfonyStyle($input, $output);
-    if (file_put_contents($filepath, $render)) {
+    if ($filepath = $input->getOption('report-filename')) {
+      $console = new SymfonyStyle($input, $output);
       $console->success('Report written to ' . $filepath);
-    }
-    else {
-      $console->error("Could not write report to file: " . $filepath);
     }
   }
 }

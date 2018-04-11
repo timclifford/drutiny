@@ -1,0 +1,13 @@
+### {{ result.title }} ({{ result.status_title }})
+{{ result.description }}
+
+{{ result.failure }}
+
+#### Remediation
+
+{{ result.remediation }}
+
+{% if result.has_warning %}
+#### Warning
+{{ result.warning | raw }}
+{% endif %}
