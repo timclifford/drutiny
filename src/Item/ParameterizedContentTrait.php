@@ -14,8 +14,8 @@ trait ParameterizedContentTrait {
       'default' => FALSE,
       'description' => '',
     ];
-
-    $info = $default + $info;
+    
+    $info = array_merge($default, $info);
 
     if (!isset($info['type'])) {
       $info['type'] = gettype($info['default']);
