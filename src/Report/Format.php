@@ -73,7 +73,7 @@ abstract class Format {
     }
     else {
       // @var array
-      $variables = $this->preprocessMultiResult($profile, $target, $result);
+      $variables = $this->preprocessMultiResult($profile, $target, $results);
 
       // @var string
       $renderedOutput = $this->renderMultiResult($variables);
