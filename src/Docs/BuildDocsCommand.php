@@ -53,123 +53,11 @@ class BuildDocsCommand extends Command {
 
     $pages = [];
     foreach ($auditors as $class) {
-      $metadata = $registry->getAuditMedtadata($class);
-      $metadata->source = FALSE;
-      if ($metadata->reflect->hasMethod('audit')) {
-        $method = $metadata->reflect->getMethod('audit');
-        if ($method->getStartLine() != $method->getEndLine()) {
-          $metadata->source = array_slice(file($method->getFilename()), $method->getStartLine() - 1, $method->getEndLine() - $method->getStartLine() + 1);
-          $metadata->source = implode('', $metadata->source);
-        }
-      }
-
-      $package = $this->findPackage($metadata->filename);
-
-      $names = explode('\\', $metadata->class);
-
-      $md = ['## ' . array_pop($names)];
-      $md[] = $metadata->description;
-      $md[] = '';
-      $md[] = 'Class: `' . $metadata->class . '`  ';
-      $md[] = 'Extends: `' . $metadata->extends . '`  ';
-      $md[] = 'Package: `' . $package . '`';
-      $md[] = '';
-
-
-      if ($metadata->remediable) {
-        $md[] = 'This class can **remediate** failed audits.';
-        $md[] = '';
-      }
-
-      if ($metadata->isAbstract || $metadata->reflect->getMethod('audit')->isAbstract()) {
-        $md[] = '**NOTE**: This Audit is **abstract** and cannot be used directly by a policy.';
-        $md[] = '';
-      }
-
-
-      $policies = array_filter($registry->policies(), function ($policy) use ($metadata) {
-        $class = $policy->get('class');
-        if (strpos($class, '\\') === 0) {
-          $class = substr($class, 1);
-        }
-        return $class == $metadata->class;
-      });
-
-      if (!empty($policies)) {
-        $md[] = '### Policies';
-        $md[] = 'These are the policies that use this class:';
-        $md[] = '';
-        $md[] = 'Name | Title';
-        $md[] = '-- | --';
-        foreach ($policies as $policy) {
-          $md[] = strtr('name | title', [
-            'name' => $policy->get('name'),
-            'title' => $policy->get('title'),
-          ]);
-        }
-
-      }
-
-      if (!empty($metadata->params)) {
-        $md[] = '';
-        $md[] = '### Parameters';
-        $md[] = 'Name | Type | Description | Default';
-        $md[] = '-- | -- | -- | --';
-
-        foreach ($metadata->params as $name => $param) {
-          // $params may not correctly conform so this it just to prevent the
-          // php notices.
-          $param = array_merge([
-            'type' => '',
-            'description' => '',
-            'default' => '',
-          ], (array) $param);
-
-          $md[] = strtr('Name | Type | Description | Default', [
-            'Name' => $name,
-            'Type' => $param['type'],
-            'Description' => $param['description'],
-            'Default' => str_replace(PHP_EOL, '<br>', Yaml::dump($param['default'])),
-          ]);
-        }
-      }
-
-      if (!empty($metadata->tokens)) {
-        $md[] = '';
-        $md[] = '### Tokens';
-        $md[] = 'Name | Type | Description | Default';
-        $md[] = '-- | -- | -- | --';
-
-        foreach ($metadata->tokens as $name => $param) {
-          // $params may not correctly conform so this it just to prevent the
-          // php notices.
-          $param = array_merge([
-            'type' => '',
-            'description' => '',
-            'default' => '',
-          ], (array) $param);
-
-          $md[] = strtr('Name | Type | Description | Default', [
-            'Name' => $name,
-            'Type' => $param['type'],
-            'Description' => $param['description'],
-            'Default' => str_replace(PHP_EOL, '<br>', Yaml::dump($param['default'])),
-          ]);
-        }
-      }
-
-      if ($metadata->source) {
-        $md[] = '';
-        $md[] = '#### Source';
-        $md[] = '```php';
-        $md[] = $metadata->source;
-        $md[] = '```';
-      }
-
-      $namespace = explode('\\', $metadata->class);
+      $docs = new AuditDocsGenerator();
+      $namespace = explode('\\', $class);
       array_pop($namespace);
       $namespace = implode('\\', $namespace);
-      $pages[$namespace][$metadata->class] = implode(PHP_EOL, $md);
+      $pages[$namespace][$class] = $docs->buildAuditDocumentation($class);
     }
 
     $nav = [];
@@ -207,78 +95,9 @@ class BuildDocsCommand extends Command {
     $pages = [];
 
     foreach ($policies as $policy) {
-      $filepath = $policy->get('filepath');
-      $package = $this->findPackage($filepath);
-
-      $md = [];
-      $md[] = $link = strtr('## title', [
-        'title' => $policy->get('title'),
-        'name' => $policy->get('name'),
-      ]);
-
-      $toc[$policy->get('title')] = [
-        'title' => $policy->get('title'),
-        'name' => $policy->get('name'),
-        'package' => $package,
-        'link' => str_replace(' ', '-', trim(preg_replace('/[^a-z0-9 \-]/', '', strtolower($link)))),
-      ];
-
-      $md[] = "**Name**: `" . $policy->get('name') . "`  ";
-      $md[] = "**Package**: `$package`  ";
-      $md[] = "**Class**: `" . $policy->get('class') . "`";
-      $md[] = '';
-      $md[] = $policy->get('description');
-
-      $audit = (new \Drutiny\Registry)->getAuditMedtadata($policy->get('class'));
-
-      $params = $policy->get('parameters');
-      foreach ($audit->params as $param) {
-        if (isset($params[$param->name])) {
-          $params[$param->name] = array_merge($param->toArray(), $params[$param->name]);
-        }
-      }
-
-      if (!empty($params)) {
-        $md[] = '';
-        $md[] = '### Parameters';
-        $md[] = 'Name | Type | Description | Default';
-        $md[] = '-- | -- | -- | --';
-
-        foreach ($params as $name => $param) {
-          // $params may not correctly conform so this it just to prevent the
-          // php notices.
-          $param = array_merge([
-            'type' => '',
-            'description' => '',
-            'default' => '',
-          ], $param);
-          $md[] = strtr('Name | Type | Description | Default', [
-            'Name' => $name,
-            'Type' => $param['type'],
-            'Description' => $param['description'],
-            'Default' => str_replace(PHP_EOL, '<br>', Yaml::dump($param['default'])),
-          ]);
-        }
-      }
-
-      $tokens = $policy->get('tokens');
-      if (!empty($tokens)) {
-        $md[] = '';
-        $md[] = '### Tokens';
-        $md[] = 'Name | Type | Description | Default';
-        $md[] = '-- | -- | -- | --';
-
-        foreach ($tokens as $name => $token) {
-          $md[] = strtr('Name | Type | Description | Default', [
-            'Name' => $name,
-            'Type' => $token['type'],
-            'Description' => $token['description'],
-            'Default' => $token['default'],
-          ]);
-        }
-      }
-
-      $pages[$package][$policy->get('name')] = implode(PHP_EOL, $md);
+      $docs = new PolicyDocsGenerator();
+      $package = $this->findPackage($policy->get('filepath'));
+      $pages[$package][$policy->get('name')] = $docs->buildPolicyDocumentation($policy);
     }
 
     $nav = [['Overview' => 'policy-library.md']];

@@ -5,7 +5,7 @@ namespace Drutiny\Docs;
 use Drutiny\Registry;
 use Symfony\Component\Yaml\Yaml;
 
-class AuditDocsGenerator {
+class AuditDocsGenerator extends DocsGenerator {
 
   public function buildAuditDocumentation($audit_class)
   {
@@ -124,21 +124,5 @@ class AuditDocsGenerator {
     }
 
     return implode(PHP_EOL, $md);
-  }
-
-  protected function findPackage($filepath)
-  {
-      $composer = FALSE;
-      while ($filepath) {
-        $filepath = dirname($filepath);
-
-        if (file_exists($filepath . '/composer.json')) {
-          break;
-        }
-      }
-
-      $json = file_get_contents($filepath . '/composer.json');
-      $composer = json_decode($json, TRUE);
-      return $composer['name'];
   }
 }
