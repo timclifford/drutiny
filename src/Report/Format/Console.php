@@ -57,7 +57,7 @@ class Console extends Format {
     return $this->output;
   }
 
-  public function render(Profile $profile, Target $target, array $result)
+  protected function preprocessResult(Profile $profile, Target $target, array $result)
   {
     $io = new SymfonyStyle($this->input, $this->output);
     $io->title($profile->getTitle());
@@ -103,10 +103,12 @@ class Console extends Format {
     $total_pass = count(array_filter($pass));
     $table_rows[] = ['', "$total_pass/$total_tests passed", ''];
     $io->table(['', 'Policy', 'Severity', 'Summary'], $table_rows);
-    return '';
+    return [];
   }
 
-  public function renderMultiple(Profile $profile, Target $target, array $results)
+  protected function renderResult(array $variables) {}
+
+  protected function preprocessMultiResult(Profile $profile, Target $target, array $results)
   {
     $io = new SymfonyStyle($this->input, $this->output);
 
@@ -151,6 +153,8 @@ class Console extends Format {
     $io->table([], $table_rows);
     return '';
   }
+
+  protected function renderMultiResult(array $variables) {}
 
   protected function getIcon(AuditResponse $response)
   {
