@@ -87,8 +87,7 @@ class ProfileRunCommand extends Command {
 
     // Setup the reporting format.
     $format = $profile->getFormatOption($input->getOption('format'), [
-      'output' => $filepath != 'stdout' ? $filepath : $output,
-      'input' => $input
+      'output' => $filepath != 'stdout' ? $filepath : $output
     ]);
 
     // Allow command line omission of policies highlighted in the profile.

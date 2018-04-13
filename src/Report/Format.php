@@ -129,7 +129,7 @@ abstract class Format {
   /**
    * Set the title of the profile.
    */
-  protected function setOutput($filepath = 'stdout')
+  public function setOutput($filepath = 'stdout')
   {
     if ($filepath != 'stdout' && !($filepath instanceof OutputInterface) && !file_exists(dirname($filepath))) {
       throw new \InvalidArgumentException("Cannot write to $filepath. Parent directory doesn't exist.");
