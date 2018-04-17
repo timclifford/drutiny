@@ -26,7 +26,7 @@ class HTML extends Markdown {
   protected function preprocessResult(Profile $profile, Target $target, array $result)
   {
     $render = parent::preprocessResult($profile, $target, $result);
-    $parsedown = new \Parsedown();
+    $parsedown = new MarkdownHelper();
 
     foreach ($render['remediations'] as &$remedy) {
       $remedy = $parsedown->text($remedy);
