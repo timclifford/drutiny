@@ -142,6 +142,14 @@ class PolicyDefinition {
   {
     return $this->positionBefore;
   }
+
+  public function getProfileMetadata()
+  {
+    return array_filter([
+      'parameters' => $this->parameters,
+      'severity' => $this->severity
+    ]);
+  }
 }
 
  ?>

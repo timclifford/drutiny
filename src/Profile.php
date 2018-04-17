@@ -323,6 +323,25 @@ class Profile {
     }
     return $this->parent;
   }
+
+  public function dump()
+  {
+    $export = [
+      'title' => $this->getTitle(),
+      'description' => $this->getDescription(),
+      'policies' => $this->dumpPolicyDefinitions(),
+    ];
+    return array_filter($export);
+  }
+
+  protected function dumpPolicyDefinitions()
+  {
+    $list = [];
+    foreach ($this->policies as $name => $policy) {
+      $list[$name] = $policy->getProfileMetadata();
+    }
+    return $list;
+  }
 }
 
  ?>
