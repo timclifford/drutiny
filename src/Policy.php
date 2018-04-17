@@ -74,13 +74,14 @@ class Policy extends Item {
 
     $severity = isset($info['severity']) ? $info['severity'] : self::SEVERITY_NORMAL;
 
+    $this->setSeverity($severity);
+
+    parent::__construct($info);
+
     // Data type policies do not have a severity.
     if ($this->type == 'data') {
       $severity = self::SEVERITY_NONE;
     }
-    $this->setSeverity($severity);
-
-    parent::__construct($info);
     $this->renderableProperties[] = 'remediation';
     $this->renderableProperties[] = 'success';
     $this->renderableProperties[] = 'failure';
