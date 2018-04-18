@@ -2,8 +2,8 @@
 
 <img src="https://github.com/drutiny/drutiny/raw/2.1.x/assets/logo.png" alt="Drutiny logo" align="right"/>
 
-[![Build Status](https://travis-ci.org/drutiny/drutiny.svg?branch=2.1.x)](https://travis-ci.org/drutiny/drutiny) 
-[![Latest Stable Version](https://poser.pugx.org/drutiny/drutiny/v/stable)](https://packagist.org/drutiny/drutiny) 
+[![Build Status](https://travis-ci.org/drutiny/drutiny.svg?branch=2.1.x)](https://travis-ci.org/drutiny/drutiny)
+[![Latest Stable Version](https://poser.pugx.org/drutiny/drutiny/v/stable)](https://packagist.org/drutiny/drutiny)
 [![Total Downloads](https://poser.pugx.org/drutiny/drutiny/downloads)](https://packagist.org/drutiny/drutiny)
 [![Latest Unstable Version](https://poser.pugx.org/drutiny/drutiny/v/unstable)](https://packagist.org/drutiny/drutiny)
 [![License](https://poser.pugx.org/drutiny/drutiny/license)](https://packagist.org/drutiny/drutiny)
@@ -109,6 +109,7 @@ Profiles allow you to define parameters to fine tune policies within. You can do
 title: 10s Page Cache Expiry Profile
 policies:
     'Drupal-8:PageCacheExpiry':
+      parameters:
         value: 10
 ```
 

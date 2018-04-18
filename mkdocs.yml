@@ -19,6 +19,8 @@ pages:
     -
         Usage:
             -
+                Getting Started: getting-started.md
+            -
                 Reports: reports.md
             -
                 Plugins: plugins.md
