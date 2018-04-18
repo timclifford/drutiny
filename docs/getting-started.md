@@ -88,3 +88,17 @@ the first part of the profile filename. E.g. `demo` will load in the profile fro
 
 ```
 ./bin/drutiny profile:run demo @site.env
+```
+
+### Creating a Report
+Drutiny can export profile runs to HTML, Markdown, Json or by default, it just
+publishes the findings out to the console (see the above command). You can use
+the `--format` option (or `-f`) to specify the which format to export to and
+the `--report-filename` option (or `-o`) to specify the file to write too.
+
+```
+./bin/drutiny profile:run demo @site.env -f html -o demo-report.html
+```
+
+Open the HTML report in your browser to view the report. From there you could
+also print it to PDF.
