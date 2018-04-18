@@ -25,7 +25,8 @@
         "erusev/parsedown": "^1.6.3",
         "twig/twig": "~1.0",
         "caseyamcl/toc": "~1.0",
-        "fiasco/symfony-console-style-markdown": "~1.0"
+        "fiasco/symfony-console-style-markdown": "~1.0",
+        "composer/semver": "^1.4.2"
     },
     "autoload": {
         "psr-4": {
