@@ -71,6 +71,10 @@ class LargeDrupalFiles extends Audit {
       ];
     }
     $totalRows = count($rows);
+
+    if ($totalRows < 1) {
+      return TRUE;
+    }
     $sandbox->setParameter('total', $totalRows);
 
     // Reduce the number of rows to 10
