@@ -58,14 +58,16 @@ class CodeScan extends Audit {
 
     $directory =  strtr($directory, $stat['%paths']);
 
-
-    $command = ['find', $stat['%paths']['%root']];
+    $command = ['find', $directory, '-type f'];
 
     $types = $sandbox->getParameter('filetypes', []);
 
     if (!empty($types)) {
-      $command[] = '-regex';
-      $command[] = "'.*\.\(" . implode('\|', $sandbox->getParameter('filetypes', ['php'])) . "\)'";
+      $conditions = [];
+      foreach ($types as $type) {
+        $conditions[] = '-iname "*.' . $type . '"';
+      }
+      $command[] = implode(' -or ', $conditions);
     }
 
     foreach ($sandbox->getParameter('exclude', []) as $filepath) {
@@ -73,17 +75,17 @@ class CodeScan extends Audit {
       $command[] = "! -path '$filepath'";
     }
 
-    $command[] = '| xargs grep -nE';
-    $command[] = '"' . implode('|', $sandbox->getParameter('patterns', [])) . '" || exit 0';
+    $command[] = '| (xargs grep -nE';
+    $command[] = '"' . implode('|', $sandbox->getParameter('patterns', [])) . '" || exit 0)';
 
     $whitelist = $sandbox->getParameter('whitelist', []);
     if (!empty($whitelist)) {
-      $command[] = "| grep -vE '" . implode('|', $whitelist) . "'";
+      $command[] = "| (grep -vE '" . implode('|', $whitelist) . "' || exit 0)";
     }
 
 
     $command = implode(' ', $command);
-    // echo $command;die;
+    $sandbox->logger()->info('[' . __CLASS__ . '] ' . $command);
     $output = $sandbox->exec($command);
 
     if (empty($output)) {
