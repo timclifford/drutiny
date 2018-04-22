@@ -10,6 +10,7 @@ use Drutiny\RemediableInterface;
 use Drutiny\AuditResponse\AuditResponse;
 use Drutiny\Policy;
 use Drutiny\Cache;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Run check in an isolated environment.
@@ -68,6 +69,9 @@ class Sandbox {
     try {
       // Run the audit over the policy.
       $outcome = $this->getAuditor()->execute($this);
+
+      // Log the parameters output.
+      $this->logger()->info("Tokens:\n" . Yaml::dump($this->getParameterTokens(), 4));
 
       // Set the response.
       $response->set($outcome, $this->getParameterTokens());
