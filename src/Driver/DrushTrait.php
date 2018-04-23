@@ -261,7 +261,8 @@ trait DrushTrait {
     $transfer = base64_encode(implode(PHP_EOL, $code));
 
     $execution = [];
-    $execution[] = 'f=`tempfile`';
+    // Linux uses tempfile while OSX uses mktemp.
+    $execution[] = 't=`which tempfile || which mktemp`; f=$($t)';
     $execution[] = "echo $transfer | base64 --decode > \$f";
 
     $pipe = implode(';' . PHP_EOL, $execution);
