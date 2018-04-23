@@ -2,9 +2,10 @@
 
 namespace DrutinyTests\Audit;
 
-use PHPUnit\Framework\TestCase;
-use Drutiny\Sandbox\Sandbox;
 use Drutiny\Policy;
+use Drutiny\Sandbox\Sandbox;
+use Drutiny\Target\Registry as TargetRegistry;
+use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 
 class PolicyTest extends TestCase {
