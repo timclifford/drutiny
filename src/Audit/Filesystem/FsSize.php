@@ -4,10 +4,22 @@ namespace Drutiny\Audit\Filesystem;
 
 use Drutiny\Audit;
 use Drutiny\Sandbox\Sandbox;
-use Drutiny\AuditResponse\AuditResponse;
+use Drutiny\Annotation\Param;
+
 
 /**
  * Large files
+ * @Param(
+ *  name = "max_size",
+ *  description = "The maximum size in MegaBytes a directory should be.",
+ *  type = "integer",
+ *  default = 20
+ * )
+ * @Param(
+ *  name = "path",
+ *  description = "The path of the directory to check for size.",
+ *  type = "string"
+ * )
  */
 class FsSize extends Audit {
 
