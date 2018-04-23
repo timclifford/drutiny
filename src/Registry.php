@@ -183,15 +183,6 @@ class Registry {
     return $registry;
   }
 
-  public function getPolicy($name)
-  {
-    $r = $this->policies();
-    if (!isset($r[$name])) {
-      throw new \InvalidArgumentException("No such policy exists: $name");
-    }
-    return $r[$name];
-  }
-
   /**
    *
    */

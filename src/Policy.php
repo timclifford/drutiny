@@ -2,20 +2,21 @@
 
 namespace Drutiny;
 
-use Symfony\Component\Validator\Constraints\NotNull;
-use Symfony\Component\Validator\Constraints\Collection;
-use Symfony\Component\Validator\Constraints\All;
-use Symfony\Component\Validator\Constraints\Optional;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Callback;
-use Symfony\Component\Validator\Constraints\Type;
-use Symfony\Component\Validator\Validation;
-use Symfony\Component\Validator\Mapping\ClassMetadata;
-use Symfony\Component\Validator\Context\ExecutionContextInterface;
-use Symfony\Component\Console\Output\ConsoleOutput;
 use Drutiny\Item\Item;
 use Drutiny\Logger\ConsoleLogger;
-
+use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Validator\Constraints\All;
+use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Constraints\Collection;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\NotNull;
+use Symfony\Component\Validator\Constraints\Optional;
+use Symfony\Component\Validator\Constraints\Type;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Component\Validator\Mapping\ClassMetadata;
+use Symfony\Component\Validator\Validation;
+use Symfony\Component\Yaml\Yaml;
 
 
 /**
@@ -62,6 +63,27 @@ class Policy extends Item {
    */
   protected $filepath;
 
+  public static function load($name)
+  {
+    $map = Registry::get('policy:map');
+    if (empty($map)) {
+      $finder = new Finder();
+      $finder->files()
+        ->in('.')
+        ->name('*.policy.yml');
+        foreach ($finder as $file) {
+          $policy = Yaml::parse(file_get_contents($file->getRealPath()));
+          $map[$policy['name']] = $policy;
+        }
+        Registry::add('policy:map', $map);
+    }
+
+    if (!isset($map[$name])) {
+      throw new \Exception("Cannot find policy '$name'");
+    }
+    return new static($map[$name]);
+  }
+
   /**
    * Retrieve a property value and token replacement.
    *
@@ -73,7 +95,6 @@ class Policy extends Item {
   public function __construct(array $info) {
 
     $severity = isset($info['severity']) ? $info['severity'] : self::SEVERITY_NORMAL;
-
     $this->setSeverity($severity);
 
     parent::__construct($info);

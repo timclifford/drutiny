@@ -3,7 +3,7 @@
 namespace Drutiny\Command;
 
 use Drutiny\Docs\PolicyDocsGenerator;
-use Drutiny\Registry;
+use Drutiny\Policy;
 use Fiasco\SymfonyConsoleStyleMarkdown\Renderer;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -34,7 +34,7 @@ class PolicyInfoCommand extends Command {
    */
   protected function execute(InputInterface $input, OutputInterface $output) {
     $docs = new PolicyDocsGenerator();
-    $policy = (new Registry)->getPolicy($input->getArgument('policy'));
+    $policy = Policy::load($input->getArgument('policy'));
     $markdown = $docs->buildPolicyDocumentation($policy);
 
     $formatted_output = Renderer::createFromMarkdown($markdown);

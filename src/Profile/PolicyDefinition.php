@@ -3,7 +3,6 @@
 namespace Drutiny\Profile;
 
 use Drutiny\Policy;
-use Drutiny\Registry as GlobalRegistry;
 
 class PolicyDefinition {
   use \Drutiny\Item\ContentSeverityTrait;
@@ -53,7 +52,7 @@ class PolicyDefinition {
     }
 
     // Load a policy to get defaults.
-    $policy = $policyDefinition->getPolicy();
+    $policy = Policy::load($name);
 
     if (isset($definition['severity'])) {
       $policyDefinition->setSeverity($definition['severity']);
@@ -110,11 +109,11 @@ class PolicyDefinition {
   }
 
   /**
-   * Get the singleton policy for the profile.
+   * Get the policy for the profile.
    */
   public function getPolicy()
   {
-    $policy = (new GlobalRegistry)->getPolicy($this->getName());
+    $policy = Policy::load($this->getName());
     if ($this->getSeverity() !== NULL) {
       $policy->setSeverity($this->getSeverity());
     }
