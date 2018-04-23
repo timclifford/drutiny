@@ -4,7 +4,7 @@ namespace DrutinyTests\Audit;
 
 use PHPUnit\Framework\TestCase;
 use Drutiny\Sandbox\Sandbox;
-use Drutiny\Target\Registry as TargetRegistry;
+use Drutiny\Policy;
 use Psr\Log\NullLogger;
 
 class PolicyTest extends TestCase {
@@ -14,14 +14,13 @@ class PolicyTest extends TestCase {
 
   public function __construct()
   {
-    $this->registry = new \Drutiny\Registry();
     $this->target = TargetRegistry::getTarget('none', '');
     parent::__construct();
   }
 
   public function testPass()
   {
-    $policy = $this->registry->getPolicy('Test:Pass');
+    $policy = Policy::load('Test:Pass');
     $sandbox = new Sandbox($this->target, $policy);
 
     $sandbox->setLogger(new NullLogger());
@@ -32,7 +31,7 @@ class PolicyTest extends TestCase {
 
   public function testFail()
   {
-    $policy = $this->registry->getPolicy('Test:Fail');
+    $policy = Policy::load('Test:Fail');
     $sandbox = new Sandbox($this->target, $policy);
 
     $sandbox->setLogger(new NullLogger());
@@ -43,7 +42,7 @@ class PolicyTest extends TestCase {
 
   public function testError()
   {
-    $policy = $this->registry->getPolicy('Test:Error');
+    $policy = Policy::load('Test:Error');
     $sandbox = new Sandbox($this->target, $policy);
 
     $sandbox->setLogger(new NullLogger());
@@ -55,7 +54,7 @@ class PolicyTest extends TestCase {
 
   public function testWarning()
   {
-    $policy = $this->registry->getPolicy('Test:Warning');
+    $policy = Policy::load('Test:Warning');
     $sandbox = new Sandbox($this->target, $policy);
 
     $sandbox->setLogger(new NullLogger());
@@ -67,7 +66,7 @@ class PolicyTest extends TestCase {
 
   public function testNotApplicable()
   {
-    $policy = $this->registry->getPolicy('Test:NA');
+    $policy = Policy::load('Test:NA');
     $sandbox = new Sandbox($this->target, $policy);
 
     $sandbox->setLogger(new NullLogger());
@@ -79,7 +78,7 @@ class PolicyTest extends TestCase {
 
   public function testNotice()
   {
-    $policy = $this->registry->getPolicy('Test:Notice');
+    $policy = Policy::load('Test:Notice');
     $sandbox = new Sandbox($this->target, $policy);
 
     $sandbox->setLogger(new NullLogger());
