@@ -139,7 +139,7 @@ critical a failure or warning is. Possible values in order of importance:
 
 * none (only option for `data` type policies)
 * low
-* normal (default)
+* medium (default)
 * high
 * critical
 

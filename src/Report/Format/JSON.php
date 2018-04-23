@@ -53,7 +53,7 @@ class JSON extends Format {
     $schema['stats'] = [
       'critical' => $outcomes,
       'high' => $outcomes,
-      'normal' => $outcomes,
+      'medium' => $outcomes,
       'low' => $outcomes,
       'none' => $outcomes,
     ];

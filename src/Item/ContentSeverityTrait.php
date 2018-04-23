@@ -23,6 +23,7 @@ trait ContentSeverityTrait {
 
       case $sev === Item::SEVERITY_NORMAL:
       case $sev === 'normal':
+      case $sev === 'medium':
         $this->severity = Item::SEVERITY_NORMAL;
         break;
 
@@ -50,23 +51,25 @@ trait ContentSeverityTrait {
   {
 
     switch (TRUE) {
-      case $this->severity === self::SEVERITY_NONE:
+      case $this->severity === Item::SEVERITY_NONE:
       case $this->severity === 'none':
+      case $this->severity === NULL;
         return 'none';
 
-      case $this->severity === self::SEVERITY_LOW:
+      case $this->severity === Item::SEVERITY_LOW:
       case $this->severity === 'low':
         return 'low';
 
-      case $this->severity === self::SEVERITY_NORMAL:
+      case $this->severity === Item::SEVERITY_NORMAL:
       case $this->severity === 'normal':
-        return 'normal';
+      case $this->severity === 'medium':
+        return 'medium';
 
-      case $this->severity === self::SEVERITY_HIGH:
+      case $this->severity === Item::SEVERITY_HIGH:
       case $this->severity === 'high':
         return 'high';
 
-      case $this->severity === self::SEVERITY_CRITICAL:
+      case $this->severity === Item::SEVERITY_CRITICAL:
       case $this->severity === 'critical':
         return 'critical';
 
