@@ -1,39 +1,30 @@
-- heading: Policy Findings
+- heading: Policy Outcome
   body: |
-    {{{ appendix_table }}}
-
     {{#failures}}
-    ### Issues
     {{# output_failure }}
     {{{.}}}
     {{/ output_failure }}
     {{/failures}}
 
     {{#warnings}}
-    ### Warnings
     {{# output_warning }}
     {{{.}}}
     {{/ output_warning }}
     {{/warnings}}
 
     {{#notices}}
-    ### Analysis
-
     {{# output_data }}
     {{{.}}}
     {{/ output_data }}
     {{/notices}}
 
     {{#errors}}
-    ### Errors
-
     {{#output_error}}
     {{{.}}}
     {{/output_error}}
     {{/errors}}
 
     {{#passes}}
-    ### Passes
     {{# output_success }}
     {{{.}}}
     {{/ output_success }}
