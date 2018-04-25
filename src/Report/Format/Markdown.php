@@ -133,7 +133,60 @@ class Markdown extends JSON {
     $render['content'] = $content;
     $content = $this->renderTemplate($this->getTemplate(), $render);
 
-    return $content;
+    return self::formatTables($content);
+  }
+
+  public static function formatTables($markdown)
+  {
+    $lines = explode(PHP_EOL, $markdown);
+    $table = [
+    'start' => NULL,
+    'widths' => [],
+    'rows' => [],
+    ];
+
+    foreach ($lines as $idx => $line) {
+
+      if ($table['start'] === NULL) {
+        if (strpos($line, ' | ') !== FALSE) {
+          $table['start'] = $idx;
+        }
+        else {
+          continue;
+        }
+      }
+      elseif (strpos($line, ' | ') === FALSE) {
+
+        foreach ($table['rows'] as $line_idx => $row) {
+          $widths = $table['widths'];
+
+          foreach ($row as $i => $value) {
+            $pad = array_search($line_idx, array_keys($table['rows'])) === 1 ? '-' : ' ';
+            $row[$i] = str_pad($value, $table['widths'][$i], $pad, STR_PAD_RIGHT);
+          }
+          $lines[$line_idx] = implode(' | ', $row);
+        }
+
+        $table['start']  = NULL;
+        $table['widths'] = [];
+        $table['rows']   = [];
+        continue;
+      }
+
+      $cells = array_map('trim', explode('|', $line));
+
+      foreach ($cells as $i => $value) {
+        if (!isset($table['widths'][$i])) {
+          $table['widths'][$i] = strlen($value);
+        }
+        else {
+          $table['widths'][$i] = max($table['widths'][$i], strlen($value));
+        }
+      }
+      $table['rows'][$idx] = $cells;
+    }
+
+    return implode(PHP_EOL, $lines);
   }
 }
 
