@@ -46,6 +46,11 @@ class Profile {
   protected $policies = [];
 
   /**
+   * A list of policy names, presumably inherited, to exclude.
+   */
+  protected $excludedPolicies = [];
+
+  /**
    * A list of other \Drutiny\Profile objects to include.
    *
    * @var array
@@ -98,6 +103,10 @@ class Profile {
       }
     }
 
+    if (isset($info['excluded_policies']) && is_array($info['excluded_policies'])) {
+      $profile->addExcludedPolicies($info['excluded_policies']);
+    }
+
     if (isset($info['include'])) {
       foreach ($info['include'] as $name) {
         $include = self::loadFromFile(ProfileRegistry::locateProfile($name));
@@ -140,7 +149,16 @@ class Profile {
    */
   public function addPolicyDefinition(PolicyDefinition $definition)
   {
-    $this->policies[$definition->getName()] = $definition;
+    // Do not include excluded dependencies
+    if (!in_array($definition->getName(), $this->excludedPolicies)) {
+      $this->policies[$definition->getName()] = $definition;
+    }
+    return $this;
+  }
+
+  public function addExcludedPolicies(array $excluded_policies)
+  {
+    $this->excludedPolicies = array_unique(array_merge($this->excludedPolicies, $excluded_policies));
     return $this;
   }
 
