@@ -79,18 +79,6 @@ class HTML extends Markdown {
     return $this->processRender(self::renderTemplate('site', $variables), $variables);
   }
 
-  protected function preprocessMultiResult(Profile $profile, Target $target, array $results)
-  {
-    $vars = parent::preprocessMultiResult($profile, $target, $results);
-    $render = [
-      'title' => $profile->getTitle(),
-      'description' => $profile->getDescription(),
-      'summary' => 'Report audits policies over ' . count($results) . ' sites.',
-      'domain' => 'Multisite report'
-    ];
-    return $vars;
-  }
-
   protected function renderMultiResult(array $variables)
   {
     return $this->processRender(self::renderTemplate('multisite', $variables), $variables);
@@ -108,7 +96,7 @@ class HTML extends Markdown {
     // Insert span infront of headers to address navbar positioning.
     $content = preg_replace(
       '/(<h[2-4] id="([^"]+)")/',
-      '<span class="navbar-pad"></span>$1', 
+      '<span class="navbar-pad"></span>$1',
       $content);
 
     // Table of Contents.

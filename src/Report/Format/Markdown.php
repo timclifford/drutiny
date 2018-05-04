@@ -118,7 +118,7 @@ class Markdown extends JSON {
       'summary' => 'Report audits policies over ' . count($results) . ' sites.',
       'domain' => 'Multisite report'
     ];
-    return $render;
+    return array_merge($render, $vars);
   }
 
   protected function renderMultiResult(array $variables)
