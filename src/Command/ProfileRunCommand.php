@@ -2,20 +2,21 @@
 
 namespace Drutiny\Command;
 
+use Drutiny\Config;
+use Drutiny\Logger\ConsoleLogger;
+use Drutiny\Profile\Registry as ProfileRegistry;
+use Drutiny\Report;
+use Drutiny\Sandbox\Sandbox;
+use Drutiny\Target\Registry as TargetRegistry;
+use Drutiny\DomainList\DomainListRegistry;
+use Drutiny\Target\Target;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Drutiny\Profile\Registry as ProfileRegistry;
-use Drutiny\Target\Registry as TargetRegistry;
-use Drutiny\Sandbox\Sandbox;
-use Drutiny\Logger\ConsoleLogger;
-use Drutiny\Report;
-use Drutiny\Target\Target;
-
 
 /**
  *
@@ -60,6 +61,12 @@ class ProfileRunCommand extends Command {
         ['default']
       )
       ->addOption(
+        'domain-source',
+        'd',
+        InputOption::VALUE_OPTIONAL,
+        'Use a domain source to preload uri options. Defaults to yaml filepath.'
+      )
+      ->addOption(
         'report-filename',
         'o',
         InputOption::VALUE_OPTIONAL,
@@ -99,16 +106,29 @@ class ProfileRunCommand extends Command {
       return !in_array($policy->getName(), $excluded_policies);
     });
 
+    // Setup the target.
+    $target = TargetRegistry::loadTarget($input->getArgument('target'));
+
     // Get the URLs.
     $uris = $input->getOption('uri');
+
+    // Load additional uris from domain-source
+    if ($source = $input->getOption('domain-source')) {
+      $domain_loader = DomainListRegistry::loadFromInput($input->getOption('domain-source'));
+      $domains = $domain_loader->getDomains($target);
+
+      if (!empty($domains)) {
+        if ($uris === ['default']) {
+          $uris = [];
+        }
+        $uris += $domains;
+      }
+    }
 
     // Setup the progress bar to log updates.
     $steps = count($policyDefinitions) * count($uris);
 
     $progress = new _CommandProgressBar($output, $steps, ($filepath != 'stdout' || $format->getFormat() == 'console') && $output->getVerbosity() < OutputInterface::VERBOSITY_VERY_VERBOSE);
-
-    // Setup the target.
-    $target = TargetRegistry::loadTarget($input->getArgument('target'));
 
     $results = [];
 
