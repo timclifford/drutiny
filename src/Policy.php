@@ -73,6 +73,7 @@ class Policy extends Item {
         ->name('*.policy.yml');
         foreach ($finder as $file) {
           $policy = Yaml::parse(file_get_contents($file->getRealPath()));
+          $policy['filepath'] = $file->getRealPath();
           $map[$policy['name']] = $policy;
         }
         Registry::add('policy:map', $map);
