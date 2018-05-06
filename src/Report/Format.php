@@ -5,6 +5,7 @@ namespace Drutiny\Report;
 use Drutiny\Profile;
 use Drutiny\Target\Target;
 use Symfony\Component\Console\Output\OutputInterface;
+use Drutiny\Config;
 
 abstract class Format {
 
@@ -21,29 +22,11 @@ abstract class Format {
 
   public static function create($format, $options)
   {
-    switch ($format) {
-      case 'html':
-        $format = new Format\HTML($options);
-        break;
-      case 'json':
-        $format = new Format\JSON($options);
-        break;
-      case 'markdown':
-        $format = new Format\Markdown($options);
-        break;
-      case 'console':
-        $format = new Format\Console($options);
-        break;
-      case 'terminal':
-        $format = new Format\Terminal($options);
-        break;
-
-      default:
-        throw new \InvalidArgumentException("Reporting format '$format' is not supported.");
-        break;
+    $formats = Config::get('Format');
+    if (!isset($formats[$format])) {
+      throw new \InvalidArgumentException("Reporting format '$format' is not supported.");
     }
-
-    return $format;
+    return new $formats[$format]($options);
   }
 
   /**

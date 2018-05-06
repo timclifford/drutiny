@@ -17,3 +17,9 @@ Command:
 Template:
   - src/Report/templates/html
   - src/Report/templates/markdown
+Format:
+  html: Drutiny\Report\Format\HTML
+  json: Drutiny\Report\Format\JSON
+  markdown: Drutiny\Report\Format\Markdown
+  terminal: Drutiny\Report\Format\Terminal
+  console: Drutiny\Report\Format\Console
