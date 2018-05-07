@@ -75,6 +75,19 @@ class HTML extends Markdown {
     return $render;
   }
 
+  protected function preprocessMultiResult(Profile $profile, Target $target, array $results)
+  {
+    $vars = parent::preprocessMultiResult($profile, $target, $results);
+    $parsedown = new MarkdownHelper();
+    foreach ($vars['by_policy'] as $name => $policy) {
+      $vars['by_policy'][$name]['description'] = $parsedown->text($policy['description']);
+      foreach ($policy['sites'] as $site => $outcome) {
+        $vars['by_policy'][$name]['sites'][$site]['message'] = $parsedown->text($outcome['message']);
+      }
+    }
+    return $vars;
+  }
+
   protected function renderResult(array $variables) {
     return $this->processRender(self::renderTemplate('site', $variables), $variables);
   }
