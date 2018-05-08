@@ -37,7 +37,11 @@ pages:
             -
                 Profile: profiles.md
             -
+                Config: config.md
+            -
                 'Credential Manager': creds.md
+            -
+                'Domain Provider': domains.md
     -
         'Policy Library':
             -
