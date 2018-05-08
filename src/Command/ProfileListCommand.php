@@ -31,9 +31,22 @@ class ProfileListCommand extends Command {
 
     $profiles = Registry::getAllProfiles();
 
-    $render->table(['Profile', 'Name'], array_map(function ($profile) {
+    // Build array of table rows.
+    $rows = array_map(function ($profile) {
       return [$profile->getTitle(), $profile->getName()];
-    }, $profiles));
+    }, $profiles);
+
+    // Sort rows by profile name alphabetically.
+    usort($rows, function ($a, $b) {
+      if ($a[1] === $b[1]) {
+        return 0;
+      }
+      $sort = [$a[1], $b[1]];
+      sort($sort);
+      return $a[1] === $sort[0] ? -1 : 1;
+    });
+
+    $render->table(['Profile', 'Name'], $rows);
 
     $render->note("Use drutiny profile:info to view more information about a profile.");
   }
