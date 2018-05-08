@@ -27,6 +27,7 @@ class ProfileRunCommand extends Command {
    * @inheritdoc
    */
   protected function configure() {
+    $domain_list = array_keys(Config::get('DomainList'));
     $this
       ->setName('profile:run')
       ->setDescription('Run a profile of checks against a target.')
@@ -64,7 +65,7 @@ class ProfileRunCommand extends Command {
         'domain-source',
         'd',
         InputOption::VALUE_OPTIONAL,
-        'Use a domain source to preload uri options. Defaults to yaml filepath.'
+        'Use a domain source to preload uri options. Defaults to yaml filepath. Options: (' . implode(', ', $domain_list) . ')'
       )
       ->addOption(
         'report-filename',
@@ -80,6 +81,18 @@ class ProfileRunCommand extends Command {
         'Specify policy names to exclude from the profile that are normally listed.',
         []
       );
+
+      foreach (Config::get('DomainList') as $name => $class) {
+        $options = DomainListRegistry::getOptions($name);
+        foreach ($options as $param) {
+          $this->addOption(
+            'domain-source-' . $name . '-' . $param->name,
+            null,
+            InputOption::VALUE_OPTIONAL,
+            $param->description
+          );
+        }
+      }
   }
 
   /**
@@ -114,7 +127,14 @@ class ProfileRunCommand extends Command {
 
     // Load additional uris from domain-source
     if ($source = $input->getOption('domain-source')) {
-      $domain_loader = DomainListRegistry::loadFromInput($input->getOption('domain-source'));
+      $options = [];
+      foreach ($input->getOptions() as $name => $value) {
+        if (strpos($name, 'domain-source-' . $source) === FALSE) {
+          continue;
+        }
+        $options[str_replace('domain-source-' . $source . '-', '', $name)] = $value;
+      }
+      $domain_loader = DomainListRegistry::loadFromInput($source, $options);
       $domains = $domain_loader->getDomains($target);
 
       if (!empty($domains)) {

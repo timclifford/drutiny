@@ -3,12 +3,12 @@
 namespace Drutiny\DomainList;
 
 use Drutiny\Config;
+use Doctrine\Common\Annotations\AnnotationReader;
 
 class DomainListRegistry {
-  public static function loadFromInput($source)
+  public static function loadFromInput($source, $options = [])
   {
     $loaders = Config::get('DomainList');
-    $options = [];
 
     // Special case for default DomainListYamlFile.
     if (file_exists($source)) {
@@ -16,24 +16,26 @@ class DomainListRegistry {
       return new $loaders['YamlFile']($options);
     }
 
-    if (strpos($source, ',') !== FALSE) {
-      list($loader, $source) = explode(',', $source, 2);
-    }
-    else {
-      $loader = $source;
-      $source = '';
+    if (!isset($loaders[$source])) {
+      throw new \Exception("No such DomainList loader known: $source.");
     }
 
-    if (!isset($loaders[$loader])) {
-      throw new \Exception("No such DomainList loader known: $loader.");
-    }
+    return new $loaders[$source]($options);
+  }
 
-    foreach (array_filter(explode(',', $source)) as $data) {
-      list($key, $value) = explode('=', $data, 2);
-      $options[$key] = $value;
-    }
+  public static function getOptions($dl)
+  {
+    $loaders = Config::get('DomainList');
+    $class = $loaders[$dl];
 
-    return new $loaders[$loader]($options);
+    $reflect = new \ReflectionClass($class);
+    $reader = new AnnotationReader();
+    if (!$reflect->implementsInterface('\Drutiny\DomainList\DomainListInterface')) {
+      throw new \InvalidArgumentException("$class Does not implement Drutiny\DomainListInterface.");
+    }
+    return array_filter($reader->getClassAnnotations($reflect), function ($annotation) {
+      return $annotation instanceof \Drutiny\Annotation\Param;
+    });
   }
 }
 
