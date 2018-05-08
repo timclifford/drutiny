@@ -126,6 +126,9 @@ class Registry {
       throw new \InvalidArgumentException("$class is not of type \Drutiny\Audit.");
     }
     $annotations = $reader->getClassAnnotations($reflect);
+    $parent = $this->getAuditMedtadata($reflect->getParentClass());
+    $annotations += $parent->tokens;
+
     $comment = explode(PHP_EOL, $reflect->getDocComment());
 
     $info = new \StdClass;
