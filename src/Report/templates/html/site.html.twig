@@ -1,10 +1,12 @@
-<div class="container">
+<div id="report" class="container">
   #table_of_contents#
   <!-- Example row of columns -->
   <div class="row">
 
     {% for section in sections %}
+      <section>
       {{ section | raw }}
+      </section>
     {% endfor %}
 
   </div>
