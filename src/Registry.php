@@ -126,8 +126,13 @@ class Registry {
       throw new \InvalidArgumentException("$class is not of type \Drutiny\Audit.");
     }
     $annotations = $reader->getClassAnnotations($reflect);
-    $parent = $this->getAuditMedtadata($reflect->getParentClass());
-    $annotations += $parent->tokens;
+
+    try {
+      $parent = $this->getAuditMedtadata($reflect->getParentClass());
+      $annotations += array_values($parent->tokens);
+    }
+    // Will recurse up to Drutiny/Audit where InvalidArgumentException will be thrown.
+    catch (\InvalidArgumentException $e) {}
 
     $comment = explode(PHP_EOL, $reflect->getDocComment());
 
