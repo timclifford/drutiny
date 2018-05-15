@@ -59,6 +59,11 @@ class Policy extends Item {
   protected $remediable;
 
   /**
+   * @array Chart metadata.
+   */
+  protected $chart = [];
+
+  /**
    * @string Absolute location of the YAML policy file.
    */
   protected $filepath;
@@ -163,6 +168,26 @@ class Policy extends Item {
           $defaults[$param->name] = isset($param->default) ? $param->default : null;
         }
       }
+
+      $defaults['_chart'] = array_map(function ($chart) {
+        $chart += $chart + [
+          'type' => 'bar',
+          'hide-table' => false,
+          'stacked' => false,
+          'series' => [],
+          'series-labels' => [],
+          'labels' => [],
+          'title' => ''
+        ];
+
+        $el = [];
+        foreach ($chart as $attr => $value) {
+          $value = is_array($value) ? implode(',', $value) : $value;
+          $el[] = $attr . '="' . $value . '"';
+        }
+
+        return '[[[' . implode(' ', $el) . ']]]';
+      }, $this->chart);
 
       return $defaults;
   }
