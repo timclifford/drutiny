@@ -45,7 +45,7 @@ class PolicyAuditCommand extends Command {
       ->addOption(
         'set-parameter',
         'p',
-        InputOption::VALUE_OPTIONAL,
+        InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
         'Set parameters for the check.',
         []
       )
