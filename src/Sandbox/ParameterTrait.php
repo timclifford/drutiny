@@ -60,7 +60,7 @@ trait ParameterTrait {
    *
    */
   public function getParameterTokens() {
-    $tokens = [];
+    $tokens = $this->getPolicy()->getParameterDefaults();
     foreach ($this->params as $key => $value) {
       $tokens[$key] = $value;
     }
