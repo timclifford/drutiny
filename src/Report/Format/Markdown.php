@@ -106,7 +106,15 @@ class Markdown extends JSON {
 
   protected function renderResult(array $variables)
   {
-    return $this->processRender($this->renderTemplate('site', $variables), $variables);
+    $md = $this->processRender($this->renderTemplate('site', $variables), $variables);
+
+    // Don't render charts in markdown.
+    $lines = explode(PHP_EOL, $md);
+    $lines = array_filter($lines, function ($line) {
+      return !preg_match(MarkdownHelper::CHART_REGEX, $line);
+    });
+
+    return implode(PHP_EOL, $lines);
   }
 
   protected function preprocessMultiResult(Profile $profile, Target $target, array $results)
