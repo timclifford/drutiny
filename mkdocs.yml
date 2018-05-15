@@ -42,6 +42,8 @@ pages:
                 'Credential Manager': creds.md
             -
                 'Domain Provider': domains.md
+            -
+                'Charts': charts.md
     -
         'Policy Library':
             -

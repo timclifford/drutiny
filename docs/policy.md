@@ -147,6 +147,23 @@ critical a failure or warning is. Possible values in order of importance:
 severity: 'high'
 ```
 
+### chart
+Chart declarations allow you to provide metadata about how to build a chart for
+display in the html format. This then produces a chart token that can be used in the success, failure, warning or remediation fields to render a chart in place.
+
+```yaml
+chart:
+  requests:
+    type: doughnut
+    labels: tr td:first-child
+    hide-table: false
+    title: Request Distribution by Domain
+    series:
+      - tr td:nth-child(4)
+```
+
+See [charts documentation]('charts.md') for more information.
+
 ## Using Tokens in message renders.
 Tokens are variables you can use in the render of policy messaging.
 This includes success, failure, warning and description fields defined in a policy.
