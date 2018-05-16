@@ -71,8 +71,8 @@ class ProfileRunCommand extends Command {
         'report-filename',
         'o',
         InputOption::VALUE_OPTIONAL,
-        'For json and html formats, use this option to write report to file. Defaults to stdout.',
-        'stdout'
+        'For json and html formats, use this option to write report to file. Drutiny will automate a filepath if the option is omitted. Use "stdout" to print to terminal',
+        false
       )
       ->addOption(
         'exclude-policy',
@@ -104,6 +104,22 @@ class ProfileRunCommand extends Command {
     $profile = ProfileRegistry::getProfile($input->getArgument('profile'));
 
     $filepath = $input->getOption('report-filename');
+    $format = $input->getOption('format');
+
+    // If format is not out to console and the filepath isn't set, automate
+    // what the filepath should be.
+    if (!in_array($format, ['console', 'terminal']) && !$filepath) {
+      $filepath = strtr('target-profile-date.format', [
+        'target' => preg_replace('/[^a-z0-9]/', '', strtolower($input->getArgument('target'))),
+        'profile' => $input->getArgument('profile'),
+        'date' => date('Ymd-His'),
+        'format' => $input->getOption('format')
+      ]);
+    }
+    // If the filepath is not set for console formats, then force to stdout.
+    elseif (in_array($format, ['console', 'terminal']) && !$filepath) {
+      $filepath = 'stdout';
+    }
 
     // Setup the reporting format.
     $format = $profile->getFormatOption($input->getOption('format'), [
@@ -179,7 +195,7 @@ class ProfileRunCommand extends Command {
 
     $format->render($profile, $target, $results);
 
-    if ($filepath = $input->getOption('report-filename')) {
+    if ($filepath != 'stdout') {
       $console = new SymfonyStyle($input, $output);
       $console->success('Report written to ' . $filepath);
     }
