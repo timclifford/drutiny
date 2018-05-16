@@ -30,19 +30,27 @@
     ];
     Chart.defaults.global.legend.position = 'right';
     Chart.defaults.global.title.display = true;
-
     $('.chart-unprocessed').each(function () {
-      $(this).html('<canvas></canvas>');
 
-      var ctx = $('canvas', this).get(0).getContext('2d');
       var data = $.extend({
         chartSeries: '',
         chartLabels: '',
         chartSeriesLabels: false,
         chartType: 'bar',
         chartStacked: false,
-        chartTitle: ''
+        chartTitle: '',
+        chartWidth: '100%',
+        chartHeight: '100%',
       }, $(this).data());
+
+      $(this).html('<canvas></canvas>');
+      $('canvas', this).css({
+        width: data.chartWidth,
+        height: data.chartHeight
+      });
+
+      var ctx = $('canvas', this).get(0).getContext('2d');
+
       var series = data.chartSeries.split(',');
 
       var table = $(this).siblings('table').first();
@@ -74,22 +82,45 @@
           options: {}
       };
 
+      var xAxis = {};
+      var yAxis = {};
+
       if (data.chartStacked) {
-        chart_config.options.scales = {
-          xAxes: [{
-            stacked: true
-          }],
-          yAxes: [{
-            stacked: true
-          }]
-        };
+        xAxis.stacked = true;
+        yAxis.stacked = true;
       }
+      if (data.chartXAxis) {
+        xAxis.scaleLabel = {
+          labelString: data.chartXAxis,
+          display: true
+        }
+      }
+      if (data.chartYAxis) {
+        yAxis.scaleLabel = {
+          labelString: data.chartYAxis,
+          display: true
+        }
+      }
+
+      chart_config.options.scales = {};
+      chart_config.options.scales.xAxes = [xAxis];
+      chart_config.options.scales.yAxes = [yAxis];
 
       if (data.chartTitle) {
         chart_config.options.title = {
           display: true,
           text: data.chartTitle
         };
+      }
+
+      if (data.chartLegend) {
+        chart_config.options.legend = {};
+        if (data.chartLegend == "none") {
+          chart_config.options.legend.display = false;
+        }
+        else {
+          chart_config.options.legend.position = data.chartLegend;
+        }
       }
 
       new Chart(ctx, chart_config);

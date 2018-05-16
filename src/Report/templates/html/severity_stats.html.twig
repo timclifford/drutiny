@@ -1,3 +1,10 @@
+{% set series = [] %}
+{% set seriesLabels = [] %}
+{% for severity, row in stats  %}
+  {% set series = series|merge(["tr:nth-child(" ~ loop.index ~ ") td"]) %}
+  {% set seriesLabels = seriesLabels|merge(["tbody tr:nth-child(" ~ loop.index ~ ") th"]) %}
+{% endfor %}
+[[[type="horizontalBar" title="Audit outcome by severity" hide-table="true" labels="thead th:not(:first-child)" series="{{ series|join(", ") }}" series-labels="{{ seriesLabels|join(", ") }}" stacked="true" height="250" legend="bottom" x-axis="Policies Audited"]]]
 <table class="table">
   <thead>
     <tr>
@@ -14,39 +21,19 @@
     <tr>
       <th>{{ severity }} ({{ totals[severity] }})</th>
       <td>
-        {% if row.success %}
-          {{ (row.success / totals[severity] * 100) | round(2) }}% ({{ row.success }})
-        {% else %}
-          -
-        {% endif %}
+        {{row.success}}
       </td>
       <td>
-        {% if row.failure %}
-          {{ (row.failure / totals[severity] * 100) | round(2) }}% ({{ row.failure }})
-        {% else %}
-          -
-        {% endif %}
+        {{ row.failure }}
       </td>
       <td>
-        {% if row.error %}
-          {{ (row.error / totals[severity] * 100) | round(2) }}% ({{ row.error }})
-        {% else %}
-          -
-        {% endif %}
+        {{ row.error }}
       </td>
       <td>
-        {% if row.warning %}
-          {{ (row.warning / totals[severity] * 100) | round(2) }}% ({{ row.warning }})
-        {% else %}
-          -
-        {% endif %}
+        {{ row.warning }}
       </td>
       <td>
-        {% if row.not_applicable %}
-          {{ (row.not_applicable / totals[severity] * 100) | round(2) }}% ({{ row.not_applicable }})
-        {% else %}
-          -
-        {% endif %}
+        {{ row.not_applicable }}
       </td>
     </tr>
     {% endfor %}

@@ -16,6 +16,9 @@ chart:
     labels: tr td:first-child
     hide-table: false
     title: Request Distribution by Domain
+    height: 300
+    width: 400
+    legend: left
     series:
       - tr td:nth-child(4)
 success: |
@@ -49,6 +52,11 @@ Property     | Description
 `hide-table` | A boolean to determine if the table used to read the tabular data should be hidden. Defaults to false.
 `title`      | The title of the graph
 `series`     | An array of css selectors that return the HTML elements whose text will become chart data.
+`height`     | The height of the graph area set as a CSS style on the `<canvas>` element.
+`width`      | The width of the graph area set as a CSS style on the `<canvas>` element.
+`x-axis`     | The label for the x-axis.
+`y-axis`     | The label for the y-axis.
+`legend`     | The position of the legend. Options are: top, bottom, left, right or none (to remove legend).
 
 ## Rendering a Chart
 Rendered charts are available as a special `_chart` token to be used in success,
