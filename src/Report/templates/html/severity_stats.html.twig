@@ -1,10 +1,4 @@
-{% set series = [] %}
-{% set seriesLabels = [] %}
-{% for severity, row in stats  %}
-  {% set series = series|merge(["tr:nth-child(" ~ loop.index ~ ") td"]) %}
-  {% set seriesLabels = seriesLabels|merge(["tbody tr:nth-child(" ~ loop.index ~ ") th"]) %}
-{% endfor %}
-[[[type="horizontalBar" title="Audit outcome by severity" hide-table="true" labels="thead th:not(:first-child)" series="{{ series|join(", ") }}" series-labels="{{ seriesLabels|join(", ") }}" stacked="true" height="250" legend="bottom" x-axis="Policies Audited"]]]
+[[[type="horizontalBar" title="Audit outcome by severity" hide-table="true" labels="tbody th" series="tr td:nth-child(2), tr td:nth-child(3), tr td:nth-child(4), tr td:nth-child(5), tr td:nth-child(6)" series-labels="thead th:nth-child(2), thead th:nth-child(3), thead th:nth-child(4), thead th:nth-child(5), thead th:nth-child(6)" stacked="true" height="250" legend="bottom" x-axis="Policies Audited"]]]
 <table class="table">
   <thead>
     <tr>
