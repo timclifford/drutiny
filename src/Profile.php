@@ -167,7 +167,7 @@ class Profile {
    */
   public function getPolicyDefinition($name)
   {
-    return $this->policies[$name];
+    return isset($this->policies[$name]) ? $this->policies[$name] : FALSE;
   }
 
   /**
@@ -286,6 +286,10 @@ class Profile {
     $profile->setParent($this);
     $this->include[$profile->getName()] = $profile;
     foreach ($profile->getAllPolicyDefinitions() as $policy) {
+      // Do not override policies already specified, they take priority.
+      if ($this->getPolicyDefinition($policy->getName())) {
+        continue;
+      }
       $this->addPolicyDefinition($policy);
     }
     return $this;
