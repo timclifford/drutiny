@@ -22,6 +22,7 @@ class Sandbox {
   use ParameterTrait;
   use LoggerTrait;
   use RegistryTrait;
+  use ReportingPeriodTrait;
 
   /**
    * @var \Drutiny\Target\Target
@@ -57,6 +58,12 @@ class Sandbox {
     }
     $this->audit = $audit;
     $this->policy = $policy;
+
+    // Default reporting period is last 24 hours to the nearest hour.
+    $start = new \DateTime(date('ha'));
+    $end   = clone $start;
+    $end->add(new \DateInterval('PT24H'));
+    $this->setReportingPeriod($start, $end);
   }
 
   /**
