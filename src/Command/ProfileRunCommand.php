@@ -62,6 +62,13 @@ class ProfileRunCommand extends Command {
         ['default']
       )
       ->addOption(
+        'title',
+        't',
+        InputOption::VALUE_OPTIONAL,
+        'Override the title of the profile with the specified value.',
+        false
+      )
+      ->addOption(
         'domain-source',
         'd',
         InputOption::VALUE_OPTIONAL,
@@ -102,6 +109,11 @@ class ProfileRunCommand extends Command {
 
     // Setup the check.
     $profile = ProfileRegistry::getProfile($input->getArgument('profile'));
+
+    // Override the title of the profile with the specified value.
+    if ($title = $input->getOption('title')) {
+      $profile->setTitle($title);
+    }
 
     $filepath = $input->getOption('report-filename');
     $format = $input->getOption('format');
