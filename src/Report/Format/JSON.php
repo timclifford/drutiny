@@ -73,6 +73,8 @@ class JSON extends Format {
         'warning' => $response->getWarning(),
         'type' => $response->getType(),
         'severity' => $response->getSeverity(),
+        'exception' => $response->getExceptionMessage(),
+        'name' => $response->getName(),
       ];
 
       $schema['total']++;
@@ -122,6 +124,7 @@ class JSON extends Format {
           break;
       }
       $schema['results'][] = $var;
+      $schema['policy'][$var['name']] = $var;
     }
 
     $schema['stats'] = array_filter($schema['stats'], function ($a) {

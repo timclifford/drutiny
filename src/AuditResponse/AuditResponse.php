@@ -98,6 +98,14 @@ class AuditResponse {
   }
 
   /**
+   * Get the exception message if present.
+   */
+  public function getExceptionMessage()
+  {
+    return isset($this->tokens['exception']) ? $this->tokens['exception'] : '';
+  }
+
+  /**
    * Get the type of response based on policy type and audit response.
    */
   public function getType()
