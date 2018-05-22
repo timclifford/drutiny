@@ -33,11 +33,13 @@ trait DrushTrait {
     }
     catch (ProcessFailedException $e) {
       $this->sandbox()->logger()->info($e->getProcess()->getOutput());
+      $this->drushOptions = [];
       throw new DrushFormatException("Drush command failed.", $e->getProcess()->getOutput());
     }
 
     if (in_array("--format='json'", $this->drushOptions)) {
       if (!$json = json_decode($output, TRUE)) {
+        $this->drushOptions = [];
         throw new DrushFormatException("Cannot parse json output from drush: $output", $output);
       }
       $output = $json;
