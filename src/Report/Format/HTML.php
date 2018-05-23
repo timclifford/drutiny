@@ -53,7 +53,16 @@ class HTML extends Markdown {
       $results_vars = ['result' => $result];
       $result_render = self::renderTemplate($result['type'], $results_vars);
       $render['output_' . $result['type']][] = $result_render;
+      $render['output_' . $result['type'] . '_by_severity'][$result['severity_code']][] = $result_render;
       $result['rendered_result'] = $result_render;
+      $render['types'][$result['type']] = $result['type'];
+    }
+
+    $render['types'] = array_values($render['types']);
+
+    foreach ($render['types'] as $type) {
+      ksort($render['output_' . $type . '_by_severity']);
+      $render['output_' . $type . '_by_severity'] = call_user_func_array('array_merge', $render['output_' . $type . '_by_severity']);
     }
 
     $render['summary_table']  = self::renderTemplate('summary_table', $render);

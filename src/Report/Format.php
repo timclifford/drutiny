@@ -94,7 +94,26 @@ abstract class Format {
     $twig = new \Twig_Environment($loader, array(
       'cache' => sys_get_temp_dir() . '/drutiny/cache',
       'auto_reload' => TRUE,
+      // 'debug' => true,
     ));
+    // $twig->addExtension(new \Twig_Extension_Debug());
+
+    // Filter to sort arrays by a property.
+    $twig->addFilter(new \Twig_SimpleFilter('psort', function (array $array, array $args = []) {
+        $property = reset($args);
+
+        usort($array, function ($a, $b) use ($property) {
+          if ($a[$property] == $b[$property]) {
+            return 0;
+          }
+          $index = [$a[$property], $b[$property]];
+          sort($index);
+          return $index[0] == $a[$property] ? 1 : -1;
+        });
+
+        return $array;
+    },
+    ['is_variadic' => true]));
 
     $template = $twig->load($tpl . '.' . $this->getFormat() . '.twig');
     $contents = $template->render($render);

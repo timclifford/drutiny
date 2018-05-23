@@ -13,9 +13,12 @@
     {{/warnings}}
 
     {{#notices}}
-    {{# output_data }}
+    {{#output_data}}
     {{{.}}}
-    {{/ output_data }}
+    {{/output_data}}
+    {{#output_notice}}
+    {{{.}}}
+    {{/output_notice}}
     {{/notices}}
 
     {{#errors}}

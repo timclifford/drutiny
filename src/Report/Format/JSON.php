@@ -73,6 +73,7 @@ class JSON extends Format {
         'warning' => $response->getWarning(),
         'type' => $response->getType(),
         'severity' => $response->getSeverity(),
+        'severity_code' => $response->getSeverityCode(),
         'exception' => $response->getExceptionMessage(),
         'name' => $response->getName(),
       ];
