@@ -19,6 +19,12 @@ chart:
     height: 300
     width: 400
     legend: left
+    colors:
+      - rgba(46, 204, 113,1.0)
+      - rgba(192, 57, 43,1.0)
+      - rgba(230, 126, 34,1.0)
+      - rgba(241, 196, 15,1.0)
+      - rgba(52, 73, 94,1.0)
     series:
       - tr td:nth-child(4)
 success: |
@@ -57,6 +63,7 @@ Property     | Description
 `x-axis`     | The label for the x-axis.
 `y-axis`     | The label for the y-axis.
 `legend`     | The position of the legend. Options are: top, bottom, left, right or none (to remove legend).
+`colors`     | An array of colors expressed using RGB syntax. E.g. `rgba(52, 73, 94,1.0)`.
 
 ## Rendering a Chart
 Rendered charts are available as a special `_chart` token to be used in success,

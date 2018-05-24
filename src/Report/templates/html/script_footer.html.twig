@@ -41,7 +41,11 @@
         chartTitle: '',
         chartWidth: '100%',
         chartHeight: '100%',
+        chartColors: ''
       }, $(this).data());
+
+      // Build color palette.
+      data.chartColors = $.merge(data.chartColors.split(';'), colors);
 
       $(this).html('<canvas></canvas>');
       $('canvas', this).css({
@@ -72,7 +76,7 @@
             return e.innerHTML.replace(',', '');
           }),
           label: $(series_labels[i], table).text(),
-          backgroundColor: series.length > 1 ? colors[i] : colors
+          backgroundColor: series.length > 1 ? data.chartColors[i] : data.chartColors
         }
       });
 
