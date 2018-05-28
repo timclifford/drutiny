@@ -64,6 +64,15 @@ include:
   - d8
 ```
 
+### excluded_policies
+This directive allows a profile to exclude policies that were implicitly included
+in an included profile defined in the `include` directive.
+
+```yaml
+excluded_policies:
+  - Drupal-7:BlackListPermissions
+  - Drupal-7:CSSAggregation
+```
 
 ### format
 
