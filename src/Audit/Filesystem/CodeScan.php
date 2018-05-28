@@ -67,7 +67,7 @@ class CodeScan extends Audit {
       foreach ($types as $type) {
         $conditions[] = '-iname "*.' . $type . '"';
       }
-      $command[] = implode(' -or ', $conditions);
+      $command[] = '\( ' . implode(' -or ', $conditions) . ' \)';
     }
 
     foreach ($sandbox->getParameter('exclude', []) as $filepath) {
