@@ -28,7 +28,11 @@
     {{/errors}}
 
     {{#passes}}
-    {{# output_success }}
+    {{#output_success}}
     {{{.}}}
-    {{/ output_success }}
+    {{/output_success}}
     {{/passes}}
+
+    {{#output_not-applicable}}
+      {{{.}}}
+    {{/output_not-applicable}}
