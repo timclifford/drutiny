@@ -17,6 +17,12 @@ use Symfony\Component\Yaml\Yaml;
  *  default = "true",
  *  description = "The expression language to evaludate. See https://symfony.com/doc/current/components/expression_language/syntax.html"
  * )
+ * @Param(
+ *  name = "not_applicable",
+ *  type = "string",
+ *  default = "false",
+ *  description = "The expression language to evaludate if the analysis is not applicable. See https://symfony.com/doc/current/components/expression_language/syntax.html"
+ * )
  */
 abstract class AbstractAnalysis extends Audit {
 
