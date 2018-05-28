@@ -28,13 +28,18 @@ abstract class AbstractAnalysis extends Audit {
   final public function audit(Sandbox $sandbox)
   {
     $this->gather($sandbox);
-    $expression = $sandbox->getParameter('expression', 'true');
-    $variables  = $sandbox->getParameterTokens();
-
     $expressionLanguage = new ExpressionLanguage();
-
-    $sandbox->logger()->info(__CLASS__ . ': ' . $expression);
+    $variables  = $sandbox->getParameterTokens();
     $sandbox->logger()->info(__CLASS__ . ': ' . Yaml::dump($variables));
+
+    $expression = $sandbox->getParameter('not_applicable', 'true');
+    $sandbox->logger()->info(__CLASS__ . ': ' . $expression);
+    if ($expressionLanguage->evaluate($expression, $variables)) {
+      return self::NOT_APPLICABLE;
+    }
+
+    $expression = $sandbox->getParameter('expression', 'true');
+    $sandbox->logger()->info(__CLASS__ . ': ' . $expression);
 
     return $expressionLanguage->evaluate($expression, $variables);
   }
