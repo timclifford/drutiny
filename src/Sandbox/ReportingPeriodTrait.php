@@ -20,6 +20,10 @@ trait ReportingPeriodTrait {
 
     public function setReportingPeriod(\DateTime $start, \DateTime $end)
     {
+      $this->logger()->info(strtr("Reporting period set @start to @end", [
+        '@start' => $start->format('Y-m-d H:i:s e'),
+        '@end' => $end->format('Y-m-d H:i:s e'),
+      ]));
       return $this->setReportingPeriodStart($start)
                   ->setReportingPeriodEnd($end);
     }

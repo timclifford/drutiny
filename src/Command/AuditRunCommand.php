@@ -60,6 +60,20 @@ class AuditRunCommand extends Command {
         'l',
         InputOption::VALUE_OPTIONAL,
         'Provide URLs to run against the target. Useful for multisite installs. Accepts multiple arguments.'
+      )
+      ->addOption(
+        'reporting-period-start',
+        null,
+        InputOption::VALUE_OPTIONAL,
+        'The starting point in time to report from. Can be absolute or relative. Defaults to 24 hours before the current hour.',
+        date('Y-m-d H:00:00', strtotime('-24 hours'))
+      )
+      ->addOption(
+        'reporting-period-end',
+        null,
+        InputOption::VALUE_OPTIONAL,
+        'The end point in time to report to. Can be absolute or relative. Defaults to the current hour.',
+        date('Y-m-d H:00:00')
       );
   }
 
@@ -94,9 +108,13 @@ class AuditRunCommand extends Command {
     $result = new AuditResponse($policy);
     $result->set(FALSE, $policy->getParameterDefaults());
 
+    $start = new \DateTime($input->getOption('reporting-period-start'));
+    $end   = new \DateTime($input->getOption('reporting-period-end'));
+
     // Generate the sandbox to execute the check.
     $sandbox = new Sandbox($target, $policy);
     $sandbox->setLogger(new ConsoleLogger($output));
+    $sandbox->setReportingPeriod($start, $end);
 
     if ($uri = $input->getOption('uri')) {
       $sandbox->drush()->setGlobalDefaultOption('uri', $uri);
