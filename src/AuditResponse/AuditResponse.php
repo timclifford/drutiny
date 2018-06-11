@@ -235,7 +235,7 @@ class AuditResponse {
         $summary[] = strtr('Could not determine the state of ' . $this->getTitle() . ' due to an error:
 ```
 exception
-```', ['exception' => $this->tokens['exception']]);
+```', $this->tokens);
         break;
 
       case ($this->state === Audit::WARNING):
