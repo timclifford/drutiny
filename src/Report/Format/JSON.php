@@ -39,6 +39,7 @@ class JSON extends Format {
 
     // Report Title.
     $schema['title'] = $profile->getTitle();
+    $schema['profile'] = $profile->getName();
     $schema['domain'] = $target->uri();
     $schema['summary'] = $target->uri();
     $schema['description'] = $profile->getDescription();
