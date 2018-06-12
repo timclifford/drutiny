@@ -2,6 +2,7 @@
 
 namespace DrutinyTests\Audit;
 
+use Drutiny\Container;
 use Drutiny\Policy;
 use Drutiny\Sandbox\Sandbox;
 use Drutiny\Target\Registry as TargetRegistry;
@@ -15,6 +16,7 @@ class PolicyTest extends TestCase {
 
   public function __construct()
   {
+    Container::setLogger(new NullLogger());
     $this->target = TargetRegistry::getTarget('none', '');
     parent::__construct();
   }
@@ -23,8 +25,6 @@ class PolicyTest extends TestCase {
   {
     $policy = Policy::load('Test:Pass');
     $sandbox = new Sandbox($this->target, $policy);
-
-    $sandbox->setLogger(new NullLogger());
 
     $response = $sandbox->run();
     $this->assertTrue($response->isSuccessful());
@@ -35,8 +35,6 @@ class PolicyTest extends TestCase {
     $policy = Policy::load('Test:Fail');
     $sandbox = new Sandbox($this->target, $policy);
 
-    $sandbox->setLogger(new NullLogger());
-
     $response = $sandbox->run();
     $this->assertFalse($response->isSuccessful());
   }
@@ -45,8 +43,6 @@ class PolicyTest extends TestCase {
   {
     $policy = Policy::load('Test:Error');
     $sandbox = new Sandbox($this->target, $policy);
-
-    $sandbox->setLogger(new NullLogger());
 
     $response = $sandbox->run();
     $this->assertFalse($response->isSuccessful());
@@ -58,8 +54,6 @@ class PolicyTest extends TestCase {
     $policy = Policy::load('Test:Warning');
     $sandbox = new Sandbox($this->target, $policy);
 
-    $sandbox->setLogger(new NullLogger());
-
     $response = $sandbox->run();
     $this->assertTrue($response->isSuccessful());
     $this->assertTrue($response->hasWarning());
@@ -70,8 +64,6 @@ class PolicyTest extends TestCase {
     $policy = Policy::load('Test:NA');
     $sandbox = new Sandbox($this->target, $policy);
 
-    $sandbox->setLogger(new NullLogger());
-
     $response = $sandbox->run();
     $this->assertFalse($response->isSuccessful());
     $this->assertTrue($response->isNotApplicable());
@@ -81,8 +73,6 @@ class PolicyTest extends TestCase {
   {
     $policy = Policy::load('Test:Notice');
     $sandbox = new Sandbox($this->target, $policy);
-
-    $sandbox->setLogger(new NullLogger());
 
     $response = $sandbox->run();
     $this->assertTrue($response->isSuccessful());
