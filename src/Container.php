@@ -2,14 +2,15 @@
 
 namespace Drutiny;
 
-use Drutiny\Logger\ConsoleLogger;
+use Symfony\Component\Console\Logger\ConsoleLogger;
+use Symfony\Component\Console\Output\ConsoleOutput;
 
 class Container {
   static $verbosity;
 
   public static function getLogger()
   {
-    return ConsoleLogger::create(self::getVerbosity());
+    return new ConsoleLogger(new ConsoleOutput(self::getVerbosity()));
   }
 
   /**

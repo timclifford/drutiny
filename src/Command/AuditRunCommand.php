@@ -3,7 +3,6 @@
 namespace Drutiny\Command;
 
 use Drutiny\AuditResponse\AuditResponse;
-use Drutiny\Logger\ConsoleLogger;
 use Drutiny\Policy;
 use Drutiny\Profile;
 use Drutiny\RemediableInterface;

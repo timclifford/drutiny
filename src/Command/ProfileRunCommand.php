@@ -4,7 +4,6 @@ namespace Drutiny\Command;
 
 use Drutiny\Config;
 use Drutiny\Container;
-use Drutiny\Logger\ConsoleLogger;
 use Drutiny\Profile\Registry as ProfileRegistry;
 use Drutiny\Report;
 use Drutiny\Sandbox\Sandbox;
