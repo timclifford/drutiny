@@ -73,6 +73,13 @@ class Profile {
   protected $format = [];
 
   /**
+   * Flag to render multisite reports into single site reports also.
+   *
+   * @var boolean
+   */
+  protected $reportPerSite = FALSE;
+
+  /**
    * Load a profile from file.
    *
    * @var $filepath string
@@ -344,6 +351,17 @@ class Profile {
       return $this->parent->getParent($name);
     }
     return $this->parent;
+  }
+
+  public function reportPerSite()
+  {
+    return $this->reportPerSite;
+  }
+
+  public function setReportPerSite($flag = TRUE)
+  {
+    $this->reportPerSite = (bool) $flag;
+    return $this;
   }
 
   public function dump()

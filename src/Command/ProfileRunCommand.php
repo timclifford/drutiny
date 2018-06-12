@@ -70,12 +70,6 @@ class ProfileRunCommand extends Command {
         false
       )
       ->addOption(
-        'domain-source',
-        'd',
-        InputOption::VALUE_OPTIONAL,
-        'Use a domain source to preload uri options. Defaults to yaml filepath. Options: (' . implode(', ', $domain_list) . ')'
-      )
-      ->addOption(
         'report-filename',
         'o',
         InputOption::VALUE_OPTIONAL,
@@ -102,6 +96,18 @@ class ProfileRunCommand extends Command {
         InputOption::VALUE_OPTIONAL,
         'The end point in time to report to. Can be absolute or relative. Defaults to the current hour.',
         date('Y-m-d H:00:00')
+      )
+      ->addOption(
+        'report-per-site',
+        null,
+        InputOption::VALUE_NONE,
+        'Flag to additionally render a report for each site audited in multisite mode.'
+      )
+      ->addOption(
+        'domain-source',
+        'd',
+        InputOption::VALUE_OPTIONAL,
+        'Use a domain source to preload uri options. Defaults to yaml filepath. Options: (' . implode(', ', $domain_list) . ')'
       );
 
       foreach (Config::get('DomainList') as $name => $class) {
@@ -141,6 +147,8 @@ class ProfileRunCommand extends Command {
 
     // Setup the check.
     $profile = ProfileRegistry::getProfile($input->getArgument('profile'));
+
+    $profile->setReportPerSite($input->getOption('report-per-site'));
 
     // Override the title of the profile with the specified value.
     if ($title = $input->getOption('title')) {

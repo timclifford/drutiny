@@ -48,6 +48,8 @@ abstract class Format {
 
   final public function render(Profile $profile, Target $target, array $results)
   {
+    $filepaths = [];
+
     if (count($results) == 1) {
       $result = reset($results);
       // @var array
@@ -57,6 +59,26 @@ abstract class Format {
       $renderedOutput = $this->renderResult($variables);
     }
     else {
+      // Render each result set into its own report.
+      if ($profile->reportPerSite() && !($this->getOutput() instanceof OutputInterface)) {
+        $info = pathinfo($this->getOutput());
+        foreach ($results as $uri => $result) {
+          $variables = $this->preprocessResult($profile, $target, $result);
+
+          $info['uri'] = $uri;
+          $filepath = strtr('dirname/filename/uri.extension', $info);
+
+          // Ensure the directory is available or continue.
+          if (!is_dir(dirname($filepath)) && !mkdir(dirname($filepath))) {
+            continue;
+          }
+
+          file_put_contents($filepath, $this->renderResult($variables));
+          $filepaths[] = $filepath;
+        }
+      }
+
+
       // @var array
       $variables = $this->preprocessMultiResult($profile, $target, $results);
 
@@ -68,8 +90,9 @@ abstract class Format {
       $this->getOutput()->writeln($renderedOutput);
     }
     else {
-      file_put_contents($this->getOutput(), $renderedOutput);
+      file_put_contents($filepaths[] = $this->getOutput(), $renderedOutput);
     }
+    return $filepaths;
   }
 
   abstract protected function preprocessResult(Profile $profile, Target $target, array $result);
