@@ -2,9 +2,6 @@
 
 namespace Drutiny\Target;
 
-use Drutiny\Driver\DrushInterface;
-use Drutiny\Driver\ExecInterface;
-use Drutiny\Driver\DrushTrait;
 use Drutiny\Driver\Exec;
 
 /**
@@ -12,10 +9,7 @@ use Drutiny\Driver\Exec;
  *  name = "drush"
  * )
  */
-class DrushTarget extends Target implements DrushInterface, ExecInterface {
-  use DrushTrait;
-
-  protected $options = [];
+class DrushTarget extends Target implements DrushTargetInterface {
 
   protected $alias;
 
@@ -25,7 +19,10 @@ class DrushTarget extends Target implements DrushInterface, ExecInterface {
    */
   public function parse($target_data) {
     $this->alias = $target_data;
-    $data = $this->sandbox()->exec('drush sa @alias --format=json', [
+
+    // Get some information from the local site-alias.
+    $proc = new Exec();
+    $data = $proc->exec('drush sa @alias --format=json', [
       '@alias' => $target_data,
     ]);
     $options = json_decode($data, TRUE);
@@ -34,37 +31,32 @@ class DrushTarget extends Target implements DrushInterface, ExecInterface {
     $this->options = isset($options[$key]) ? $options[$key] : array_shift($options);
 
     // Set the URI from the Drush alias if it hasn't been manually set already.
-    if (!isset($this->uri) && isset($this->options['uri'])) {
-      $this->setGlobalDefaultOption('uri', $this->options['uri']);
+    if (!$this->uri() && isset($this->options['uri'])) {
+      $this->setUri($this->options['uri']);
     }
 
     return $this;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getOptions() {
     return $this->options;
   }
 
   /**
-   * @inheritdoc
-   * Implements Target::uri().
+   * {@inheritdoc}
    */
-  public function uri() {
-    return $this->getGlobalDefaultOption('uri') ? $this->getGlobalDefaultOption('uri') : 'default';
-  }
-
-  public function setUri($uri)
-  {
-    $this->setGlobalDefaultOption('uri', $uri);
-    return parent::setUri($uri);
+  public function getAlias() {
+    return $this->alias;
   }
 
   /**
-   * @inheritdoc
-   * Overrides DrushTrait::runCommand().
+   * {@inheritdoc}
    */
   public function runCommand($method, $args, $pipe = '') {
-    $process = new Exec($this->sandbox());
+    $process = new Exec();
     return $process->exec('@pipe drush @alias @options @method @args', [
       '@method' => $method,
       '@args' => implode(' ', $args),
@@ -78,9 +70,10 @@ class DrushTarget extends Target implements DrushInterface, ExecInterface {
    * @inheritdoc
    * Implements ExecInterface::exec().
    */
-  public function exec($command, $args = []) {
-    $process = new Exec($this->sandbox());
-
+  public function exec($command, $args = [])
+  {
+    // If the drush target is remote, amend the command
+    // to execute the command remotely.
     if (isset($this->options['remote-host'])) {
       $args['%docroot%'] = $this->options['root'];
 
@@ -96,10 +89,7 @@ class DrushTarget extends Target implements DrushInterface, ExecInterface {
       $args = ['@command' => escapeshellarg($command)];
 
       $command = strtr('ssh ssh-options remote-user@remote-host @command', $defaults);
-
-      $process = new Exec($this->sandbox());
     }
-    return $process->exec($command, $args);
+    return parent::exec($command, $args);
   }
-
 }

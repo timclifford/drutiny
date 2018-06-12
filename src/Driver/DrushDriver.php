@@ -4,16 +4,63 @@ namespace Drutiny\Driver;
 
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Process\Exception\ProcessFailedException;
+use Drutiny\Container;
+use Drutiny\Sandbox\Sandbox;
+use Drutiny\Target\DrushTargetInterface;
+use Drutiny\Target\TargetInterface;
 
 /**
  *
  */
-trait DrushTrait {
+class DrushDriver {
+  /**
+   * @array options to pass to Drush.
+   */
+  protected $options = [];
 
-  protected $drushOptions = [];
+  /**
+   * @string path to drush.
+   */
+  protected $drushBin;
 
-  protected $globalDefaults = [];
+  /**
+   * @string drush site-alias.
+   */
+  protected $alias;
 
+  /**
+   * @param TargetInterface.
+   */
+  protected $target;
+
+  public function __construct(TargetInterface $target, $drush_bin, $options = [], $alias = '@self')
+  {
+    $this->drushBin = $drush_bin;
+    $this->target  = $target;
+    $this->setOptions($options)
+         ->setOptions(['uri' => $target->uri()]);
+    $this->alias = $alias;
+  }
+
+  /**
+   * Instansiate a new Drush Driver instance.
+   *
+   * @param TargetInterface $target
+   * @param string $drush_bin path to drush executable.
+   */
+  public static function createFromTarget(TargetInterface $target, $drush_bin = 'drush')
+  {
+    $options = [];
+    $alias = '@self';
+    if ($target instanceof DrushTargetInterface) {
+      $alias = $target->getAlias();
+    }
+    return new static($target, $drush_bin, $options, $alias);
+  }
+
+  /**
+   * Get drush site-alias.
+   */
   public function getAlias() {
     return $this->alias;
   }
@@ -22,8 +69,6 @@ trait DrushTrait {
    * Converts into method into a Drush command.
    */
   public function __call($method, $args) {
-    $this->setDrushOptions($this->getGlobalDefaults());
-
     // Convert method from camelCase to Drush hyphen based method naming.
     // E.g. PmInfo will become pm-info.
     preg_match_all('/((?:^|[A-Z])[a-z]+)/', $method, $matches);
@@ -32,23 +77,72 @@ trait DrushTrait {
       $output = $this->runCommand($method, $args);
     }
     catch (ProcessFailedException $e) {
-      $this->sandbox()->logger()->info($e->getProcess()->getOutput());
-      $this->drushOptions = [];
+      Container::getLogger()->info($e->getProcess()->getOutput());
       throw new DrushFormatException("Drush command failed: $method", $e->getProcess()->getOutput());
     }
 
-    if (in_array("--format='json'", $this->drushOptions)) {
+    if (in_array("--format='json'", $this->getOptions())) {
       if (!$json = json_decode($output, TRUE)) {
-        $this->drushOptions = [];
         throw new DrushFormatException("Cannot parse json output from drush: $output", $output);
       }
       $output = $json;
     }
 
-    // Reset drush options.
-    $this->drushOptions = [];
-
     return $output;
+  }
+
+  /**
+   * Run the drush command.
+   */
+  protected function runCommand($method, $args, $pipe = '') {
+    return $this->target->exec('@pipe @bin @alias @options @method @args', [
+      '@method' => $method,
+      '@alias' => $this->getAlias(),
+      '@bin' => $this->drushBin,
+      '@args' => implode(' ', $args),
+      '@options' => implode(' ', $this->getOptions()),
+      '@pipe' => $pipe
+    ]);
+  }
+
+  public function helper()
+  {
+    return new DrushHelper($this);
+  }
+
+  /**
+   * Get drush options.
+   */
+  public function getOptions()
+  {
+    return $this->options;
+  }
+
+  /**
+   * Set drush options.
+   */
+  public function setOptions(array $options) {
+    foreach ($options as $key => $value) {
+      if (is_int($key)) {
+        $option  = '--' . $value;
+      }
+      elseif (strlen($key) == 1) {
+        $option = '-' . $key;
+        if (!empty($value)) {
+          $option .= ' ' . escapeshellarg($value);
+        }
+      }
+      else {
+        $option = '--' . $key;
+        if (!empty($value)) {
+          $option .= '=' . escapeshellarg($value);
+        }
+      }
+      if (!in_array($option, $this->options)) {
+        $this->options[] = $option;
+      }
+    }
+    return $this;
   }
 
   /**
@@ -98,12 +192,12 @@ trait DrushTrait {
    * @throws DrushFormatException
    */
   public function moduleEnabled($name) {
-    $this->drushOptions[] = '--format=json';
+    $this->options[] = '--format=json';
     $modules = $this->__call('pmList', []);
     if (!$modules = json_decode($modules, TRUE)) {
       throw new DrushFormatException("Cannot parse json output from drush: $modules", $modules);
     }
-    $this->drushOptions = [];
+    $this->options = [];
     return isset($modules[$name]) && $modules[$name]['status'] === 'Enabled';
   }
 
@@ -118,11 +212,11 @@ trait DrushTrait {
   public function configSet($collection, $key, $value) {
     $value = base64_encode(Yaml::dump($value));
 
-    if ($index = array_search('--format=json', $this->drushOptions)) {
-      unset($this->drushOptions[$index]);
+    if ($index = array_search('--format=json', $this->options)) {
+      unset($this->options[$index]);
     }
-    $this->drushOptions[] = '--format=yaml';
-    $this->drushOptions[] = '-y';
+    $this->options[] = '--format=yaml';
+    $this->options[] = '-y';
 
     $pipe = "echo '$value' | base64 --decode |";
 
@@ -130,7 +224,6 @@ trait DrushTrait {
       $collection, $key, '-'
     ], $pipe);
 
-    $this->drushOptions = [];
     return TRUE;
   }
 
@@ -153,75 +246,6 @@ trait DrushTrait {
    */
   public function sqlQuery($sql) {
     return $this->sqlq($sql);
-  }
-
-  /**
-   *
-   */
-  public function runCommand($method, $args, $pipe = '') {
-    return $this->sandbox()->exec('@pipe drush @options @method @args', [
-      '@method' => $method,
-      '@args' => implode(' ', $args),
-      '@options' => implode(' ', $this->drushOptions),
-      '@pipe' => $pipe
-    ]);
-  }
-
-  /**
-   *
-   */
-  public function setDrushOptions(array $options) {
-    foreach ($options as $key => $value) {
-      if (is_int($key)) {
-        $option  = '--' . $value;
-      }
-      elseif (strlen($key) == 1) {
-        $option = '-' . $key;
-        if (!empty($value)) {
-          $option .= ' ' . escapeshellarg($value);
-        }
-      }
-      else {
-        $option = '--' . $key;
-        if (!empty($value)) {
-          $option .= '=' . escapeshellarg($value);
-        }
-      }
-      if (!in_array($option, $this->drushOptions)) {
-        $this->drushOptions[] = $option;
-      }
-    }
-    return $this;
-  }
-
-  /**
-   * Set an option that will be presented on every drush command.
-   */
-  public function setGlobalDefaultOption($key, $value) {
-    $this->globalDefaults[$key] = $value;
-    return $this;
-  }
-
-  /**
-   * Get an option that will be presented on every drush command.
-   */
-  public function getGlobalDefaultOption($key) {
-    return isset($this->globalDefaults[$key]) ? $this->globalDefaults[$key] : FALSE;
-  }
-
-  /**
-   * Remove global option.
-   */
-  public function removeGlobalDefaultOption($key) {
-    unset($this->globalDefaults[$key]);
-    return $this;
-  }
-
-  /**
-   * Retrieve global defaults.
-   */
-  public function getGlobalDefaults() {
-    return $this->globalDefaults;
   }
 
   /**
@@ -269,19 +293,15 @@ trait DrushTrait {
 
     $pipe = implode(';' . PHP_EOL, $execution);
 
-    $this->setDrushOptions($this->getGlobalDefaults());
     $execution[] = strtr('drush @alias @options scr $f', [
-      '@options' => implode(' ', $this->drushOptions),
-      '@alias' => $this->alias,
+      '@options' => implode(' ', $this->getOptions()),
+      '@alias' => $this->getAlias(),
     ]);
     $execution[] = 'rm $f';
 
     $transfer = implode(';' . PHP_EOL, $execution);
 
-
-    // $transfer = "echo $transfer | base64 --decode | bash";
-
-    $output = $this->sandbox()->exec($transfer);
+    $output = $this->target->exec($transfer);
     return json_decode($output, TRUE);
   }
 

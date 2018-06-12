@@ -2,20 +2,19 @@
 
 namespace Drutiny\Target;
 
-use Drutiny\Sandbox\Sandbox;
+use Drutiny\Driver\Exec;
 
 /**
- *
+ * Basic function of a Target.
  */
-abstract class Target {
-  private $sandbox;
-  private $_data;
-  protected $uri;
+abstract class Target implements TargetInterface {
 
-  public function __construct($target_data)
+  private $uri = FALSE;
+
+  public final function __construct($target_data)
   {
     // Store target data to be used later when the sandbox is loaded.
-    $this->_data = $target_data;
+    $this->parse($target_data);
   }
 
   /**
@@ -25,20 +24,9 @@ abstract class Target {
     return $this;
   }
 
-  /**
-   *
-   */
-  protected function sandbox() {
-    return $this->sandbox;
-  }
-
-  /**
-   *
-   */
-  public function setSandbox(Sandbox $sandbox) {
-    $this->sandbox = $sandbox;
-    $this->parse($this->_data);
-    return $this;
+  public function validate()
+  {
+    return TRUE;
   }
 
   /**
@@ -52,7 +40,21 @@ abstract class Target {
   public function setUri($uri)
   {
     $this->uri = $uri;
+    if (!$this->validate()) {
+      throw new InvalidTargetException(strtr("@uri is an invalid target", [
+        '@uri' => $uri
+      ]));
+    }
     return $this;
+  }
+
+  /**
+   * @inheritdoc
+   * Implements ExecInterface::exec().
+   */
+  public function exec($command, $args = []) {
+    $process = new Exec();
+    return $process->exec($command, $args);
   }
 
   /**
@@ -66,6 +68,14 @@ abstract class Target {
       list($target_name, $target_data) = explode(':', $target, 2);
     }
     return [$target_name, $target_data];
+  }
+
+  /**
+   * Alias for Registry::getTarget().
+   */
+  static public function getTarget($name, $options = [])
+  {
+    return Registry::getTarget($name, $options);
   }
 
 }

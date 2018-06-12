@@ -5,11 +5,12 @@ namespace Drutiny\Driver;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Drutiny\Cache;
+use Drutiny\Container;
 
 /**
  *
  */
-class Exec extends Driver implements ExecInterface {
+class Exec {
 
   /**
    * @inheritdoc
@@ -17,16 +18,17 @@ class Exec extends Driver implements ExecInterface {
   public function exec($command, $args = []) {
     $args['%docroot'] = '';
     $command = strtr($command, $args);
+    $watchdog = Container::getLogger();
 
     if ($output = Cache::get('exec', $command)) {
-      $this->logInfo("Cache hit for: $command");
+      $watchdog->debug("Cache hit for: $command");
       return $output;
     }
 
     $process = new Process($command);
     $process->setTimeout(600);
 
-    $this->logInfo($command);
+    $watchdog->debug($command);
     $process->run();
 
     // Executes after the command finishes.
@@ -36,7 +38,7 @@ class Exec extends Driver implements ExecInterface {
 
     $output = $process->getOutput();
 
-    $this->logDebug($output);
+    $watchdog->debug($output);
     Cache::set('exec', $command, $output);
 
     return $output;

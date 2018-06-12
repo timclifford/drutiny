@@ -25,3 +25,5 @@ Format:
   markdown: Drutiny\Report\Format\Markdown
   terminal: Drutiny\Report\Format\Terminal
   console: Drutiny\Report\Format\Console
+Driver:
+  drush: Drutiny\Driver\DrushRouter::create

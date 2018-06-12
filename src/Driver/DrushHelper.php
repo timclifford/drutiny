@@ -9,7 +9,7 @@ class DrushHelper {
 
   protected $drush;
 
-  public function __construct(Drush $drush)
+  public function __construct(DrushDriver $drush)
   {
     $this->drush = $drush;
   }

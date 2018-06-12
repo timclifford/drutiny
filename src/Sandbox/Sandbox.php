@@ -2,26 +2,25 @@
 
 namespace Drutiny\Sandbox;
 
-use Drutiny\Target\Target;
-use Drutiny\AuditInterface;
 use Drutiny\Audit;
-use Drutiny\AuditValidationException;
-use Drutiny\RemediableInterface;
+use Drutiny\AuditInterface;
 use Drutiny\AuditResponse\AuditResponse;
-use Drutiny\Policy;
+use Drutiny\AuditValidationException;
 use Drutiny\Cache;
+use Drutiny\Config;
+use Drutiny\Container;
+use Drutiny\Driver\Exec;
+use Drutiny\Policy;
+use Drutiny\RemediableInterface;
+use Drutiny\Target\Target;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
 
 /**
  * Run check in an isolated environment.
  */
 class Sandbox {
-
-  use DrushDriverTrait;
-  use ExecTrait;
   use ParameterTrait;
-  use LoggerTrait;
-  use RegistryTrait;
   use ReportingPeriodTrait;
 
   /**
@@ -49,7 +48,8 @@ class Sandbox {
    * @throws \Exception
    */
   public function __construct(Target $target, Policy $policy) {
-    $this->target = $target->setSandbox($this);
+
+    $this->target = $target;
 
     $class = $policy->get('class');
     $audit = new $class($this);
@@ -71,25 +71,30 @@ class Sandbox {
    */
   public function run() {
     $response = new AuditResponse($this->getPolicy());
+    $watchdog = Container::getLogger();
 
-    $this->logger()->info('Auditing ' . $this->getPolicy()->get('name'));
+    $watchdog->info('Auditing ' . $this->getPolicy()->get('name'));
     try {
       // Run the audit over the policy.
       $outcome = $this->getAuditor()->execute($this);
 
       // Log the parameters output.
-      $this->logger()->info("Tokens:\n" . Yaml::dump($this->getParameterTokens(), 4));
+      $watchdog->debug("Tokens:\n" . Yaml::dump($this->getParameterTokens(), 4));
 
       // Set the response.
       $response->set($outcome, $this->getParameterTokens());
     }
     catch (AuditValidationException $e) {
       $this->setParameter('exception', $e->getMessage());
-      $this->logger()->warning($e->getMessage());
+      $watchdog->warning($e->getMessage());
       $response->set(Audit::NOT_APPLICABLE, $this->getParameterTokens());
     }
     catch (\Exception $e) {
-      $this->setParameter('exception', $e->getMessage() . PHP_EOL . $e->getTraceAsString());
+      $message = $e->getMessage();
+      if (Container::getVerbosity() > OutputInterface::VERBOSITY_NORMAL) {
+        $message .= PHP_EOL . $e->getTraceAsString();
+      }
+      $this->setParameter('exception', $message);
       $response->set(Audit::ERROR, $this->getParameterTokens());
     }
 
@@ -149,4 +154,43 @@ class Sandbox {
     return $this;
   }
 
+  /**
+   * @param $method
+   * @param $args
+   * @return mixed
+   * @throws \ErrorException
+   */
+  public function __call($method, $args) {
+    $config = Config::get('Driver');
+    if (!isset($config[$method])) {
+      throw new \ErrorException("Unknown method $method on " . get_class($this));
+    }
+    array_unshift($args, $this);
+    return call_user_func_array($config[$method], $args);
+  }
+
+  /**
+   * Pull the logger from the Container.
+   */
+  public function logger() {
+    return Container::getLogger();
+  }
+
+  /**
+   * Execute a command against the Target.
+   * @deprecated
+   */
+  public function exec() {
+    $args = func_get_args();
+    return call_user_func_array([$this->target, 'exec'], $args);
+  }
+
+  /**
+   * Execute a local command.
+   */
+   public function localExec() {
+     $args = func_get_args();
+     $driver = new Exec();
+     return call_user_func_array([$driver, 'exec'], $args);
+   }
 }
