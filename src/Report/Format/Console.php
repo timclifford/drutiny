@@ -151,7 +151,7 @@ class Console extends Format {
 
     $io->title($profile->getTitle());
     $io->table([], $table_rows);
-    return '';
+    return [];
   }
 
   protected function renderMultiResult(array $variables) {}
