@@ -1,8 +1,8 @@
 # Drutiny - automated site auditing
 
-<img src="https://github.com/drutiny/drutiny/raw/2.1.x/assets/logo.png" alt="Drutiny logo" align="right"/>
+<img src="https://github.com/drutiny/drutiny/raw/2.2.x/assets/logo.png" alt="Drutiny logo" align="right"/>
 
-[![Build Status](https://travis-ci.org/drutiny/drutiny.svg?branch=2.1.x)](https://travis-ci.org/drutiny/drutiny)
+[![Build Status](https://travis-ci.org/drutiny/drutiny.svg?branch=2.2.x)](https://travis-ci.org/drutiny/drutiny)
 [![Latest Stable Version](https://poser.pugx.org/drutiny/drutiny/v/stable)](https://packagist.org/drutiny/drutiny)
 [![Total Downloads](https://poser.pugx.org/drutiny/drutiny/downloads)](https://packagist.org/drutiny/drutiny)
 [![Latest Unstable Version](https://poser.pugx.org/drutiny/drutiny/v/unstable)](https://packagist.org/drutiny/drutiny)
@@ -80,7 +80,7 @@ Some policies have parameters you can specify which can be passed in at call tim
 ./vendor/bin/drutiny policy:audit -p max_age=600 Drupal-8:PageCacheExpiry @drupalvm.dev
 ```
 
-Audits are simple self contained classes that are simple to read and understand. Policies are simple YAML files that determine how to use Audit classes. Drutiny can be extended very easily to audit for your own unique requirements. Pull requests are welcome as well, please see the [contributing guide](https://drutiny.github.io/2.1.x/CONTRIBUTING/).
+Audits are simple self contained classes that are simple to read and understand. Policies are simple YAML files that determine how to use Audit classes. Drutiny can be extended very easily to audit for your own unique requirements. Pull requests are welcome as well, please see the [contributing guide](https://drutiny.github.io/2.2.x/CONTRIBUTING/).
 
 ### Remediation
 Some checks have redemptive capability. Passing the `--remediate` flag into the call with "auto-heal" the site if the check fails on first pass.

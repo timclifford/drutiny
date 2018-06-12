@@ -78,7 +78,6 @@ abstract class Format {
         }
       }
 
-
       // @var array
       $variables = $this->preprocessMultiResult($profile, $target, $results);
 
