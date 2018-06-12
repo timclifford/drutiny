@@ -3,7 +3,7 @@
 namespace Drutiny;
 
 use Drutiny\Item\Item;
-use Drutiny\Logger\ConsoleLogger;
+use Drutiny\Container;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Validator\Constraints\All;
@@ -155,7 +155,7 @@ class Policy extends Item {
       // audit.
       foreach (array_keys($defaults) as $name) {
         if (!isset($audit->params[$name])) {
-          (new ConsoleLogger(new ConsoleOutput()))->warning(strtr('Policy :name documents parameter ":param" not documented by :class.', [
+          Container::getLogger()->warning(strtr('Policy :name documents parameter ":param" not documented by :class.', [
             ':name' => $this->name,
             ':param' => $name,
             ':class' => $this->class,
