@@ -111,14 +111,13 @@ class AuditRunCommand extends Command {
     $start = new \DateTime($input->getOption('reporting-period-start'));
     $end   = new \DateTime($input->getOption('reporting-period-end'));
 
+    if ($uri = $input->getOption('uri')) {
+      $target->setUri($uri);
+    }
+
     // Generate the sandbox to execute the check.
     $sandbox = new Sandbox($target, $policy);
-    $sandbox->setLogger(new ConsoleLogger($output));
     $sandbox->setReportingPeriod($start, $end);
-
-    if ($uri = $input->getOption('uri')) {
-      $sandbox->drush()->setGlobalDefaultOption('uri', $uri);
-    }
 
     $response = $sandbox->run();
 

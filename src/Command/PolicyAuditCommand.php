@@ -2,6 +2,7 @@
 
 namespace Drutiny\Command;
 
+use Drutiny\Container;
 use Drutiny\Logger\ConsoleLogger;
 use Drutiny\Profile;
 use Drutiny\Profile\PolicyDefinition;
@@ -81,6 +82,8 @@ class PolicyAuditCommand extends Command {
    * @inheritdoc
    */
   protected function execute(InputInterface $input, OutputInterface $output) {
+    // Ensure Container logger uses the same verbosity.
+    Container::setVerbosity($output->getVerbosity());
 
     // Setup any parameters for the check.
     $parameters = [];
@@ -117,11 +120,10 @@ class PolicyAuditCommand extends Command {
 
       // Generate the sandbox to execute the check.
       $sandbox = new Sandbox($target, $policy);
-      $sandbox->setLogger(new ConsoleLogger($output));
       $sandbox->setReportingPeriod($start, $end);
 
       if ($uri = $input->getOption('uri')) {
-        $sandbox->drush()->setGlobalDefaultOption('uri', $uri);
+        $target->setUri($uri);
       }
 
       $response = $sandbox->run();

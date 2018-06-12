@@ -3,11 +3,13 @@
 namespace Drutiny\Command;
 
 use Drutiny\Config;
+use Drutiny\Container;
 use Drutiny\Logger\ConsoleLogger;
 use Drutiny\Profile\Registry as ProfileRegistry;
 use Drutiny\Report;
 use Drutiny\Sandbox\Sandbox;
 use Drutiny\Target\Registry as TargetRegistry;
+use Drutiny\DomainSource;
 use Drutiny\DomainList\DomainListRegistry;
 use Drutiny\Target\Target;
 use Symfony\Component\Console\Command\Command;
@@ -114,12 +116,29 @@ class ProfileRunCommand extends Command {
           );
         }
       }
+
+      $this->addOption(
+        'domain-source-blacklist',
+        null,
+        InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
+        'Exclude domains that match this regex filter',
+        []
+      )
+      ->addOption(
+        'domain-source-whitelist',
+        null,
+        InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
+        'Exclude domains that don\'t match this regex filter',
+        []
+      );
   }
 
   /**
    * @inheritdoc
    */
   protected function execute(InputInterface $input, OutputInterface $output) {
+    // Ensure Container logger uses the same verbosity.
+    Container::setVerbosity($output->getVerbosity());
 
     // Setup the check.
     $profile = ProfileRegistry::getProfile($input->getArgument('profile'));
@@ -168,23 +187,9 @@ class ProfileRunCommand extends Command {
     $uris = $input->getOption('uri');
 
     // Load additional uris from domain-source
-    if ($source = $input->getOption('domain-source')) {
-      $options = [];
-      foreach ($input->getOptions() as $name => $value) {
-        if (strpos($name, 'domain-source-' . $source) === FALSE) {
-          continue;
-        }
-        $options[str_replace('domain-source-' . $source . '-', '', $name)] = $value;
-      }
-      $domain_loader = DomainListRegistry::loadFromInput($source, $options);
-      $domains = $domain_loader->getDomains($target);
-
-      if (!empty($domains)) {
-        if ($uris === ['default']) {
-          $uris = [];
-        }
-        $uris += $domains;
-      }
+    if ($domains = DomainSource::loadFromInput($input)) {
+      $uris = ($uris === ['default']) ? [] : $uris;
+      $uris = array_merge($domains, $uris);
     }
 
     // Setup the progress bar to log updates.
@@ -198,7 +203,14 @@ class ProfileRunCommand extends Command {
     $end   = new \DateTime($input->getOption('reporting-period-end'));
 
     foreach ($uris as $uri) {
-      $target->setUri($uri);
+      try {
+        $target->setUri($uri);
+      }
+      catch (\Drutiny\Target\InvalidTargetException $e) {
+        Container::getLogger()->warning("Target cannot be evaluated: " . $e->getMessage());
+        $progress->advance(count($policyDefinitions));
+        continue;
+      }
       foreach ($policyDefinitions as $policyDefinition) {
         $policy = $policyDefinition->getPolicy();
 
@@ -206,9 +218,7 @@ class ProfileRunCommand extends Command {
 
         // Setup the sandbox to run the assessment.
         $sandbox = new Sandbox($target, $policy);
-        $sandbox->setLogger(new ConsoleLogger($output));
         $sandbox->setReportingPeriod($start, $end);
-
 
         $response = $sandbox->run();
 
@@ -224,10 +234,15 @@ class ProfileRunCommand extends Command {
 
     $progress->finish();
 
-    $format->render($profile, $target, $results);
+    if (!count($results)) {
+      Container::getLogger()->error("No results were generated.");
+      return;
+    }
 
-    if ($filepath != 'stdout') {
-      $console = new SymfonyStyle($input, $output);
+    $files = $format->render($profile, $target, $results);
+
+    $console = new SymfonyStyle($input, $output);
+    foreach ($files as $filepath) {
       $console->success('Report written to ' . $filepath);
     }
   }
@@ -255,10 +270,10 @@ Class _CommandProgressBar {
     }
   }
 
-  public function advance()
+  public function advance($step = 1)
   {
     if ($this->status) {
-      $this->bar->advance();
+      $this->bar->advance($step);
     }
   }
 
