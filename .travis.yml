@@ -19,7 +19,7 @@ script:
 - "./bin/drutiny profile:run test @none"
 - "./bin/drutiny profile:run test @none --uri=site1.test --uri=site2.test -f html -o multisite.test"
 - "./bin/drutiny policy:audit Test:Pass @none"
-- "./bin/drutiny audit:run \"Drutiny\\Audit\\AlwaysPass\" @none"
+- "./bin/drutiny audit:run Drutiny\\Audit\\AlwaysPass @none"
 deploy:
 - provider: script
   script: ./docs/deploy.sh
