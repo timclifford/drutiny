@@ -34,11 +34,12 @@ composer require --global drush/drush
 
 ## Usage
 
-Drutiny is a command line tool that can be called from the composer vendor bin directory
+Drutiny is a command line tool that can be called from the composer vendor bin directory:
 
 ```
 ./vendor/bin/drutiny
 ```
+(Substitute `./bin/drutiny` if using Drutiny as a standalone tool.)
 
 ### Finding policies available to run
 
