@@ -4,9 +4,9 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
 <script type="text/javascript">
-  (function ($) {
+  (function ($, c) {
     // Series colors.
-    colors = [
+    var colors = [
       'rgba(26, 188, 156,1.0)',
       'rgba(46, 204, 113,1.0)',
       'rgba(52, 152, 219,1.0)',
@@ -45,7 +45,10 @@
       }, $(this).data());
 
       // Build color palette.
-      data.chartColors = $.merge(data.chartColors.split(';'), colors);
+      data.chartColors = $.merge(data.chartColors.split(';'), $.merge(c, colors))
+          .filter(function (i) {
+            return i.length;
+          });
 
       $(this).html('<canvas></canvas>');
       $('canvas', this).css({
@@ -71,12 +74,13 @@
       }
 
       chart_data.datasets = $.map(series, function (s, i) {
+        var set = $.map($(s, table), function (e) {
+          return e.innerHTML.replace(',', '');
+        });
         return {
-          data: $.map($(s, table), function (e) {
-            return e.innerHTML.replace(',', '');
-          }),
+          data: set,
           label: $(series_labels[i], table).text(),
-          backgroundColor: series.length > 1 ? data.chartColors[i] : data.chartColors
+          backgroundColor: set.length <= data.chartColors.length || series.length > 1 ? data.chartColors[i] : data.chartColors[0]
         }
       });
 
@@ -85,6 +89,7 @@
           data: chart_data,
           options: {}
       };
+      console.log(chart_config);
 
       var xAxis = {};
       var yAxis = {};
@@ -136,22 +141,9 @@
       }
     });
 
-  })(jQuery);
+  })(jQuery, window.chartColors || []);
 </script>
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<!-- <script async src="https://www.googletagmanager.com/gtag/js?id=UA-120749223-1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
 
-  gtag('config', 'UA-120749223-1', {
-    'page_title' : '{{ title | raw }} - {{ domain }}',
-    'page_path': '/profile/{{ profile }}/{{ domain }}'
-  });
-</script> -->
-
-<!-- Google Analytics -->
 <script>
 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
