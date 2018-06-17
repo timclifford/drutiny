@@ -5,6 +5,7 @@ namespace Drutiny\Command;
 use Drutiny\Config;
 use Drutiny\Container;
 use Drutiny\Profile\Registry as ProfileRegistry;
+use Drutiny\Profile\PolicyDefinition;
 use Drutiny\Report;
 use Drutiny\Sandbox\Sandbox;
 use Drutiny\Target\Registry as TargetRegistry;
@@ -81,6 +82,13 @@ class ProfileRunCommand extends Command {
         'e',
         InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
         'Specify policy names to exclude from the profile that are normally listed.',
+        []
+      )
+      ->addOption(
+        'include-policy',
+        'p',
+        InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
+        'Specify policy names to include in the profile in addition to those listed in the profile.',
         []
       )
       ->addOption(
@@ -178,6 +186,13 @@ class ProfileRunCommand extends Command {
       'output' => $filepath != 'stdout' ? $filepath : $output,
       'input' => $input
     ]);
+
+    // Allow command line to add policies to the profile.
+    $included_policies = $input->getOption('include-policy');
+    foreach ($included_policies as $policy_name) {
+      $policyDefinition = PolicyDefinition::createFromProfile($policy_name, count($profile->getAllPolicyDefinitions()));
+      $profile->addPolicyDefinition($policyDefinition);
+    }
 
     // Allow command line omission of policies highlighted in the profile.
     // WARNING: This may remove policy dependants which may make polices behave
