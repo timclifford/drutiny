@@ -30,6 +30,7 @@
     ];
     Chart.defaults.global.legend.position = 'right';
     Chart.defaults.global.title.display = true;
+
     $('.chart-unprocessed').each(function () {
 
       var data = $.extend({
@@ -43,6 +44,8 @@
         chartHeight: '100%',
         chartColors: ''
       }, $(this).data());
+
+      var pieish = ['pie', 'doughnut'].indexOf(data.chartType) > 0;
 
       // Build color palette.
       data.chartColors = $.merge(data.chartColors.split(';'), $.merge(c, colors))
@@ -77,10 +80,19 @@
         var set = $.map($(s, table), function (e) {
           return e.innerHTML.replace(',', '');
         });
+        // For bar/line graphs, if there is only one series, we should use
+        // one color unless there are enough colors in available for each
+        // value in the set.
+        var bgColor = set.length <= data.chartColors.length || series.length > 1 ? data.chartColors[i] : data.chartColors[0];
+
+        // The above logic doesn't apply to pie or doughnut graphs.
+        if (pieish) {
+          bgColor = data.chartColors;
+        }
         return {
           data: set,
           label: $(series_labels[i], table).text(),
-          backgroundColor: set.length <= data.chartColors.length || series.length > 1 ? data.chartColors[i] : data.chartColors[0]
+          backgroundColor: bgColor
         }
       });
 
@@ -91,7 +103,7 @@
       };
 
       // Axis labels and gridlines for bar/line type graphs.
-      if (['pie', 'doughnut'].indexOf(chart_config.type) < 0) {
+      if (!pieish) {
         var xAxis = {};
         var yAxis = {};
 
