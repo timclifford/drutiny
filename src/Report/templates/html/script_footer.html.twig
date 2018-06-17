@@ -89,31 +89,33 @@
           data: chart_data,
           options: {}
       };
-      console.log(chart_config);
 
-      var xAxis = {};
-      var yAxis = {};
+      // Axis labels and gridlines for bar/line type graphs.
+      if (['pie', 'doughnut'].indexOf(chart_config.type) < 0) {
+        var xAxis = {};
+        var yAxis = {};
 
-      if (data.chartStacked) {
-        xAxis.stacked = true;
-        yAxis.stacked = true;
-      }
-      if (data.chartXAxis) {
-        xAxis.scaleLabel = {
-          labelString: data.chartXAxis,
-          display: true
+        if (data.chartStacked) {
+          xAxis.stacked = true;
+          yAxis.stacked = true;
         }
-      }
-      if (data.chartYAxis) {
-        yAxis.scaleLabel = {
-          labelString: data.chartYAxis,
-          display: true
+        if (data.chartXAxis) {
+          xAxis.scaleLabel = {
+            labelString: data.chartXAxis,
+            display: true
+          }
         }
-      }
+        if (data.chartYAxis) {
+          yAxis.scaleLabel = {
+            labelString: data.chartYAxis,
+            display: true
+          }
+        }
 
-      chart_config.options.scales = {};
-      chart_config.options.scales.xAxes = [xAxis];
-      chart_config.options.scales.yAxes = [yAxis];
+        chart_config.options.scales = {};
+        chart_config.options.scales.xAxes = [xAxis];
+        chart_config.options.scales.yAxes = [yAxis];
+      }
 
       if (data.chartTitle) {
         chart_config.options.title = {
