@@ -30,6 +30,7 @@ class BuildDocsCommand extends Command {
     $this->clean()
          ->setup()
          ->buildPolicyLibrary($output)
+         ->generatePolicyAPI($output)
          ->buildAuditLibrary($output);
   }
 
@@ -128,11 +129,41 @@ class BuildDocsCommand extends Command {
     return $this;
   }
 
+  protected function generatePolicyAPI(OutputInterface $output)
+  {
+    $policies = (new \Drutiny\Registry())->policies();
+    $list = [];
+
+    file_exists('docs/api') || mkdir('docs/api');
+    file_exists('docs/api/policy') || mkdir('docs/api/policy');
+
+    foreach ($policies as $policy) {
+      $payload = $policy->export();
+      $list[] = [
+        'title' => $payload['title'],
+        'name' => $payload['name'],
+        'type' => $payload['type'],
+        'description' => $payload['description'],
+        '_links' => [
+          'self' => [
+            'href' => "{baseUri}/api/policy/{$payload['name']}.json",
+          ]
+        ]
+      ];
+      file_put_contents("docs/api/policy/{$payload['name']}.json", json_encode($payload));
+      $output->writeln("Written docs/api/policy/{$payload['name']}.json");
+    }
+    file_put_contents("docs/api/policy_list.json", json_encode($list));
+    $output->writeln("Written docs/api/policy_list.json");
+    return $this;
+  }
+
   protected function clean()
   {
     $paths = array_filter([
       'docs/policies',
       'docs/audits',
+      'docs/api',
       'docs/img',
       'docs/index.md'
     ], 'file_exists');

@@ -87,7 +87,27 @@ class Policy extends Item {
     if (!isset($map[$name])) {
       throw new \Exception("Cannot find policy '$name'");
     }
+
     return new static($map[$name]);
+  }
+
+  public function export()
+  {
+    return array_filter([
+      'title' => $this->title,
+      'name' => $this->name,
+      'class' => $this->class,
+      'description' => $this->description,
+      'type' => $this->type,
+      'tags' => $this->tags,
+      'success' => $this->success,
+      'failure' => $this->failure,
+      'warning' => $this->warning,
+      'remediation' => $this->remediation,
+      'severity' => $this->severity,
+      'depends' => $this->depends,
+      'chart' => $this->chart
+    ]);
   }
 
   /**
