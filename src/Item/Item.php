@@ -132,7 +132,7 @@ class Item {
   }
 
   public function getTags() {
-    return $this->tags;
+    return $this->tags ?: [];
   }
 
   /**
