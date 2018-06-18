@@ -11,7 +11,7 @@ interface DomainListInterface {
   /**
    * @return array list of domains.
    */
-  public function getDomains(Target $target);
+  public function getDomains(Target $target, callable $filter);
 }
 
  ?>

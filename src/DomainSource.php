@@ -24,12 +24,12 @@ class DomainSource {
     $domain_loader = DomainListRegistry::loadFromInput($source, $options);
 
     $target = TargetRegistry::loadTarget($input->getArgument('target'));
-    $domains = $domain_loader->getDomains($target);
 
     $whitelist = $input->getOption('domain-source-whitelist');
     $blacklist = $input->getOption('domain-source-blacklist');
 
-    return array_filter($domains, function ($domain) use ($whitelist, $blacklist) {
+    // Filter domains by whitelist and blacklist.
+    $filter = function ($domain) use ($whitelist, $blacklist) {
       // Whitelist priority.
       if (!empty($whitelist)) {
         foreach ($whitelist as $regex) {
@@ -48,7 +48,13 @@ class DomainSource {
         }
       }
       return TRUE;
-    });
+    };
+
+    $domains = $domain_loader->getDomains($target, $filter);
+
+    // Filter the domains a second time incase the domain loader didn't use
+    // the filter.
+    return array_filter($domains, $filter);
   }
 }
 
