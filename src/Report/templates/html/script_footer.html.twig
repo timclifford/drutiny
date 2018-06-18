@@ -150,7 +150,7 @@
 
       $(this).removeClass('chart-unprocessed').addClass('chart');
 
-      if (data.chartHideTable !== undefined) {
+      if ((data.chartHideTable !== undefined) && data.chartHideTable) {
         $(table).hide();
       }
     });
