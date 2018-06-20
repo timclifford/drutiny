@@ -28,7 +28,7 @@ class Exec {
     $process = new Process($command);
     $process->setTimeout(600);
 
-    $watchdog->debug($command);
+    $watchdog->info($command);
     $process->run();
 
     // Executes after the command finishes.
