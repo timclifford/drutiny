@@ -110,10 +110,6 @@ class AuditResponse {
    */
   public function getType()
   {
-    $policy_type = $this->policy->get('type');
-    if ($policy_type == 'data') {
-      return $policy_type;
-    }
     if ($this->isNotApplicable()) {
       return 'not-applicable';
     }
@@ -125,6 +121,10 @@ class AuditResponse {
     }
     if ($this->hasWarning()) {
       return 'warning';
+    }
+    $policy_type = $this->policy->get('type');
+    if ($policy_type == 'data') {
+      return 'notice';
     }
     return $this->isSuccessful() ? 'success' : 'failure';
   }
