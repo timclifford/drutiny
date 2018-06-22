@@ -139,11 +139,14 @@ class BuildDocsCommand extends Command {
 
     foreach ($policies as $policy) {
       $payload = $policy->export();
+      $payload['signature'] = hash('sha1', Yaml::dump($payload));
       $list[] = [
         'title' => $payload['title'],
         'name' => $payload['name'],
         'type' => $payload['type'],
         'description' => $payload['description'],
+        'signature' => $payload['signature'],
+        'class' => $payload['class'],
         '_links' => [
           'self' => [
             'href' => "{baseUri}/api/policy/{$payload['name']}.json",
