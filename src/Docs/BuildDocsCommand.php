@@ -7,6 +7,7 @@ use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Drutiny\Registry;
+use Drutiny\PolicySource\PolicySource;
 use Symfony\Component\Finder\Finder;
 
 /**
@@ -90,7 +91,7 @@ class BuildDocsCommand extends Command {
 
   protected function buildPolicyLibrary(OutputInterface $output)
   {
-    $policies = (new \Drutiny\Registry())->policies();
+    $policies = PolicySource::loadAll();
 
     $toc = [];
     $pages = [];
@@ -131,7 +132,7 @@ class BuildDocsCommand extends Command {
 
   protected function generatePolicyAPI(OutputInterface $output)
   {
-    $policies = (new \Drutiny\Registry())->policies();
+    $policies = PolicySource::loadAll();
     $list = [];
 
     file_exists('docs/api') || mkdir('docs/api');

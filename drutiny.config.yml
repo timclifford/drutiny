@@ -27,3 +27,6 @@ Format:
   console: Drutiny\Report\Format\Console
 Driver:
   drush: Drutiny\Driver\DrushRouter::create
+PolicySource:
+  - Drutiny\PolicySource\DrutinyGitHubIO
+  - Drutiny\PolicySource\LocalFs

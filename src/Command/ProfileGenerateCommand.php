@@ -4,6 +4,7 @@ namespace Drutiny\Command;
 
 use Drutiny\Profile;
 use Drutiny\Profile\PolicyDefinition;
+use Drutiny\PolicySource\PolicySource;
 use Drutiny\Registry;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -61,7 +62,7 @@ class ProfileGenerateCommand extends Command {
     $profile->setDescription($io->ask('Provide a brief description of what the profile is for. Markdown is supported'));
 
     // Policies.
-    $policies = array_keys((new Registry)->policies());
+    $policies = array_keys(PolicySource::getPolicyList());
     $weight = 0;
 
     foreach ($input->getOption('policy') as $name) {

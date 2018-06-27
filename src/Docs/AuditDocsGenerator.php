@@ -3,6 +3,7 @@
 namespace Drutiny\Docs;
 
 use Drutiny\Registry;
+use Drutiny\PolicySource\PolicySource;
 use Symfony\Component\Yaml\Yaml;
 
 class AuditDocsGenerator extends DocsGenerator {
@@ -44,7 +45,7 @@ class AuditDocsGenerator extends DocsGenerator {
     }
 
 
-    $policies = array_filter($registry->policies(), function ($policy) use ($metadata) {
+    $policies = array_filter(PolicySource::loadAll(), function ($policy) use ($metadata) {
       $class = $policy->get('class');
       if (strpos($class, '\\') === 0) {
         $class = substr($class, 1);

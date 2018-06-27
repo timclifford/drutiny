@@ -9,7 +9,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-
+use Drutiny\PolicySource\PolicySource;
 /**
  *
  */
@@ -33,8 +33,9 @@ class PolicyInfoCommand extends Command {
    * @inheritdoc
    */
   protected function execute(InputInterface $input, OutputInterface $output) {
+    $policy = PolicySource::loadPolicyByName($input->getArgument('policy'));
+
     $docs = new PolicyDocsGenerator();
-    $policy = Policy::load($input->getArgument('policy'));
     $markdown = $docs->buildPolicyDocumentation($policy);
 
     $formatted_output = Renderer::createFromMarkdown($markdown);

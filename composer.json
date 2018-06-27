@@ -27,7 +27,8 @@
         "symfony/process": "^3.4",
         "symfony/validator": "^3.4",
         "symfony/yaml": "^3.4",
-        "twig/twig": "~1.0"
+        "twig/twig": "~1.0",
+        "drutiny/http": "^2.1"
     },
     "autoload": {
         "psr-4": {

@@ -9,6 +9,8 @@ use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Drutiny\Registry;
+use Drutiny\Config;
+use Drutiny\PolicySource\PolicySource;
 
 /**
  *
@@ -34,35 +36,15 @@ class PolicyListCommand extends Command {
    * @inheritdoc
    */
   protected function execute(InputInterface $input, OutputInterface $output) {
-    $checks = (new Registry)->policies();
-
-    $filters = $input->getOption('filter');
+    $list = PolicySource::getPolicyList();
 
     $rows = array();
-    foreach ($checks as $name => $info) {
-      // If there are filters present, only show checks that match those filters.
-      foreach ($filters as $filter) {
-        if (!$info->hasTag($filter)) {
-          continue 2;
-        }
-      }
-
-      // Skip over testing checks.
-      // TODO: Implement testing checks.
-      // if ($info->testing) {
-      //   continue;
-      // }.
+    foreach ($list as $listedPolicy) {
       $rows[] = array(
-        'description' => implode(PHP_EOL, [
-          '<options=bold>' . wordwrap($info->get('title'), 50) . '</>',
-        //  $this->formatDescription($info->get('description')),
-        //  NULL,
-        ]),
-        'name' => $name,
-        'supports_remediation' => $info->get('remediable') ? 'Yes' : 'No',
-        'tags' => implode(', ', $info->getTags()),
+        'description' => '<options=bold>' . wordwrap($listedPolicy['title'], 50) . '</>',
+        'name' => $listedPolicy['name'],
+        'source' => $listedPolicy['source'],
       );
-      // $rows[] = new TableSeparator();
     }
 
     usort($rows, function ($a, $b) {
@@ -73,7 +55,7 @@ class PolicyListCommand extends Command {
     });
 
     $io = new SymfonyStyle($input, $output);
-    $io->table(['Title', 'Name', 'Self-heal', 'Tags'], $rows);
+    $io->table(['Title', 'Name', 'Source'], $rows);
   }
 
   /**

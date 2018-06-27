@@ -4,6 +4,7 @@ namespace Drutiny;
 
 use Drutiny\Item\Item;
 use Drutiny\Container;
+use Drutiny\PolicySource\PolicySource;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Validator\Constraints\All;
@@ -70,25 +71,7 @@ class Policy extends Item {
 
   public static function load($name)
   {
-    $map = Registry::get('policy:map');
-    if (empty($map)) {
-      $finder = new Finder();
-      $finder->files()
-        ->in('.')
-        ->name('*.policy.yml');
-        foreach ($finder as $file) {
-          $policy = Yaml::parse(file_get_contents($file->getRealPath()));
-          $policy['filepath'] = $file->getRealPath();
-          $map[$policy['name']] = $policy;
-        }
-        Registry::add('policy:map', $map);
-    }
-
-    if (!isset($map[$name])) {
-      throw new \Exception("Cannot find policy '$name'");
-    }
-
-    return new static($map[$name]);
+    return PolicySource::loadPolicyByName($name);
   }
 
   public function export()
