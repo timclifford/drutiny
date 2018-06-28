@@ -4,7 +4,8 @@ namespace Drutiny\Driver;
 
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
-use Drutiny\Cache;
+use Drutiny\Cache\LocalFsCacheItemPool as Cache;
+use Drutiny\Cache\CacheItem;
 use Drutiny\Container;
 
 /**
@@ -20,7 +21,11 @@ class Exec {
     $command = strtr($command, $args);
     $watchdog = Container::getLogger();
 
-    if ($output = Cache::get('exec', $command)) {
+    $cache = new Cache('exec');
+    $cid = hash('md5', $command);
+    $item = $cache->getItem($cid);
+
+    if ($output = $item->get()) {
       $watchdog->debug("Cache hit for: $command");
       return $output;
     }
@@ -39,7 +44,7 @@ class Exec {
     $output = $process->getOutput();
 
     $watchdog->debug($output);
-    Cache::set('exec', $command, $output);
+    $cache->save(new CacheItem($output, $cid, new \DateTime('+1 hour')));
 
     return $output;
   }
