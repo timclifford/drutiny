@@ -73,7 +73,7 @@ class LocalFsCacheItemPool implements CacheItemPoolInterface {
       // Removed expired item.
       if (!$item->isHit()) {
         $logger->debug("[EXPIRED] Cached item is stale. Removing.");
-        $this->delete($item);
+        $this->deleteItem($item->getKey());
         unset($item);
       }
     }
