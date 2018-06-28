@@ -14,6 +14,7 @@ Command:
   - Drutiny\Command\ProfileInfoCommand
   - Drutiny\Command\ProfileListCommand
   - Drutiny\Command\ProfileRunCommand
+  - Drutiny\Command\CacheClearCommand
 Template:
   - src/Report/templates/html
   - src/Report/templates/markdown
