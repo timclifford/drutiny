@@ -33,6 +33,14 @@ class AuditResponse {
   }
 
   /**
+   * Get the AudiResponse Policy.
+   */
+  public function getPolicy()
+  {
+    return $this->policy;
+  }
+
+  /**
    * Set the state of the response.
    */
   public function set($state = NULL, array $tokens) {
