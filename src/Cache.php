@@ -2,7 +2,6 @@
 
 namespace Drutiny;
 
-use Drutiny\Cache\MemoryCacheItemPool;
 use Symfony\Component\Cache\CacheItem;
 
 /**
