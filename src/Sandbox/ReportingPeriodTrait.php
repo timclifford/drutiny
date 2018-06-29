@@ -2,6 +2,7 @@
 
 namespace Drutiny\Sandbox;
 
+use Drutiny\Container;
 
 /**
  *
@@ -20,7 +21,7 @@ trait ReportingPeriodTrait {
 
     public function setReportingPeriod(\DateTime $start, \DateTime $end)
     {
-      $this->logger()->info(strtr("Reporting period set @start to @end", [
+      Container::getLogger()->info(strtr("Reporting period set @start to @end", [
         '@start' => $start->format('Y-m-d H:i:s e'),
         '@end' => $end->format('Y-m-d H:i:s e'),
       ]));
@@ -42,11 +43,17 @@ trait ReportingPeriodTrait {
 
     public function getReportingPeriodStart()
     {
+      if (empty($this->reportingPeriodStart)) {
+        $this->reportingPeriodStart = new \DateTime();
+      }
       return $this->reportingPeriodStart;
     }
 
     public function getReportingPeriodEnd()
     {
+      if (empty($this->reportingPeriodEnd)) {
+        $this->reportingPeriodEnd = new \DateTime();
+      }
       return $this->reportingPeriodEnd;
     }
 
