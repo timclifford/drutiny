@@ -5,7 +5,7 @@ namespace Drutiny\Driver;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter as Cache;
-use Drutiny\Cache\CacheItem;
+use Symfony\Component\Cache\CacheItem;
 use Drutiny\Container;
 
 /**
@@ -45,7 +45,8 @@ class Exec {
     $output = $process->getOutput();
 
     $watchdog->debug($output);
-    $cache->save(new CacheItem($output, $cid, new \DateTime('+1 hour')));
+    $item->set($output)->expiresAt(new \DateTime('+1 hour'));
+    $cache->save($item);
 
     return $output;
   }
