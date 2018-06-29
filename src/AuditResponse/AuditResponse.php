@@ -132,7 +132,7 @@ class AuditResponse {
     }
     $policy_type = $this->policy->get('type');
     if ($policy_type == 'data') {
-      return 'notice';
+      return 'data';
     }
     return $this->isSuccessful() ? 'success' : 'failure';
   }
