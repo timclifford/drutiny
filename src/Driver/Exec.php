@@ -4,7 +4,7 @@ namespace Drutiny\Driver;
 
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
-use Drutiny\Cache\LocalFsCacheItemPool as Cache;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter as Cache;
 use Drutiny\Cache\CacheItem;
 use Drutiny\Container;
 
@@ -21,7 +21,8 @@ class Exec {
     $command = strtr($command, $args);
     $watchdog = Container::getLogger();
 
-    $cache = new Cache('exec');
+    $cache = new Cache('exec', 0, DRUTINY_CACHE_DIRECTORY);
+    $cache->setLogger($watchdog);
     $cid = hash('md5', $command);
     $item = $cache->getItem($cid);
 

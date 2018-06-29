@@ -2,11 +2,12 @@
 
 namespace Drutiny\Command;
 
+use Drutiny\Container;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Drutiny\Cache\LocalFsCacheItemPool;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter as Cache;
 
 /**
  *
@@ -27,10 +28,12 @@ class CacheClearCommand extends Command {
    * @inheritdoc
    */
   protected function execute(InputInterface $input, OutputInterface $output) {
-    $cache = new LocalFsCacheItemPool('exec');
+    $cache = new Cache('exec', 0, DRUTINY_CACHE_DIRECTORY);
+    $cache->setLogger(Container::getLogger());
     $cache->clear();
 
-    $cache = new LocalFsCacheItemPool('http');
+    $cache = new Cache('http', 0, DRUTINY_CACHE_DIRECTORY);
+    $cache->setLogger(Container::getLogger());
     $cache->clear();
 
     $io = new SymfonyStyle($input, $output);

@@ -4,6 +4,7 @@ namespace Drutiny\Cache;
 
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Cache\CacheItemInterface;
+use Symfony\Component\Cache\CacheItem;
 
 class MemoryCacheItemPool implements CacheItemPoolInterface {
 
