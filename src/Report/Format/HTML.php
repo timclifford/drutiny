@@ -41,7 +41,8 @@ class HTML extends Markdown {
       $render['output_error'],
       $render['output_failure'],
       $render['output_warning'],
-      $render['output_data']
+      $render['output_data'],
+      $render['output_notice']
     );
 
     // Render any markdown into HTML for the report.
