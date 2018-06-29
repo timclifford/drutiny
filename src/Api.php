@@ -4,6 +4,7 @@ namespace Drutiny;
 
 use Drutiny\Http\Client;
 use Drutiny\Container;
+use GuzzleHttp\Exception\ConnectException;
 
 class Api {
   const BaseUrl = 'https://drutiny.github.io/2.2.x/api/';
@@ -26,7 +27,13 @@ class Api {
 
   public function getPolicyList()
   {
-    return json_decode($this->getClient()->get('policy_list.json')->getBody(), TRUE);
+    try {
+      return json_decode($this->getClient()->get('policy_list.json')->getBody(), TRUE);
+    }
+    catch (ConnectException $e) {
+      Container::getLogger()->warning($e->getMessage());
+      return [];
+    }
   }
 }
 ?>
