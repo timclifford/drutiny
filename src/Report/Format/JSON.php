@@ -28,6 +28,7 @@ class JSON extends Format {
   {
     $schema = [
       'notices' => 0,
+      'information' => 0,
       'warnings' => 0,
       'failures' => 0,
       'passes' => 0,
@@ -85,6 +86,10 @@ class JSON extends Format {
 
       switch ($response->getType()) {
         case 'data':
+          $schema['information']++;
+          $var['status_title'] = 'Information';
+          break;
+
         case 'notice':
           $schema['notices']++;
           $var['status_title'] = 'Notice';
@@ -161,6 +166,9 @@ class JSON extends Format {
         $policy = [
           'isSuccessful' => $response->isSuccessful(),
           'hasWarning' => $response->hasWarning(),
+          'hasError' => $response->hasError(),
+          'isNotice' => $response->isNotice(),
+          'isNotApplicable' => $response->isNotApplicable(),
           'message' => $response->getSummary(),
         ];
         if (!isset($report['by_policy'][$response->getName()])) {
@@ -169,6 +177,10 @@ class JSON extends Format {
             'total' => 0,
             'success' => 0,
             'failure' => 0,
+            'warning' => 0,
+            'error' => 0,
+            'not_applicable' => 0,
+            'notice' => 0,
             'title' => $response->getTitle(),
             'description' => $response->getDescription(),
             'type' => $response->getType(),
@@ -177,8 +189,12 @@ class JSON extends Format {
         }
         $report['by_policy'][$response->getName()]['sites'][$uri] = $policy;
         $report['by_policy'][$response->getName()]['total']++;
-        $report['by_policy'][$response->getName()]['success'] += $policy['isSuccessful'] ? 1 : 0;
-        $report['by_policy'][$response->getName()]['failure'] += $policy['isSuccessful'] ? 0 : 1;
+        $report['by_policy'][$response->getName()]['notice'] += $policy['isNotice'] ? 1 : 0;
+        $report['by_policy'][$response->getName()]['success'] += (!$policy['isNotice'] && $policy['isSuccessful'] && !$policy['hasWarning'])   ? 1 : 0;
+        $report['by_policy'][$response->getName()]['warning'] += $policy['hasWarning'] ? 1 : 0;
+        $report['by_policy'][$response->getName()]['error'] += $policy['hasError'] ? 1 : 0;
+        $report['by_policy'][$response->getName()]['not_applicable'] += $policy['isNotApplicable'] ? 1 : 0;
+        $report['by_policy'][$response->getName()]['failure'] += (!$policy['isSuccessful'] && !$policy['hasError'] && !$policy['isNotApplicable']) ? 1 : 0;
         $report['by_site'][$uri][$response->getName()] = $policy['isSuccessful'];
       }
     }
