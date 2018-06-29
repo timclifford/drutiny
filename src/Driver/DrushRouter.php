@@ -4,7 +4,9 @@ namespace Drutiny\Driver;
 
 use Drutiny\Sandbox\Sandbox;
 use Drutiny\Target\TargetInterface;
+use Drutiny\Container;
 use Composer\Semver\Comparator;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 
 /**
  * Find the correct drush driver to use.
@@ -28,9 +30,16 @@ class DrushRouter {
    */
   public static function createFromTarget(TargetInterface $target, $options = [])
   {
-    $binary = trim($target->exec('which drush-launcher || which drush'));
-    $output = $target->exec($binary . ' --version');
-    preg_match('/Drush Version.+: +([0-9\.a-z]+)/', $output, $match);
+    try {
+      $binary = trim($target->exec('which drush-launcher || which drush'));
+      $output = $target->exec($binary . ' --version');
+      preg_match('/Drush Version.+: +([0-9\.a-z]+)/', $output, $match);
+    }
+    catch (ProcessFailedException $e) {
+      Container::getLogger()->error($e->getProcess()->getOutput());
+      throw $e;
+    }
+
 
     // if (Comparator::greaterThanOrEqualTo($match[1], '9.0.0')) {
     //   // Use Drush 9 Driver
