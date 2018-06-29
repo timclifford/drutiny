@@ -3,7 +3,7 @@
 namespace Drutiny\PolicySource;
 
 use Drutiny\Config;
-use Drutiny\Cache;
+use Drutiny\Container;
 
 class PolicySource {
   public static function loadPolicyByName($name)
@@ -54,8 +54,9 @@ class PolicySource {
    */
   public static function getSources()
   {
-    if ($sources = Cache::get(__CLASS__, 'sources')) {
-      return $sources;
+    $item = Container::cache(__CLASS__)->getItem('sources');
+    if ($item->isHit()) {
+      return $item->get();
     }
 
     // The PolicySource config directive loads in class names that provides
@@ -78,7 +79,10 @@ class PolicySource {
       return $a->getWeight() > $b->getWeight() ? 1 : -1;
     });
 
-    Cache::get(__CLASS__, 'sources', $sources);
+
+    Container::cache(__CLASS__)->save(
+      $item->set($sources)->expiresAfter(3600)
+    );
     return $sources;
   }
 

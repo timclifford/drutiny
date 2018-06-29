@@ -4,6 +4,7 @@ namespace Drutiny\PolicySource;
 
 use Drutiny\Api;
 use Drutiny\Cache;
+use Drutiny\Container;
 use Drutiny\Policy;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
@@ -23,8 +24,9 @@ class LocalFs implements PolicySourceInterface {
    */
   public function getList()
   {
-    if ($list = Cache::get($this->getName(), 'list')) {
-      return $list;
+    $cache = Container::cache($this->getName())->getItem('list');
+    if ($cache->isHit()) {
+      return $cache->get();
     }
     $finder = new Finder();
     $finder->files()
@@ -37,7 +39,9 @@ class LocalFs implements PolicySourceInterface {
       $policy['filepath'] = $file->getRealPath();
       $list[$policy['name']] = $policy;
     }
-    Cache::set($this->getName(), 'list', $list);
+    Container::cache($this->getName())->save(
+      $cache->set($list)->expiresAfter(3600)
+    );
     return $list;
   }
 

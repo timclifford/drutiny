@@ -10,17 +10,31 @@ use Psr\Log\LoggerInterface;
 class Container {
   static $verbosity;
 
-  public static function getLogger()
+  public static function cache($bin)
   {
-    if (Cache::get('container', 'logger') instanceof LoggerInterface) {
-      return Cache::get('container', 'logger');
+    $registry = Config::get('Cache');
+    $class = 'Drutiny\Cache\MemoryCacheItemPool';
+    if (isset($registry[$bin])) {
+      $class = $registry[$bin];
     }
-    return new ConsoleLogger(new ConsoleOutput(self::getVerbosity()));
+    return new $class($bin, 0, DRUTINY_CACHE_DIRECTORY);
   }
 
-  public static function setLogger(LoggerInterface $logger)
+  public static function getLogger()
   {
-    return Cache::set('container', 'logger', $logger);
+    if (!(self::setLogger() instanceof LoggerInterface)) {
+      self::setLogger(new ConsoleLogger(new ConsoleOutput(self::getVerbosity())));
+    }
+    return self::setLogger();
+  }
+
+  public static function setLogger(LoggerInterface $logger = null)
+  {
+    static $device;
+    if ($logger instanceof LoggerInterface) {
+       $device = $logger;
+    }
+    return $device;
   }
 
   /**

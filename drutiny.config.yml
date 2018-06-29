@@ -31,3 +31,5 @@ Driver:
 PolicySource:
   - Drutiny\PolicySource\DrutinyGitHubIO
   - Drutiny\PolicySource\LocalFs
+Cache:
+  exec: Symfony\Component\Cache\Adapter\FilesystemAdapter
