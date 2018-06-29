@@ -24,6 +24,8 @@ else {
   date_default_timezone_set('UTC');
 }
 
+define('DRUTINY_CACHE_DIRECTORY', getenv('HOME') . '/.drutiny/cache');
+
 
 /**
  * @var ClassLoader $loader
