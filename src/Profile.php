@@ -8,6 +8,7 @@ use Drutiny\Report\Format;
 use Symfony\Component\Yaml\Yaml;
 
 class Profile {
+  use \Drutiny\Sandbox\ReportingPeriodTrait;
 
   /**
    * Title of the Profile.
