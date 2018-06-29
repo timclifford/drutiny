@@ -66,7 +66,7 @@
       var table = $(this).siblings('table').first();
       var chart_data = {
         labels: $.map($(data.chartLabels, table), function (e) {
-          return e.innerHTML;
+          return $(e).text();
         }),
         datasets: []
       };
@@ -78,7 +78,7 @@
 
       chart_data.datasets = $.map(series, function (s, i) {
         var set = $.map($(s, table), function (e) {
-          return e.innerHTML.replace(',', '');
+          return $(e).text().replace(',', '');
         });
         // For bar/line graphs, if there is only one series, we should use
         // one color unless there are enough colors in available for each
