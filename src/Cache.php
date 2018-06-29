@@ -3,7 +3,7 @@
 namespace Drutiny;
 
 use Drutiny\Cache\MemoryCacheItemPool;
-use Drutiny\Cache\CacheItem;
+use Symfony\Component\Cache\CacheItem;
 
 /**
  * A static cache handler.
