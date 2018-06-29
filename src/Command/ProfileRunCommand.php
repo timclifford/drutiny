@@ -223,6 +223,7 @@ class ProfileRunCommand extends Command {
 
     $start = new \DateTime($input->getOption('reporting-period-start'));
     $end   = new \DateTime($input->getOption('reporting-period-end'));
+    $profile->setReportingPeriod($start, $end);
 
     foreach ($uris as $uri) {
       try {
