@@ -13,11 +13,13 @@ class Container {
   public static function cache($bin)
   {
     $registry = Config::get('Cache');
-    $class = 'Drutiny\Cache\MemoryCacheItemPool';
+    $cache = new \Symfony\Component\Cache\Adapter\ArrayAdapter();
     if (isset($registry[$bin])) {
       $class = $registry[$bin];
+      $cache = new $registry[$bin]($bin, 0, DRUTINY_CACHE_DIRECTORY);
     }
-    return new $class($bin, 0, DRUTINY_CACHE_DIRECTORY);
+    $cache->setLogger(self::getLogger());
+    return $cache;
   }
 
   public static function getLogger()
