@@ -10,6 +10,7 @@ before_script:
 - sudo ln -s /usr/share/zoneinfo/UTC /etc/localtime
 install:
 - travis_retry composer install --no-interaction
+- composer config version `echo $TRAVIS_BRANCH | sed -e's/x/x-dev/g'`
 - composer require drush/drush:^8.1.0
 - composer info -i
 script:
