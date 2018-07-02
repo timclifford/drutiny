@@ -28,13 +28,10 @@ class CacheClearCommand extends Command {
    * @inheritdoc
    */
   protected function execute(InputInterface $input, OutputInterface $output) {
-    $cache = new Cache('exec', 0, DRUTINY_CACHE_DIRECTORY);
-    $cache->setLogger(Container::getLogger());
-    $cache->clear();
-
-    $cache = new Cache('http', 0, DRUTINY_CACHE_DIRECTORY);
-    $cache->setLogger(Container::getLogger());
-    $cache->clear();
+    foreach (array_keys(Container::config('Cache')) as $bin) {
+      $cache = new Container::cache($bin);
+      $cache->clear();
+    }
 
     $io = new SymfonyStyle($input, $output);
     $io->success('Cache is cleared.');

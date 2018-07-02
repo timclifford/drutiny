@@ -7,8 +7,12 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Psr\Log\LoggerInterface;
 
+define('DRUTINY_CACHE_DIRECTORY', getenv('HOME') . '/.drutiny/cache');
+
 class Container {
   static $verbosity;
+
+  const CACHE_DIRECTORY = DRUTINY_CACHE_DIRECTORY;
 
   public static function cache($bin)
   {
@@ -20,6 +24,11 @@ class Container {
     }
     $cache->setLogger(self::getLogger());
     return $cache;
+  }
+
+  public static function config($bin)
+  {
+    return Config::get($bin);
   }
 
   public static function getLogger()

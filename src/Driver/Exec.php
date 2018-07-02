@@ -21,7 +21,7 @@ class Exec {
     $command = strtr($command, $args);
     $watchdog = Container::getLogger();
 
-    $cache = new Cache('exec', 0, DRUTINY_CACHE_DIRECTORY);
+    $cache = new Cache('exec', 0, Container::CACHE_DIRECTORY);
     $cache->setLogger($watchdog);
     $cid = hash('md5', $command);
     $item = $cache->getItem($cid);
