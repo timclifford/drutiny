@@ -369,6 +369,7 @@ class Profile {
   {
     $export = [
       'title' => $this->getTitle(),
+      'name' => $this->getName(),
       'description' => $this->getDescription(),
       'policies' => $this->dumpPolicyDefinitions(),
     ];

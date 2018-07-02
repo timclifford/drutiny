@@ -7,6 +7,7 @@ use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Drutiny\Registry;
+use Drutiny\Profile\Registry as ProfileRegisry;
 use Drutiny\PolicySource\PolicySource;
 use Symfony\Component\Finder\Finder;
 
@@ -32,6 +33,7 @@ class BuildDocsCommand extends Command {
          ->setup()
          ->buildPolicyLibrary($output)
          ->generatePolicyAPI($output)
+         ->generateProfileAPI($output)
          ->buildAuditLibrary($output);
   }
 
@@ -159,6 +161,43 @@ class BuildDocsCommand extends Command {
     }
     file_put_contents("docs/api/policy_list.json", json_encode($list));
     $output->writeln("Written docs/api/policy_list.json");
+    return $this;
+  }
+
+  protected function generateProfileAPI(OutputInterface $output)
+  {
+    $profiles = ProfileRegisry::getAllProfiles();
+    $list = [];
+
+    file_exists('docs/api') || mkdir('docs/api');
+    file_exists('docs/api/profile') || mkdir('docs/api/profile');
+
+    foreach ($profiles as $profile) {
+      $payload = $profile->dump();
+      if (!isset($payload['policies'])) {
+        $payload['policies'] = [];
+      }
+      if (!isset($payload['description'])) {
+        $payload['description'] = '';
+      }
+      $payload['signature'] = hash('sha1', Yaml::dump($payload));
+      $list[] = [
+        'title' => $payload['title'],
+        'name' => $payload['name'],
+        'description' => $payload['description'],
+        'signature' => $payload['signature'],
+        'policies' => array_keys($payload['policies']),
+        '_links' => [
+          'self' => [
+            'href' => "{baseUri}/api/profile/{$payload['name']}.json",
+          ]
+        ]
+      ];
+      file_put_contents("docs/api/profile/{$payload['name']}.json", json_encode($payload));
+      $output->writeln("Written docs/api/profile/{$payload['name']}.json");
+    }
+    file_put_contents("docs/api/profile_list.json", json_encode($list));
+    $output->writeln("Written docs/api/profile_list.json");
     return $this;
   }
 
