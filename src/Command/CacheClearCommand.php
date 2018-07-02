@@ -29,7 +29,7 @@ class CacheClearCommand extends Command {
    */
   protected function execute(InputInterface $input, OutputInterface $output) {
     foreach (array_keys(Container::config('Cache')) as $bin) {
-      $cache = new Container::cache($bin);
+      $cache = Container::cache($bin);
       $cache->clear();
     }
 
