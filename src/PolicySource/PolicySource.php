@@ -15,8 +15,22 @@ class PolicySource {
   public static function loadPolicyByName($name)
   {
     $list = self::getPolicyList();
+
+    if (!isset($list[$name])) {
+      $list = self::getPolicyList(TRUE);
+      if (!isset($list[$name])) {
+        throw new UnknownPolicyException("$name does not exist.");
+      }
+      throw new UnavailablePolicyException("$name requires {$list[$name]['class']} but is not available in this environment.");
+    }
     $definition = $list[$name];
-    return self::getSource($definition['source'])->load($definition);
+
+    try {
+      return self::getSource($definition['source'])->load($definition);
+    }
+    catch (\InvalidArgumentException $e) {
+      throw new UnavailablePolicyException("$name requires {$list[$name]['class']} but is not available in this environment.");
+    }
   }
 
   /**
@@ -24,10 +38,10 @@ class PolicySource {
    *
    * @return array of policy information arrays.
    */
-  public static function getPolicyList()
+  public static function getPolicyList($include_invalid = FALSE)
   {
-    static $list;
-    if (isset($list)) {
+    static $list, $available_list;
+    if (!empty($list)) {
       return $list;
     }
     $lists = array_map(function ($source) {
@@ -39,10 +53,20 @@ class PolicySource {
     },
     self::getSources());
 
-    $list = array_filter(call_user_func_array('array_merge', $lists), function ($listedPolicy) {
+    $list = call_user_func_array('array_merge', $lists);
+
+    if ($include_invalid) {
+      return $list;
+    }
+
+    if (!empty($available_list)) {
+      return $available_list;
+    }
+
+    $available_list = array_filter($list, function ($listedPolicy) {
       return class_exists($listedPolicy['class']);
     });
-    return $list;
+    return $available_list;
   }
 
   /**
@@ -106,7 +130,7 @@ class PolicySource {
         return $source;
       }
     }
-    throw new Exception("PolicySource not found: $name.");
+    throw new \Exception("PolicySource not found: $name.");
   }
 }
 ?>

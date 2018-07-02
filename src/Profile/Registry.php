@@ -4,6 +4,8 @@ namespace Drutiny\Profile;
 
 use Drutiny\Registry as GlobalRegisry;
 use Drutiny\Profile;
+use Drutiny\Container;
+use Drutiny\PolicySource\UnavailablePolicyException;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
 
@@ -56,9 +58,15 @@ class Registry extends GlobalRegisry {
 
   public static function getAllProfiles()
   {
-    return array_map(function ($filepath) {
-      return Profile::loadFromFile($filepath);
-    }, self::locateProfiles());
+    return array_filter(array_map(function ($filepath) {
+      try {
+        return Profile::loadFromFile($filepath);
+      }
+      catch (UnavailablePolicyException $e) {
+        Container::getLogger()->info($e->getMessage());
+      }
+      return FALSE;
+    }, self::locateProfiles()));
   }
 
 }
