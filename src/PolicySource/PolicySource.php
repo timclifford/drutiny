@@ -6,6 +6,12 @@ use Drutiny\Config;
 use Drutiny\Container;
 
 class PolicySource {
+
+  /**
+   * Load policy by name.
+   *
+   * @param $name string
+   */
   public static function loadPolicyByName($name)
   {
     $list = self::getPolicyList();
@@ -20,6 +26,10 @@ class PolicySource {
    */
   public static function getPolicyList()
   {
+    static $list;
+    if (isset($list)) {
+      return $list;
+    }
     $lists = array_map(function ($source) {
       return array_map(function ($item) use ($source) {
         $item['source'] = $source->getName();
@@ -42,7 +52,7 @@ class PolicySource {
   {
     $list = [];
     foreach (self::getPolicyList() as $definition) {
-      $list[$definition['name']] = self::loadPolicyByName($definition);
+      $list[$definition['name']] = self::loadPolicyByName($definition['name']);
     }
     return $list;
   }
