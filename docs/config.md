@@ -81,3 +81,39 @@ CredentialSchema:
 ```
 
 Learn more about the [Credential Manager](creds.md)
+
+## Driver
+
+The `Driver` directive provides access to a driver directly from the [Sandbox](sandbox.md).
+
+```yaml
+Driver:
+  drush: Drutiny\Driver\DrushRouter::create
+```
+
+The key of the directive becomes a callable method and the value is a function
+that will be called and the returned value returned through the driver:
+
+```php
+<?php
+  $sandbox->drush()->pmList();
+```
+
+## PolicySource
+The `PolicySource` directive declares PHP classes that implement the
+ `Drutiny\PolicySource\PolicySourceInterface` interface. Policy sources provide
+ policies for Drutiny to execute.
+
+```yaml
+PolicySource:
+  - Drutiny\PolicySource\DrutinyGitHubIO
+  - Drutiny\PolicySource\LocalFs
+```
+
+## Cache
+The `Cache`directive provides PSR-6 storage classes for mapped cache bins.
+
+```yaml
+Cache:
+  exec: Symfony\Component\Cache\Adapter\FilesystemAdapter
+```
