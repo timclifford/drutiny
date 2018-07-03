@@ -12,8 +12,8 @@ use Drutiny\Target\Registry as TargetRegistry;
 use Drutiny\DomainSource;
 use Drutiny\DomainList\DomainListRegistry;
 use Drutiny\Target\Target;
+use Drutiny\ProgressBar;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -217,7 +217,19 @@ class ProfileRunCommand extends Command {
     // Setup the progress bar to log updates.
     $steps = count($policyDefinitions) * count($uris);
 
-    $progress = new _CommandProgressBar($output, $steps, ($filepath != 'stdout' || $format->getFormat() == 'console') && $output->getVerbosity() < OutputInterface::VERBOSITY_VERY_VERBOSE);
+
+    $progress = new ProgressBar($output, $steps);
+
+    // We don't want to run the progress bar if the output is to stdout.
+    // Unless the format is console/terminal as then the output doesn't matter.
+    // E.g. turn of progress bar in json, html and markdown formats.
+    if ($filepath == 'stdout' && !in_array($format->getFormat(), ['console', 'terminal'])) {
+      $progress->disable();
+    }
+    // Do not use the progress bar when using a high verbosity logging output.
+    elseif ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+      $progress->disable();
+    }
 
     $results = [];
 
@@ -237,7 +249,8 @@ class ProfileRunCommand extends Command {
       foreach ($policyDefinitions as $policyDefinition) {
         $policy = $policyDefinition->getPolicy();
 
-        $progress->log("[$uri] " . $policy->get('title'));
+        $progress->setTopic($uri . ':' . $policy->get('title'))
+          ->info("Running policy...");
 
         // Setup the sandbox to run the assessment.
         $sandbox = new Sandbox($target, $policy);
@@ -247,7 +260,7 @@ class ProfileRunCommand extends Command {
 
         // Attempt remediation.
         if (!$response->isSuccessful() && $input->getOption('remediate')) {
-          $progress->log("\xE2\x9A\xA0 Remediating " . $policy->get('title'));
+          $progress->info("\xE2\x9A\xA0 Remediating " . $policy->get('title'));
           $response = $sandbox->remediate();
         }
         $results[$uri][$policyDefinition->getName()] = $response;
@@ -267,45 +280,6 @@ class ProfileRunCommand extends Command {
     $console = new SymfonyStyle($input, $output);
     foreach ($files as $filepath) {
       $console->success('Report written to ' . $filepath);
-    }
-  }
-}
-
-Class _CommandProgressBar {
-  protected $status = TRUE;
-  protected $bar;
-
-  public function __construct($output, $steps, $enabled = TRUE)
-  {
-    $this->status = $enabled;
-    $progress = new ProgressBar($output, $steps);
-    $progress->setFormatDefinition('custom', " <comment>%message%</comment>\n %current%/%max% <info>[%bar%]</info> %percent:3s%% %memory:6s%");
-    $progress->setFormat('custom');
-    $progress->setMessage("Starting...");
-    $progress->setBarWidth(80);
-    $this->bar = $progress;
-  }
-
-  public function log($message)
-  {
-    if ($this->status) {
-      $this->bar->setMessage($message);
-    }
-  }
-
-  public function advance($step = 1)
-  {
-    if ($this->status) {
-      $this->bar->advance($step);
-    }
-  }
-
-  public function finish()
-  {
-    if ($this->status) {
-      $this->bar->setMessage("Done");
-      $this->bar->finish();
-      echo '';
     }
   }
 }
