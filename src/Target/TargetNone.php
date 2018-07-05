@@ -10,9 +10,10 @@ namespace Drutiny\Target;
 class TargetNone extends Target {
 
   /**
-   *
+   * Set a default URI.
    */
-  public function uri() {
-    return 'http://default/';
+  public function parse($target_data) {
+    $this->setUri('http://default/');
+    return $this;
   }
 }

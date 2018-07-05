@@ -32,12 +32,12 @@ abstract class Target implements TargetInterface {
   /**
    *
    */
-  public function uri()
+  final public function uri()
   {
     return $this->uri;
   }
 
-  public function setUri($uri)
+  final public function setUri($uri)
   {
     $this->uri = $uri;
     if (!$this->validate()) {
