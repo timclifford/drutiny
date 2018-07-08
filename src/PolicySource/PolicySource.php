@@ -44,16 +44,14 @@ class PolicySource {
     if (!empty($list)) {
       return $list;
     }
-    $lists = array_map(function ($source) {
-      return array_map(function ($item) use ($source) {
-        $item['source'] = $source->getName();
-        return $item;
-      },
-      $source->getList());
-    },
-    self::getSources());
 
-    $list = call_user_func_array('array_merge', $lists);
+    $lists = [];
+    foreach (self::getSources() as $source) {
+      foreach ($source->getList() as $name => $item) {
+        $item['source'] = $source->getName();
+        $list[$name] = $item;
+      }
+    }
 
     if ($include_invalid) {
       return $list;
