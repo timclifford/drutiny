@@ -33,7 +33,7 @@ class DrutinyGitHubIO implements PolicySourceInterface {
    */
   public function load(array $definition)
   {
-    $endpoint = str_replace('{baseUri}/api/', '', $definition['_links']['self']['href']);
+    $endpoint = str_replace(parse_url(Api::BaseUrl, PHP_URL_PATH), '', $definition['_links']['self']['href']);
     $policyData = json_decode(Api::getClient()->get($endpoint)->getBody(), TRUE);
     $policyData['filepath'] = $definition['_links']['self']['href'];
     return new Policy($policyData);
