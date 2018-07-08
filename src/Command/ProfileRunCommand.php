@@ -249,7 +249,7 @@ class ProfileRunCommand extends Command {
       foreach ($policyDefinitions as $policyDefinition) {
         $policy = $policyDefinition->getPolicy();
 
-        $progress->setTopic($uri . ':' . $policy->get('title'))
+        $progress->setTopic($uri . '][' . $policy->get('title'))
           ->info("Running policy...");
 
         // Setup the sandbox to run the assessment.
