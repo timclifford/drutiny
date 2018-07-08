@@ -4,6 +4,7 @@ namespace Drutiny\PolicySource;
 
 use Drutiny\Api;
 use Drutiny\Policy;
+use Drutiny\Container;
 
 class DrutinyGitHubIO implements PolicySourceInterface {
 
@@ -33,9 +34,23 @@ class DrutinyGitHubIO implements PolicySourceInterface {
    */
   public function load(array $definition)
   {
+    $cache = Container::cache('drutiny.github.io.policy');
+    $item  = $cache->getItem($definition['signature']);
+
+    if ($item->isHit()) {
+      return new Policy($item->get());
+    }
+
     $endpoint = str_replace(parse_url(Api::BaseUrl, PHP_URL_PATH), '', $definition['_links']['self']['href']);
     $policyData = json_decode(Api::getClient()->get($endpoint)->getBody(), TRUE);
     $policyData['filepath'] = $definition['_links']['self']['href'];
+
+    $item->set($policyData)
+         // The cache ID (signature) is a hash that changes when the policy
+         // metadata changes so we can cache this as long as we like.
+         ->expiresAt(new \DateTime('+1 month'));
+    $cache->save($item);
+
     return new Policy($policyData);
   }
 
