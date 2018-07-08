@@ -7,7 +7,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Drutiny\Profile\Registry;
+use Drutiny\Profile\ProfileSource;
 use Drutiny\Profile;
 
 /**
@@ -35,7 +35,7 @@ class ProfileInfoCommand extends Command {
   protected function execute(InputInterface $input, OutputInterface $output) {
     $render = new SymfonyStyle($input, $output);
 
-    $profile = Registry::getProfile($input->getArgument('profile'));
+    $profile = ProfileSource::loadProfileByName($input->getArgument('profile'));
 
     $render->title($profile->getTitle());
     $render->text($profile->getDescription());

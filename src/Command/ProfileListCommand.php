@@ -6,7 +6,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Drutiny\Profile\Registry;
+use Drutiny\Profile\ProfileSource;
 use Drutiny\Profile;
 
 /**
@@ -29,11 +29,11 @@ class ProfileListCommand extends Command {
   protected function execute(InputInterface $input, OutputInterface $output) {
     $render = new SymfonyStyle($input, $output);
 
-    $profiles = Registry::getAllProfiles();
+    $profiles = ProfileSource::getProfileList();
 
     // Build array of table rows.
     $rows = array_map(function ($profile) {
-      return [$profile->getTitle(), $profile->getName()];
+      return [$profile['title'], $profile['name'], $profile['source']];
     }, $profiles);
 
     // Sort rows by profile name alphabetically.
@@ -46,7 +46,7 @@ class ProfileListCommand extends Command {
       return $a[1] === $sort[0] ? -1 : 1;
     });
 
-    $render->table(['Profile', 'Name'], $rows);
+    $render->table(['Profile', 'Name', 'Source'], $rows);
 
     $render->note("Use drutiny profile:info to view more information about a profile.");
   }

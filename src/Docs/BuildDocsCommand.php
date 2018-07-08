@@ -7,7 +7,7 @@ use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Drutiny\Registry;
-use Drutiny\Profile\Registry as ProfileRegisry;
+use Drutiny\Profile\ProfileSource;
 use Drutiny\PolicySource\PolicySource;
 use Symfony\Component\Finder\Finder;
 
@@ -166,7 +166,7 @@ class BuildDocsCommand extends Command {
 
   protected function generateProfileAPI(OutputInterface $output)
   {
-    $profiles = ProfileRegisry::getAllProfiles();
+    $profiles = ProfileSource::loadAll();
     $list = [];
 
     file_exists('docs/api') || mkdir('docs/api');

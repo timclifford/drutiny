@@ -4,7 +4,7 @@ namespace Drutiny\Command;
 
 use Drutiny\Config;
 use Drutiny\Container;
-use Drutiny\Profile\Registry as ProfileRegistry;
+use Drutiny\Profile\ProfileSource;
 use Drutiny\Profile\PolicyDefinition;
 use Drutiny\Report;
 use Drutiny\Sandbox\Sandbox;
@@ -154,7 +154,7 @@ class ProfileRunCommand extends Command {
     Container::setVerbosity($output->getVerbosity());
 
     // Setup the check.
-    $profile = ProfileRegistry::getProfile($input->getArgument('profile'));
+    $profile = ProfileSource::loadProfileByName($input->getArgument('profile'));
 
     $profile->setReportPerSite($input->getOption('report-per-site'));
 
