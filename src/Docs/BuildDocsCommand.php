@@ -32,8 +32,6 @@ class BuildDocsCommand extends Command {
     $this->clean()
          ->setup()
          ->buildPolicyLibrary($output)
-         ->generatePolicyAPI($output)
-         ->generateProfileAPI($output)
          ->buildAuditLibrary($output);
   }
 
@@ -129,75 +127,6 @@ class BuildDocsCommand extends Command {
     $mkdocs['pages'][3] = ['Policy Library' => $nav];
     file_put_contents('mkdocs.yml', Yaml::dump($mkdocs, 6));
     $output->writeln("Updated mkdocs.yml");
-    return $this;
-  }
-
-  protected function generatePolicyAPI(OutputInterface $output)
-  {
-    $policies = PolicySource::loadAll();
-    $list = [];
-
-    file_exists('docs/api') || mkdir('docs/api');
-    file_exists('docs/api/policy') || mkdir('docs/api/policy');
-
-    foreach ($policies as $policy) {
-      $payload = $policy->export();
-      $payload['signature'] = hash('sha1', Yaml::dump($payload));
-      $list[] = [
-        'title' => $payload['title'],
-        'name' => $payload['name'],
-        'type' => $payload['type'],
-        'description' => $payload['description'],
-        'signature' => $payload['signature'],
-        'class' => $payload['class'],
-        '_links' => [
-          'self' => [
-            'href' => "{baseUri}/api/policy/{$payload['name']}.json",
-          ]
-        ]
-      ];
-      file_put_contents("docs/api/policy/{$payload['name']}.json", json_encode($payload));
-      $output->writeln("Written docs/api/policy/{$payload['name']}.json");
-    }
-    file_put_contents("docs/api/policy_list.json", json_encode($list));
-    $output->writeln("Written docs/api/policy_list.json");
-    return $this;
-  }
-
-  protected function generateProfileAPI(OutputInterface $output)
-  {
-    $profiles = ProfileSource::loadAll();
-    $list = [];
-
-    file_exists('docs/api') || mkdir('docs/api');
-    file_exists('docs/api/profile') || mkdir('docs/api/profile');
-
-    foreach ($profiles as $profile) {
-      $payload = $profile->dump();
-      if (!isset($payload['policies'])) {
-        $payload['policies'] = [];
-      }
-      if (!isset($payload['description'])) {
-        $payload['description'] = '';
-      }
-      $payload['signature'] = hash('sha1', Yaml::dump($payload));
-      $list[] = [
-        'title' => $payload['title'],
-        'name' => $payload['name'],
-        'description' => $payload['description'],
-        'signature' => $payload['signature'],
-        'policies' => array_keys($payload['policies']),
-        '_links' => [
-          'self' => [
-            'href' => "{baseUri}/api/profile/{$payload['name']}.json",
-          ]
-        ]
-      ];
-      file_put_contents("docs/api/profile/{$payload['name']}.json", json_encode($payload));
-      $output->writeln("Written docs/api/profile/{$payload['name']}.json");
-    }
-    file_put_contents("docs/api/profile_list.json", json_encode($list));
-    $output->writeln("Written docs/api/profile_list.json");
     return $this;
   }
 

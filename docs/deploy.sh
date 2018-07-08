@@ -13,12 +13,6 @@ composer require --prefer-stable  drutiny/plugin-distro-common drutiny/acquia dr
 ./bin/build_docs
 mkdocs build --clean
 
-if [ -d content ]; then
-  rm -rf content;
-fi
-
-git clone git@github.com:drutiny/content.git
-
 if [ -d ghp ]; then
   rm -rf ghp;
 fi
