@@ -29,6 +29,7 @@ class PolicySource {
       return self::getSource($definition['source'])->load($definition);
     }
     catch (\InvalidArgumentException $e) {
+      Container::getLogger()->warning($e->getMessage());
       throw new UnavailablePolicyException("$name requires {$list[$name]['class']} but is not available in this environment.");
     }
   }
