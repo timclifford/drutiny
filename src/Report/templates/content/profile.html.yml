@@ -43,9 +43,9 @@
       The various appendices provides more detailed data regarding the health of
       the site.
 
-      {{# output_data }}
+      {{# output_notice }}
         {{{.}}}
-      {{/ output_data }}
+      {{/ output_notice }}
     {{/notices}}
 
     {{#errors}}
