@@ -24,6 +24,15 @@ fi
 mkdir -p ghp/$TRAVIS_BRANCH
 rsync -av docs_html/ ghp/$TRAVIS_BRANCH/
 
+# Hack to support backwards compatibility.
+if [ "$TRAVIS_BRANCH" == "2.2.x" ]; then
+  if [ ! -d ghp/2.2.x/api ] && [ ! -L ghp/2.2.x/api ] && [ -d ghp/2.2.x ]; then
+    pushd ghp/2.2.x
+    ln -s ../2.2.2/api
+    popd
+  fi
+fi
+
 cd ghp
 git config user.name "Travis CI"
 git config user.email "drutiny@travis.ci"
