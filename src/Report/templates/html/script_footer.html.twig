@@ -5,6 +5,138 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
 <script type="text/javascript">
   (function ($, c) {
+
+    function getPieishConfig(data, series, table) {
+      var config = {
+        data: {},
+        type: data.chartType,
+        options: {}
+      };
+
+      // Labels == X-Axis labels.
+      config.data.labels = $.map($(data.chartLabels, table), function (e) {
+        return $(e).text();
+      });
+
+      config.data.datasets = $.map(series, function (s, i) {
+        var set = $.map($(s, table), function (e) {
+          return $(e).text().replace(',', '');
+        });
+        return {
+          data: set,
+          backgroundColor: data.chartColors
+        }
+      });
+
+      if (data.chartTitle) {
+        config.options.title = {
+          display: true,
+          text: data.chartTitle
+        };
+      }
+
+      if (data.chartLegend) {
+        config.options.legend = {};
+        if (data.chartLegend == "none") {
+          config.options.legend.display = false;
+        }
+        else {
+          config.options.legend.position = data.chartLegend;
+        }
+      }
+
+      return config;
+    }
+
+    function getBarLineConfig(data, series, table) {
+      var config = {
+        data: {},
+        type: data.chartType,
+        options: {
+          scales: {
+            xAxes: [],
+            yAxes: []
+          }
+        }
+      };
+
+      // Labels == X-Axis labels.
+      config.data.labels = $.map($(data.chartLabels, table), function (e) {
+        var label = $(e).text();
+        if (d = Date.parse(label)) {
+          label = (new Date(d)).toDateString();
+        }
+        return label;
+      });
+
+      var series_labels = [];
+      if (data.chartSeriesLabels) {
+        series_labels = data.chartSeriesLabels.split(',');
+      }
+
+      config.data.datasets = $.map(series, function (s, i) {
+
+        // Derive a set of numbers.
+        var set = $.map($(s, table), function (e) {
+          return $(e).text().replace(',', '');
+        });
+
+        // For bar/line graphs, if there is only one series, we should use
+        // one color unless there are enough colors available for each
+        // value in the set.
+        var bgColor = set.length <= data.chartColors.length || series.length > 1 ? data.chartColors[i] : data.chartColors[0];
+
+        return {
+          data: set,
+          label: $(series_labels[i], table).text(),
+          backgroundColor: bgColor
+        }
+      });
+
+      // Axis labels and gridlines for bar/line type graphs.
+      var xAxis = {};
+      var yAxis = {};
+
+      if (data.chartStacked) {
+        xAxis.stacked = true;
+        yAxis.stacked = true;
+      }
+      if (data.chartXAxis) {
+        xAxis.scaleLabel = {
+          labelString: data.chartXAxis,
+          display: true
+        }
+      }
+      if (data.chartYAxis) {
+        yAxis.scaleLabel = {
+          labelString: data.chartYAxis,
+          display: true
+        }
+      }
+
+      config.options.scales.xAxes.push(xAxis);
+      config.options.scales.yAxes.push(yAxis);
+
+      if (data.chartTitle) {
+        config.options.title = {
+          display: true,
+          text: data.chartTitle
+        };
+      }
+
+      if (data.chartLegend) {
+        config.options.legend = {};
+        if (data.chartLegend == "none") {
+          config.options.legend.display = false;
+        }
+        else {
+          config.options.legend.position = data.chartLegend;
+        }
+      }
+      return config;
+    }
+
+
     // Series colors.
     var colors = [
       'rgba(26, 188, 156,1.0)',
@@ -42,7 +174,8 @@
         chartTitle: '',
         chartWidth: '100%',
         chartHeight: '100%',
-        chartColors: ''
+        chartColors: '',
+        chartTableIndex: 0
       }, $(this).data());
 
       var pieish = ['pie', 'doughnut'].indexOf(data.chartType) > 0;
@@ -53,101 +186,29 @@
             return i.length;
           });
 
+      if (data.chartBootstrapColumns != undefined) {
+        $(this).addClass('col-sm-' + data.chartBootstrapColumns);
+      }
+      else {
+        $('canvas', this).css({
+          width: data.chartWidth,
+          height: data.chartHeight
+        })
+      }
+
       $(this).html('<canvas></canvas>');
-      $('canvas', this).css({
-        width: data.chartWidth,
-        height: data.chartHeight
-      });
+      $('canvas', this).css('height', data.chartHeight);
 
       var ctx = $('canvas', this).get(0).getContext('2d');
-
       var series = data.chartSeries.split(',');
+      var table = $(this).siblings('table').get(data.chartTableIndex);
 
-      var table = $(this).siblings('table').first();
-      var chart_data = {
-        labels: $.map($(data.chartLabels, table), function (e) {
-          return $(e).text();
-        }),
-        datasets: []
-      };
-
-      var series_labels = [];
-      if (data.chartSeriesLabels) {
-        series_labels = data.chartSeriesLabels.split(',');
+      if (pieish) {
+        new Chart(ctx, getPieishConfig(data, series, table));
       }
-
-      chart_data.datasets = $.map(series, function (s, i) {
-        var set = $.map($(s, table), function (e) {
-          return $(e).text().replace(',', '');
-        });
-        // For bar/line graphs, if there is only one series, we should use
-        // one color unless there are enough colors in available for each
-        // value in the set.
-        var bgColor = set.length <= data.chartColors.length || series.length > 1 ? data.chartColors[i] : data.chartColors[0];
-
-        // The above logic doesn't apply to pie or doughnut graphs.
-        if (pieish) {
-          bgColor = data.chartColors;
-        }
-        return {
-          data: set,
-          label: $(series_labels[i], table).text(),
-          backgroundColor: bgColor
-        }
-      });
-
-      var chart_config = {
-          type: data.chartType,
-          data: chart_data,
-          options: {}
-      };
-
-      // Axis labels and gridlines for bar/line type graphs.
-      if (!pieish) {
-        var xAxis = {};
-        var yAxis = {};
-
-        if (data.chartStacked) {
-          xAxis.stacked = true;
-          yAxis.stacked = true;
-        }
-        if (data.chartXAxis) {
-          xAxis.scaleLabel = {
-            labelString: data.chartXAxis,
-            display: true
-          }
-        }
-        if (data.chartYAxis) {
-          yAxis.scaleLabel = {
-            labelString: data.chartYAxis,
-            display: true
-          }
-        }
-
-        chart_config.options.scales = {};
-        chart_config.options.scales.xAxes = [xAxis];
-        chart_config.options.scales.yAxes = [yAxis];
+      else {
+        new Chart(ctx, getBarLineConfig(data, series, table));
       }
-
-      if (data.chartTitle) {
-        chart_config.options.title = {
-          display: true,
-          text: data.chartTitle
-        };
-      }
-
-      if (data.chartLegend) {
-        chart_config.options.legend = {};
-        if (data.chartLegend == "none") {
-          chart_config.options.legend.display = false;
-        }
-        else {
-          chart_config.options.legend.position = data.chartLegend;
-        }
-      }
-
-      new Chart(ctx, chart_config);
-
       $(this).removeClass('chart-unprocessed').addClass('chart');
 
       if ((data.chartHideTable !== undefined) && data.chartHideTable) {
