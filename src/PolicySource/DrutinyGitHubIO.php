@@ -38,8 +38,10 @@ class DrutinyGitHubIO implements PolicySourceInterface {
     $item  = $cache->getItem($definition['signature']);
 
     if ($item->isHit()) {
+      Container::getLogger()->info("Cache hit for {$definition['name']} from " . $this->getName());
       return new Policy($item->get());
     }
+    Container::getLogger()->info("Fetching {$definition['name']} from {Api::BaseUrl}");
 
     $endpoint = str_replace(parse_url(Api::BaseUrl, PHP_URL_PATH), '', $definition['_links']['self']['href']);
     $policyData = json_decode(Api::getClient()->get($endpoint)->getBody(), TRUE);

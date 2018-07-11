@@ -8,17 +8,24 @@ use Symfony\Component\Yaml\Yaml;
 abstract class DocsGenerator {
 
   protected function findPackage($filepath)
-  {
-      $composer = FALSE;
+  {   $checked_paths = [];
       while ($filepath) {
         $filepath = dirname($filepath);
+        $composer_filepath = $filepath . '/composer.json';
 
-        if (file_exists($filepath . '/composer.json')) {
+        if (in_array($composer_filepath, $checked_paths)) {
+          break;
+        }
+
+        $checked_paths[] = $composer_filepath;
+        if (file_exists($composer_filepath)) {
           break;
         }
       }
 
-      $json = file_get_contents($filepath . '/composer.json');
+      if (!$json = @file_get_contents($composer_filepath)) {
+        return 'drutiny/content';
+      }
       $composer = json_decode($json, TRUE);
       return $composer['name'];
   }
