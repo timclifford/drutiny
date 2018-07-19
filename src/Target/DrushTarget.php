@@ -10,6 +10,7 @@ use Drutiny\Driver\Exec;
  * )
  */
 class DrushTarget extends Target implements DrushTargetInterface, DrushExecutableTargetInterface {
+  use DrushTargetMetadataTrait;
 
   protected $alias;
 

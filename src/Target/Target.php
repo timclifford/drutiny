@@ -2,7 +2,10 @@
 
 namespace Drutiny\Target;
 
+use Doctrine\Common\Annotations\AnnotationReader;
+use Drutiny\Container;
 use Drutiny\Driver\Exec;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 /**
  * Basic function of a Target.
@@ -78,4 +81,33 @@ abstract class Target implements TargetInterface {
     return Registry::getTarget($name, $options);
   }
 
+  /**
+   * Pull metadata from Drutiny\Target\Metadata interfaces.
+   *
+   * @return array of metatdata keyed by metadata name.
+   */
+  final public function getMetadata()
+  {
+    $item = Container::cache('target')->getItem('metadata');
+
+    if (!$item->isHit()) {
+      $metadata = [];
+      $reflection = new \ReflectionClass($this);
+      $interfaces = $reflection->getInterfaces();
+      $reader = new AnnotationReader();
+
+      foreach ($interfaces as $interface) {
+        $methods = $interface->getMethods(\ReflectionMethod::IS_PUBLIC);
+        foreach ($methods as $method) {
+          $annotation = $reader->getMethodAnnotation($method, 'Drutiny\Annotation\Metadata');
+          if (empty($annotation)) {
+            continue;
+          }
+          $metadata[$annotation->name] = $method->name;
+        }
+      }
+      Container::cache('target')->save($item->set($metadata));
+    }
+    return $item->get();
+  }
 }
