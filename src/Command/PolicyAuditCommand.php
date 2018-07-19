@@ -19,7 +19,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Yaml\Yaml;
 
-
 /**
  *
  */
@@ -138,9 +137,6 @@ class PolicyAuditCommand extends Command {
 
     $profile->getFormatOption('markdown')
             ->render($profile, $sandbox->getTarget(), [$result]);
-
-    // $report = new ProfileRunReport($profile, $sandbox->getTarget(), $result);
-    // $report->render($input, $output);
   }
 
 }
