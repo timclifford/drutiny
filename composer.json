@@ -16,7 +16,7 @@
         "caseyamcl/toc": "~1.0",
         "composer/semver": "^1.4.2",
         "doctrine/annotations": "^v1.2",
-        "drutiny/http": "^2.1",
+        "drutiny/http": "2.x-dev",
         "erusev/parsedown": "^1.6.3",
         "fiasco/symfony-console-style-markdown": "~1.0",
         "mustache/mustache": "^2.11",
@@ -29,7 +29,8 @@
         "symfony/process": "^3.4",
         "symfony/validator": "^3.4",
         "symfony/yaml": "^3.4",
-        "twig/twig": "~1.0"
+        "twig/twig": "~1.0",
+        "romaricdrigon/metayaml": "^1.1"
     },
     "autoload": {
         "psr-4": {

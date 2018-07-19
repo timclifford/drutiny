@@ -2,26 +2,20 @@
 
 namespace Drutiny;
 
-use Drutiny\Item\Item;
 use Drutiny\Container;
+use Drutiny\Item\Item;
+use Drutiny\Policy\ValidationException;
 use Drutiny\PolicySource\PolicySource;
+use RomaricDrigon\MetaYaml\Exception\NodeValidatorException;
+use RomaricDrigon\MetaYaml\MetaYaml;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Validator\Constraints\All;
-use Symfony\Component\Validator\Constraints\Callback;
-use Symfony\Component\Validator\Constraints\Collection;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\NotNull;
-use Symfony\Component\Validator\Constraints\Optional;
-use Symfony\Component\Validator\Constraints\Type;
-use Symfony\Component\Validator\Context\ExecutionContextInterface;
-use Symfony\Component\Validator\Mapping\ClassMetadata;
-use Symfony\Component\Validator\Validation;
 use Symfony\Component\Yaml\Yaml;
 
-
 /**
+ * A Drutiny policy.
  *
+ * @see policy.schema.yml
  */
 class Policy extends Item {
   use \Drutiny\Item\ContentSeverityTrait;
@@ -103,6 +97,14 @@ class Policy extends Item {
    */
   public function __construct(array $info) {
 
+    try {
+      $schema = new MetaYaml(Yaml::parseFile(__DIR__ . '/policy.schema.yml'));
+      $schema->validate($info);
+    }
+    catch (NodeValidatorException $e) {
+      throw new PolicyValidationException($info, $e);
+    }
+
     $severity = isset($info['severity']) ? $info['severity'] : self::SEVERITY_NORMAL;
     $this->setSeverity($severity);
 
@@ -123,26 +125,7 @@ class Policy extends Item {
   }
 
   /**
-   * Validation metadata.
-   *
-   * @param ClassMetadata $metadata
    */
-  public static function loadValidatorMetadata(ClassMetadata $metadata) {
-    parent::loadValidatorMetadata($metadata);
-    $metadata->addPropertyConstraint('success', new NotBlank());
-    $metadata->addPropertyConstraint('failure', new NotBlank());
-    $metadata->addPropertyConstraint('parameters', new All(array(
-      'constraints' => array(
-        new Collection([
-          'fields' => [
-            'type' => new Optional(new Type("string")),
-            'description' => new Optional(new Type("string")),
-            'default' => new NotNull(),
-          ],
-        ]),
-      ),
-    )));
-    $metadata->addPropertyConstraint('tags', new Optional());
   }
 
   /**
