@@ -4,6 +4,7 @@ namespace Drutiny\Profile;
 
 use Drutiny\Api;
 use Drutiny\Profile;
+use Drutiny\Report\Format;
 
 class ProfileSourceDrutinyGitHubIO implements ProfileSourceInterface {
 
