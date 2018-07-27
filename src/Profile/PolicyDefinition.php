@@ -5,7 +5,7 @@ namespace Drutiny\Profile;
 use Drutiny\Policy;
 
 class PolicyDefinition {
-  use \Drutiny\Item\ContentSeverityTrait;
+  use \Drutiny\Policy\ContentSeverityTrait;
 
   /**
    * Name of the poilcy.
@@ -62,9 +62,9 @@ class PolicyDefinition {
     }
 
     // Track policies that are depended on.
-    foreach ((array) $policy->get('depends') as $name) {
-      $policyDefinition->setDependencyPolicyName($name);
-    }
+    // foreach ((array) $policy->get('depends') as $name) {
+    //   $policyDefinition->setDependencyPolicyName($name);
+    // }
 
     return $policyDefinition;
   }

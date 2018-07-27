@@ -3,7 +3,7 @@
 namespace Drutiny;
 
 use Drutiny\Container;
-use Drutiny\Item\Item;
+use Drutiny\Policy\Dependency;
 use Drutiny\Policy\ValidationException;
 use Drutiny\PolicySource\PolicySource;
 use RomaricDrigon\MetaYaml\Exception\NodeValidatorException;
@@ -17,44 +17,49 @@ use Symfony\Component\Yaml\Yaml;
  *
  * @see policy.schema.yml
  */
-class Policy extends Item {
-  use \Drutiny\Item\ContentSeverityTrait;
-  use \Drutiny\Item\ParameterizedContentTrait {
+class Policy extends Policy\PolicyBase {
+  use \Drutiny\Policy\ContentSeverityTrait;
+  use \Drutiny\Policy\ParameterizedContentTrait {
     getParameterDefaults as public useTraitgetParameterDefaults;
   }
 
   /**
-   * @string A written recommendation of what remediation to take if the policy fails.
+   * @var string A written recommendation of what remediation to take if the policy fails.
    */
   protected $remediation;
 
   /**
-   * @string A written failure message template. May contain tokens.
+   * @var string A written failure message template. May contain tokens.
    */
   protected $failure;
 
   /**
-   * @string A written success message. May contain tokens.
+   * @var string A written success message. May contain tokens.
    */
   protected $success;
 
   /**
-   * @string A written warning message. May contain tokens.
+   * @var string A written warning message. May contain tokens.
    */
   protected $warning;
 
   /**
-   * @string An array of dependencies.
+   * @var array An array of dependencies.
    */
   protected $depends = [];
 
   /**
-   * @boolean Determine if a policy is remediable.
+   * @var boolean Determine if a policy is remediable.
    */
   protected $remediable;
 
   /**
-   * @array Chart metadata.
+   * @var array of compatibility checks.
+   */
+  protected $compatibility = [];
+
+  /**
+   * @var array Chart metadata.
    */
   protected $chart = [];
 
@@ -122,10 +127,30 @@ class Policy extends Item {
     $reflect = new \ReflectionClass($this->class);
     $this->remediable = $reflect->implementsInterface('\Drutiny\RemediableInterface');
 
+    $dependencies = isset($info['depends']) ? $info['depends'] : [];
+    $this->depends = [];
+
+    foreach ($dependencies as $depends) {
+      // Backwards compatibility
+      if (is_string($depends)) {
+        $depends = [
+          'on_fail' => Dependency::ON_FAIL_REPORT_ONLY,
+          'expression' => sprintf("policy('%s') == 'success'", $depends)
+        ];
+      }
+      if (!isset($depends['on_fail'])) {
+        $depends['on_fail'] = Dependency::ON_FAIL_DEFAULT;
+      }
+      $this->depends[] = new Dependency($depends['expression'], $depends['on_fail']);
+    }
   }
 
   /**
+   * Get list of Drutiny\Policy\Dependency objects.
    */
+  public function getDepends()
+  {
+    return $this->depends;
   }
 
   /**

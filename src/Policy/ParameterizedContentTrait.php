@@ -1,5 +1,5 @@
 <?php
-namespace Drutiny\Item;
+namespace Drutiny\Policy;
 
 trait ParameterizedContentTrait {
   /**
@@ -14,7 +14,7 @@ trait ParameterizedContentTrait {
       'default' => FALSE,
       'description' => '',
     ];
-    
+
     $info = array_merge($default, $info);
 
     if (!isset($info['type'])) {

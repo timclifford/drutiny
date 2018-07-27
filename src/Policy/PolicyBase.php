@@ -1,23 +1,11 @@
 <?php
 
-namespace Drutiny\Item;
-
-use Symfony\Component\Validator\Constraints\NotNull;
-use Symfony\Component\Validator\Constraints\Collection;
-use Symfony\Component\Validator\Constraints\All;
-use Symfony\Component\Validator\Constraints\Optional;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Callback;
-use Symfony\Component\Validator\Constraints\Type;
-use Symfony\Component\Validator\Constraints\Choice;
-use Symfony\Component\Validator\Validation;
-use Symfony\Component\Validator\Mapping\ClassMetadata;
-use Symfony\Component\Validator\Context\ExecutionContextInterface;
+namespace Drutiny\Policy;
 
 /**
  * Report on collected data.
  */
-class Item {
+class PolicyBase {
   const SEVERITY_NONE = 0;
   const SEVERITY_LOW = 1;
   const SEVERITY_NORMAL = 2;
@@ -79,22 +67,6 @@ class Item {
       }
       $this->{$key} = $value;
     }
-
-    $validator = Validation::createValidatorBuilder()
-      ->addMethodMapping('loadValidatorMetadata')
-      ->getValidator();
-
-    $errors = $validator->validate($this);
-
-    if (count($errors) > 0) {
-      /*
-       * Uses a __toString method on the $errors variable which is a
-       * ConstraintViolationList object. This gives us a nice string
-       * for debugging.
-       */
-      $errorsString = (string) $errors;
-      throw new \InvalidArgumentException($errorsString . PHP_EOL . print_r($info, 1));
-    }
   }
 
   /**
@@ -133,34 +105,5 @@ class Item {
 
   public function getTags() {
     return $this->tags ?: [];
-  }
-
-  /**
-   * Validation metadata.
-   */
-  public static function loadValidatorMetadata(ClassMetadata $metadata) {
-    $metadata->addPropertyConstraint('title', new Type("string"));
-    $metadata->addPropertyConstraint('name', new Type("string"));
-    $metadata->addPropertyConstraint(
-      'type',
-       new Choice(array('audit', 'data'))
-    );
-    $metadata->addPropertyConstraint('class', new Callback(function ($class, ExecutionContextInterface $context, $payload) {
-      try {
-        if (!class_exists($class)) {
-          throw new \Exception("$class does not exist.");
-        }
-          $reflect = new \ReflectionClass($class);
-        if (!$reflect->isSubclassOf('\Drutiny\Audit')) {
-          throw new \Exception("$class does not extend \Drutiny\Audit.");
-        }
-      }
-      catch (\Exception $e) {
-        $context->buildViolation("$class is not a valid class: " . $e->getMessage())
-          ->atPath('class')
-          ->addViolation();
-      }
-    }));
-    $metadata->addPropertyConstraint('description', new NotBlank());
   }
 }

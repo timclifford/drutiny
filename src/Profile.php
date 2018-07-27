@@ -183,34 +183,17 @@ class Profile {
    */
   public function getAllPolicyDefinitions()
   {
-    // Pull the dependencies into the main list.
-    foreach ($this->policies as $policyDefinition) {
-      foreach ($policyDefinition->getDependencyPolicyDefinitions() as $definition) {
-        if (isset($this->policies[$definition->getName()])) {
-          continue;
-        }
-        $this->addPolicyDefinition($definition);
-      }
-    }
 
     // Sort $policies
-    // 1. By dependency. Ensure dependencies are weighted first.
-    // 2. By weight. Lighter policies float to the top.
-    // 3. By name, alphabetical sorting.
+    // 1. By weight. Lighter policies float to the top.
+    // 2. By name, alphabetical sorting.
     uasort($this->policies, function (PolicyDefinition $a, PolicyDefinition $b) {
-      // 1. By dependency. Ensure dependencies are weighted first.
-      if (in_array($b->getName(), array_keys($a->getDependencyPolicyDefinitions()))) {
-        return 1;
-      }
-      if (in_array($a->getName(), array_keys($b->getDependencyPolicyDefinitions()))) {
-        return -1;
-      }
 
-      // 2. By weight. Lighter policies float to the top.
+      // 1. By weight. Lighter policies float to the top.
       if ($a->getWeight() == $b->getWeight()) {
         $alpha = [$a->getName(), $b->getName()];
         sort($alpha);
-        // 3. By name, alphabetical sorting.
+        // 2. By name, alphabetical sorting.
         return $alpha[0] == $a->getName() ? -1 : 1;
       }
       return $a->getWeight() > $b->getWeight() ? 1 : -1;

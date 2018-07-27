@@ -1,5 +1,5 @@
 <?php
-namespace Drutiny\Item;
+namespace Drutiny\Policy;
 
 trait ContentSeverityTrait {
 
@@ -11,30 +11,30 @@ trait ContentSeverityTrait {
   public function setSeverity($sev = 0)
   {
     switch (TRUE) {
-      case $sev === Item::SEVERITY_NONE:
+      case $sev === PolicyBase::SEVERITY_NONE:
       case $sev === 'none':
-        $this->severity = Item::SEVERITY_NONE;
+        $this->severity = PolicyBase::SEVERITY_NONE;
         break;
 
-      case $sev === Item::SEVERITY_LOW:
+      case $sev === PolicyBase::SEVERITY_LOW:
       case $sev === 'low':
-        $this->severity = Item::SEVERITY_LOW;
+        $this->severity = PolicyBase::SEVERITY_LOW;
         break;
 
-      case $sev === Item::SEVERITY_NORMAL:
+      case $sev === PolicyBase::SEVERITY_NORMAL:
       case $sev === 'normal':
       case $sev === 'medium':
-        $this->severity = Item::SEVERITY_NORMAL;
+        $this->severity = PolicyBase::SEVERITY_NORMAL;
         break;
 
-      case $sev === Item::SEVERITY_HIGH:
+      case $sev === PolicyBase::SEVERITY_HIGH:
       case $sev === 'high':
-        $this->severity = Item::SEVERITY_HIGH;
+        $this->severity = PolicyBase::SEVERITY_HIGH;
         break;
 
-      case $sev === Item::SEVERITY_CRITICAL:
+      case $sev === PolicyBase::SEVERITY_CRITICAL:
       case $sev === 'critical':
-        $this->severity = Item::SEVERITY_CRITICAL;
+        $this->severity = PolicyBase::SEVERITY_CRITICAL;
         break;
 
       default:
@@ -51,25 +51,25 @@ trait ContentSeverityTrait {
   {
 
     switch (TRUE) {
-      case $this->severity === Item::SEVERITY_NONE:
+      case $this->severity === PolicyBase::SEVERITY_NONE:
       case $this->severity === 'none':
       case $this->severity === NULL;
         return 'none';
 
-      case $this->severity === Item::SEVERITY_LOW:
+      case $this->severity === PolicyBase::SEVERITY_LOW:
       case $this->severity === 'low':
         return 'low';
 
-      case $this->severity === Item::SEVERITY_NORMAL:
+      case $this->severity === PolicyBase::SEVERITY_NORMAL:
       case $this->severity === 'normal':
       case $this->severity === 'medium':
         return 'medium';
 
-      case $this->severity === Item::SEVERITY_HIGH:
+      case $this->severity === PolicyBase::SEVERITY_HIGH:
       case $this->severity === 'high':
         return 'high';
 
-      case $this->severity === Item::SEVERITY_CRITICAL:
+      case $this->severity === PolicyBase::SEVERITY_CRITICAL:
       case $this->severity === 'critical':
         return 'critical';
 
