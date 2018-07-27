@@ -11,8 +11,7 @@ use Psr\Log\NullLogger;
 
 class PolicyTest extends TestCase {
 
-  protected $registry;
-  protected $targetClass;
+  protected $target;
 
   public function __construct()
   {

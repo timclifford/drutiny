@@ -3,6 +3,7 @@
 namespace Drutiny\Report\Format;
 
 use Drutiny\AuditResponse\AuditResponse;
+use Drutiny\Assessment;
 use Drutiny\Profile;
 use Drutiny\Report\Format;
 use Drutiny\Target\Target;
@@ -57,14 +58,14 @@ class Console extends Format {
     return $this->output;
   }
 
-  protected function preprocessResult(Profile $profile, Target $target, array $result)
+  protected function preprocessResult(Profile $profile, Target $target, Assessment $assessment)
   {
     $io = new SymfonyStyle($this->input, $this->output);
     $io->title($profile->getTitle());
 
     $table_rows = [];
     $pass = [];
-    foreach ($result as $response) {
+    foreach ($assessment->getResults() as $response) {
       $pass[] = $response->isSuccessful();
 
       $summary = [];
@@ -99,7 +100,7 @@ class Console extends Format {
       $table_rows[] = new TableSeparator();
     }
 
-    $total_tests = count($result);
+    $total_tests = count($assessment->getResults());
     $total_pass = count(array_filter($pass));
     $table_rows[] = ['', "$total_pass/$total_tests passed", ''];
     $io->table(['', 'Policy', 'Severity', 'Summary'], $table_rows);
@@ -114,8 +115,8 @@ class Console extends Format {
 
     // Set results by policy rather than by site.
     $resultsByPolicy = [];
-    foreach ($results as $uri => $siteReport) {
-      foreach ($siteReport as $response) {
+    foreach ($results as $uri => $assessment) {
+      foreach ($assessment->getResults() as $response) {
         $resultsByPolicy[$response->getName()][$uri] = $response;
       }
     }

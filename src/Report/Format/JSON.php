@@ -5,6 +5,7 @@ namespace Drutiny\Report\Format;
 use Drutiny\Profile;
 use Drutiny\Report\Format;
 use Drutiny\Target\Target;
+use Drutiny\Assessment;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -24,7 +25,7 @@ class JSON extends Format {
     }
   }
 
-  protected function preprocessResult(Profile $profile, Target $target, array $result)
+  protected function preprocessResult(Profile $profile, Target $target, Assessment $assessment)
   {
     $schema = [
       'notices' => 0,
@@ -62,7 +63,7 @@ class JSON extends Format {
       'none' => $outcomes,
     ];
 
-    foreach ($result as $response) {
+    foreach ($assessment->getResults() as $response) {
       $var = [
         'status' => $response->isSuccessful(),
         'is_notice' => $response->isNotice(),

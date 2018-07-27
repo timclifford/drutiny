@@ -2,6 +2,7 @@
 
 namespace Drutiny\Report;
 
+use Drutiny\Assessment;
 use Drutiny\Profile;
 use Drutiny\Target\Target;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -94,7 +95,7 @@ abstract class Format {
     return $filepaths;
   }
 
-  abstract protected function preprocessResult(Profile $profile, Target $target, array $result);
+  abstract protected function preprocessResult(Profile $profile, Target $target, Assessment $assessment);
   abstract protected function preprocessMultiResult(Profile $profile, Target $target, array $results);
 
   abstract protected function renderResult(array $variables);

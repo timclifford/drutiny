@@ -4,6 +4,7 @@ namespace Drutiny\Report\Format;
 
 use Drutiny\Registry;
 use Drutiny\Profile;
+use Drutiny\Assessment;
 use Drutiny\Target\Target;
 use Symfony\Component\Yaml\Yaml;
 
@@ -72,9 +73,9 @@ class Markdown extends JSON {
   }
 
 
-  protected function preprocessResult(Profile $profile, Target $target, array $result)
+  protected function preprocessResult(Profile $profile, Target $target, Assessment $assessment)
   {
-    $render = parent::preprocessResult($profile, $target, $result);
+    $render = parent::preprocessResult($profile, $target, $assessment);
 
     // Render any markdown into HTML for the report.
     foreach ($render['results'] as &$result) {

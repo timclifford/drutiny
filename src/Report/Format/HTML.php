@@ -2,6 +2,7 @@
 
 namespace Drutiny\Report\Format;
 
+use Drutiny\Assessment;
 use Drutiny\Registry;
 use Drutiny\Profile;
 use Drutiny\Target\Target;
@@ -24,9 +25,9 @@ class HTML extends Markdown {
     $this->setFormat('html');
   }
 
-  protected function preprocessResult(Profile $profile, Target $target, array $result)
+  protected function preprocessResult(Profile $profile, Target $target, Assessment $assessment)
   {
-    $render = parent::preprocessResult($profile, $target, $result);
+    $render = parent::preprocessResult($profile, $target, $assessment);
     $parsedown = new MarkdownHelper();
 
     foreach ($render['remediations'] as &$remedy) {

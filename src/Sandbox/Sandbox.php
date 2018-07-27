@@ -5,12 +5,12 @@ namespace Drutiny\Sandbox;
 use Drutiny\Audit;
 use Drutiny\AuditInterface;
 use Drutiny\AuditResponse\AuditResponse;
-use Drutiny\AuditValidationException;
 use Drutiny\Cache;
 use Drutiny\Config;
 use Drutiny\Container;
 use Drutiny\Driver\Exec;
 use Drutiny\Policy;
+use Drutiny\Assessment;
 use Drutiny\RemediableInterface;
 use Drutiny\Target\Target;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -39,6 +39,11 @@ class Sandbox {
   protected $policy;
 
   /**
+   * @var \Drutiny\Assessment
+   */
+  protected $assessment;
+
+  /**
    * Create a new Sandbox.
    *
    * @param string $target
@@ -47,7 +52,8 @@ class Sandbox {
    *
    * @throws \Exception
    */
-  public function __construct(Target $target, Policy $policy) {
+  public function __construct(Target $target, Policy $policy, Assessment $assessment = NULL)
+  {
 
     $this->target = $target;
 
@@ -64,17 +70,26 @@ class Sandbox {
     $end   = clone $start;
     $end->add(new \DateInterval('PT24H'));
     $this->setReportingPeriod($start, $end);
+
+    $this->assessment = isset($assessment) ? $assessment : new Assessment();
   }
 
   /**
    * Run the check and capture the outcomes.
    */
-  public function run() {
+  public function run()
+  {
     $response = new AuditResponse($this->getPolicy());
     $watchdog = Container::getLogger();
 
     $watchdog->info('Auditing ' . $this->getPolicy()->get('name'));
     try {
+      // Ensure policy dependencies are met.
+      foreach ($this->getPolicy()->getDepends() as $dependency) {
+        // Throws DependencyException if dependency is not met.
+        $dependency->execute($this);
+      }
+
       // Run the audit over the policy.
       $outcome = $this->getAuditor()->execute($this);
 
@@ -84,7 +99,11 @@ class Sandbox {
       // Set the response.
       $response->set($outcome, $this->getParameterTokens());
     }
-    catch (AuditValidationException $e) {
+    catch (\Drutiny\Policy\DependencyException $e) {
+      $this->setParameter('exception', $e->getMessage());
+      $response->set($e->getDependency()->getFailBehaviour(), $this->getParameterTokens());
+    }
+    catch (\Drutiny\AuditValidationException $e) {
       $this->setParameter('exception', $e->getMessage());
       $watchdog->warning($e->getMessage());
       $response->set(Audit::NOT_APPLICABLE, $this->getParameterTokens());
@@ -98,13 +117,15 @@ class Sandbox {
       $response->set(Audit::ERROR, $this->getParameterTokens());
     }
 
+    $this->getAssessment()->setPolicyResult($response);
     return $response;
   }
 
   /**
    * Remediate the check if available.
    */
-  public function remediate() {
+  public function remediate()
+  {
     $response = new AuditResponse($this->getPolicy());
     try {
 
@@ -122,35 +143,44 @@ class Sandbox {
       $this->setParameter('exception', $e->getMessage());
       $response->set(Audit::ERROR, $this->getParameterTokens());
     }
-
+    $this->getAssessment()->setPolicyResult($response);
     return $response;
   }
 
   /**
    *
    */
-  public function getAuditor() {
+  public function getAuditor()
+  {
     return $this->audit;
   }
 
   /**
    *
    */
-  public function getPolicy() {
+  public function getPolicy()
+  {
     return $this->policy;
+  }
+
+  public function getAssessment()
+  {
+    return $this->assessment;
   }
 
   /**
    *
    */
-  public function getTarget() {
+  public function getTarget()
+  {
     return $this->target;
   }
 
   /**
    * A wrapper function for traits to use.
    */
-  public function sandbox() {
+  public function sandbox()
+  {
     return $this;
   }
 
@@ -160,7 +190,8 @@ class Sandbox {
    * @return mixed
    * @throws \ErrorException
    */
-  public function __call($method, $args) {
+  public function __call($method, $args)
+  {
     $config = Config::get('Driver');
     if (!isset($config[$method])) {
       throw new \ErrorException("Unknown method $method on " . get_class($this));
@@ -172,7 +203,8 @@ class Sandbox {
   /**
    * Pull the logger from the Container.
    */
-  public function logger() {
+  public function logger()
+  {
     return Container::getLogger();
   }
 
@@ -180,7 +212,8 @@ class Sandbox {
    * Execute a command against the Target.
    * @deprecated
    */
-  public function exec() {
+  public function exec()
+  {
     $args = func_get_args();
     return call_user_func_array([$this->target, 'exec'], $args);
   }
@@ -188,7 +221,8 @@ class Sandbox {
   /**
    * Execute a local command.
    */
-   public function localExec() {
+   public function localExec()
+   {
      $args = func_get_args();
      $driver = new Exec();
      return call_user_func_array([$driver, 'exec'], $args);

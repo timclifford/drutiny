@@ -2,6 +2,7 @@
 
 namespace Drutiny\Command;
 
+use Drutiny\Assessment;
 use Drutiny\Config;
 use Drutiny\Container;
 use Drutiny\Profile\ProfileSource;
@@ -217,7 +218,6 @@ class ProfileRunCommand extends Command {
     // Setup the progress bar to log updates.
     $steps = count($policyDefinitions) * count($uris);
 
-
     $progress = new ProgressBar($output, $steps);
 
     // We don't want to run the progress bar if the output is to stdout.
@@ -237,6 +237,11 @@ class ProfileRunCommand extends Command {
     $end   = new \DateTime($input->getOption('reporting-period-end'));
     $profile->setReportingPeriod($start, $end);
 
+    $policies = [];
+    foreach ($policyDefinitions as $policyDefinition) {
+      $policies[] = $policyDefinition->getPolicy();
+    }
+
     foreach ($uris as $uri) {
       try {
         $target->setUri($uri);
@@ -246,26 +251,10 @@ class ProfileRunCommand extends Command {
         $progress->advance(count($policyDefinitions));
         continue;
       }
-      foreach ($policyDefinitions as $policyDefinition) {
-        $policy = $policyDefinition->getPolicy();
 
-        $progress->setTopic($uri . '][' . $policy->get('title'))
-          ->info("Running policy...");
-
-        // Setup the sandbox to run the assessment.
-        $sandbox = new Sandbox($target, $policy);
-        $sandbox->setReportingPeriod($start, $end);
-
-        $response = $sandbox->run();
-
-        // Attempt remediation.
-        if (!$response->isSuccessful() && $input->getOption('remediate')) {
-          $progress->info("\xE2\x9A\xA0 Remediating " . $policy->get('title'));
-          $response = $sandbox->remediate();
-        }
-        $results[$uri][$policyDefinition->getName()] = $response;
-        $progress->advance();
-      }
+      $assessment = new Assessment($uri);
+      $assessment->assessTarget($target, $policies, $start, $end, $input->getOption('remediate'));
+      $results[$uri] = $assessment;
     }
 
     $progress->finish();

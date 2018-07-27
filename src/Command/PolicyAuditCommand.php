@@ -2,9 +2,11 @@
 
 namespace Drutiny\Command;
 
+use Drutiny\Assessment;
 use Drutiny\Container;
 use Drutiny\Profile;
 use Drutiny\Profile\PolicyDefinition;
+use Drutiny\ProgressBar;
 use Drutiny\RemediableInterface;
 use Drutiny\Report\Format;
 use Drutiny\Report\ProfileRunReport;
@@ -58,7 +60,8 @@ class PolicyAuditCommand extends Command {
         'uri',
         'l',
         InputOption::VALUE_OPTIONAL,
-        'Provide URLs to run against the target. Useful for multisite installs. Accepts multiple arguments.'
+        'Provide URLs to run against the target. Useful for multisite installs. Accepts multiple arguments.',
+        'default'
       )
       ->addOption(
         'reporting-period-start',
@@ -108,35 +111,25 @@ class PolicyAuditCommand extends Command {
 
     // Setup the target.
     $target = TargetRegistry::loadTarget($input->getArgument('target'));
+
+    $assessment = new Assessment($input->getOption('uri'));
     $result = [];
 
     $start = new \DateTime($input->getOption('reporting-period-start'));
     $end   = new \DateTime($input->getOption('reporting-period-end'));
     $profile->setReportingPeriod($start, $end);
 
+    $policies = [];
     foreach ($profile->getAllPolicyDefinitions() as $definition) {
-      $policy = $definition->getPolicy();
-
-      // Generate the sandbox to execute the check.
-      $sandbox = new Sandbox($target, $policy);
-      $sandbox->setReportingPeriod($start, $end);
-
-      if ($uri = $input->getOption('uri')) {
-        $target->setUri($uri);
-      }
-
-      $response = $sandbox->run();
-
-      // Attempt remeidation.
-      if (!$response->isSuccessful() && $input->getOption('remediate') && ($sandbox->getAuditor() instanceof RemediableInterface)) {
-        $response = $sandbox->remediate();
-      }
-
-      $result[$policy->get('name')] = $response;
+      $policies[] = $definition->getPolicy();
     }
 
+    $progress = new ProgressBar($output, count($policies));
+    $assessment->assessTarget($target, $policies, $start, $end, $input->getOption('remediate'));
+    $progress->finish();
+
     $profile->getFormatOption('markdown')
-            ->render($profile, $sandbox->getTarget(), [$result]);
+            ->render($profile, $target, [$assessment]);
   }
 
 }
