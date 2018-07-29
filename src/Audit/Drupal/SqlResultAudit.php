@@ -2,7 +2,7 @@
 
 namespace Drutiny\Audit\Drupal;
 
-use Drutiny\Audit\AbstractComparison;
+use Drutiny\Audit\AbstractAnalysis;
 use Drutiny\Sandbox\Sandbox;
 use Drutiny\Annotation\Param;
 use Drutiny\Annotation\Token;
@@ -15,39 +15,28 @@ use Drutiny\Annotation\Token;
  *  type = "string"
  * )
  * @Param(
- *  name = "field",
- *  description = "The name of the field in the result row to pull the value from",
- *  type = "string"
- * )
- * @Param(
- *  name = "value",
- *  description = "The value to compare against",
- *  type = "mixed"
- * )
- * @Param(
- *  name = "comp_type",
- *  description = "The comparison operator to use for the comparison.",
+ *  name = "expression",
+ *  description = "An expression language expression to evaluate a successful auditable outcome.",
  *  type = "string",
- *  default = "="
- * )
- * @Param(
- *  name = "default_value",
- *  description = "If no SQL result set is returned, what should the default value of the field be?",
- *  type = "string",
- *  default = ""
+ *  default = true
  * )
  * @Token(
  *  name = "result",
  *  description = "The comparison operator to use for the comparison.",
  *  type = "string"
  * )
+ * @Token(
+ *  name = "results",
+ *  description = "The record set.",
+ *  type = "string"
+ * )
  */
-class SqlResultAudit extends AbstractComparison {
+class SqlResultAudit extends AbstractAnalysis {
 
   /**
    *
    */
-  public function audit(Sandbox $sandbox)
+  public function gather(Sandbox $sandbox)
   {
     $query = $sandbox->getParameter('query');
 
@@ -55,10 +44,25 @@ class SqlResultAudit extends AbstractComparison {
     foreach ($sandbox->getParameterTokens() as $key => $value) {
         $tokens[':' . $key] = $value;
     }
-    $query = strtr($query . ' \G', $tokens);
+    foreach ($sandbox->drush(['format' => 'json'])->status() as $key => $value) {
+      if (!is_array($value)) {
+        $tokens[':' . $key] = $value;
+      }
+      // TODO: Support array values.
+    }
+    $query = strtr($query, $tokens);
 
-    if (!preg_match_all('/^SELECT (.*) FROM/', $query, $fields)) {
+    if (!preg_match_all('/^SELECT( DISTINCT)? (.*) FROM/', $query, $fields)) {
       throw new \Exception("Could not parse fields from SQL query: $query.");
+    }
+    $fields = array_map('trim', explode(',', $fields[2][0]));
+    foreach ($fields as &$field) {
+      if ($idx = strpos($field, ' as ')) {
+        $field = substr($field, $idx + 4);
+      }
+      elseif (preg_match('/[ \(\)]/', $field)) {
+        throw new \Exception("SQL query contains an non-table field without an alias: '$field.'");
+      }
     }
 
     $output = $sandbox->drush()->sqlq($query);
@@ -66,33 +70,16 @@ class SqlResultAudit extends AbstractComparison {
 
     while ($line = array_shift($output))
     {
-      if (preg_match('/^[\*]+ ([0-9]+)\. row [\*]+$/', $line, $matches)) {
-        $idx = $matches[1];
-      }
-      else {
-        list($field, $value) = explode(':', trim($line), 2);
-        $results[$idx][$field] = $value;
-      }
+      $values = array_map('trim', explode("\t", $line));
+      $results[] = array_combine($fields, $values);
     }
 
-    $field = $sandbox->getParameter('field');
-
-    if (empty($results)) {
-      $results[] = [
-        $field => $sandbox->getParameter('default_value'),
-      ];
-    }
+    $sandbox->setParameter('count', count($results));
+    $sandbox->setParameter('results', $results);
 
     $row = array_shift($results);
 
-    $field = $sandbox->getParameter('field');
-    if (!isset($row[$field])) {
-      throw new \Exception("Did not find $field in SQL query: $query.");
-    }
-
-     $sandbox->setParameter('result', $row);
-
-    return $this->compare($sandbox->getParameter('value'), $row[$field], $sandbox);
+    $sandbox->setParameter('first_row', $row);
   }
 
 }
