@@ -240,10 +240,13 @@ class AuditResponse {
         break;
 
       case ($this->state === Audit::ERROR):
+        $tokens = [
+          'exception' => isset($this->tokens['exception']) ? $this->tokens['exception'] : 'Unknown exception occured.'
+        ];
         $summary[] = strtr('Could not determine the state of ' . $this->getTitle() . ' due to an error:
 ```
 exception
-```', $this->tokens);
+```', $tokens);
         break;
 
       case ($this->state === Audit::WARNING):
