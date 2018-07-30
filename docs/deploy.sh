@@ -8,7 +8,7 @@ export GIT_SSH_COMMAND="ssh -i $IDENTITY_FILE"
 
 sudo pip install -r docs/requirements.txt
 composer config minimum-stability dev
-composer require --prefer-stable  drutiny/plugin-distro-common drutiny/acquia drutiny/sumologic drutiny/http drutiny/plugin-drupal-7 drutiny/plugin-drupal-8 drutiny/cloudflare
+composer require --prefer-stable drutiny/acquia drutiny/sumologic drutiny/http drutiny/plugin-drupal-7 drutiny/plugin-drupal-8 drutiny/cloudflare
 
 ./bin/build_docs
 mkdocs build --clean
