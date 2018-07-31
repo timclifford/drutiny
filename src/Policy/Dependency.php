@@ -74,12 +74,16 @@ class Dependency {
   public function execute(Sandbox $sandbox)
   {
     $language = new ExpressionLanguage($sandbox);
-
     Container::getLogger()->info("Evaluating expression: " . $language->compile($this->expression));
 
-    if ($return = $language->evaluate($this->expression)) {
-      Container::getLogger()->debug("Expression PASSED: $return");
-      return $return;
+    try {
+      if ($return = $language->evaluate($this->expression)) {
+        Container::getLogger()->debug("Expression PASSED: $return");
+        return $return;
+      }
+    }
+    catch (\Exception $e) {
+      Container::getLogger()->warning($e->getMessage());
     }
     Container::getLogger()->debug("Expression FAILED.");
     throw new DependencyException($this);
