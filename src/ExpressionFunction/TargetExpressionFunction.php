@@ -20,7 +20,7 @@ class TargetExpressionFunction implements ExpressionFunctionInterface {
 
     $parameter = str_replace('"', '', $parameter);
 
-    $value = "<Target Unknown Parameter: $parameter>";
+    $value = "<Target Unknown Parameter: $parameter. Available: " . implode(', ', array_keys($metadata)) . ">";
 
     if (isset($metadata[$parameter])) {
       $value = call_user_func([$target, $metadata[$parameter]]);

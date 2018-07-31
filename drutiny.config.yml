@@ -43,3 +43,4 @@ ExpressionFunction:
   - Drutiny\ExpressionFunction\SemverGtExpressionFunction
   - Drutiny\ExpressionFunction\SemverGteExpressionFunction
   - Drutiny\ExpressionFunction\TargetExpressionFunction
+  - Drutiny\ExpressionFunction\DrupalModuleEnabledExpressionFunction
