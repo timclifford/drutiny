@@ -10,6 +10,12 @@ root:
       _type: text
       _description: The machine name to programmatically reference a policy.
       _required: true
+    language:
+      _type: text
+      _description: The language code the policy is provided for.
+    signature:
+      _type: text
+      _description: A unique string that expresses the signature of the policy.
     source:
       _type: text
       _description: The name of the PolcySource that provides this policy.
