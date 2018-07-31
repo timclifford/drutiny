@@ -18,15 +18,6 @@ trait DrushTargetMetadataTrait {
   /**
    * {@inheritdoc}
    */
-  public function metadataProjectList()
-  {
-    $drush = DrushRouter::createFromTarget($this, ['format' => 'json']);
-    return $drush->pmList();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function metadataPhpVersion()
   {
     $drush = DrushRouter::createFromTarget($this);

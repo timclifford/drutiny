@@ -22,12 +22,6 @@ interface DrushTargetInterface extends TargetInterface {
   public function metadataDrushStatus();
 
   /**
-   * List of modules and versions from the site.
-   * @Metadata(name = "drush.pm-list")
-   */
-  public function metadataProjectList();
-
-  /**
    * Get the PHP version in use.
    * @Metadata(name = "php_version")
    */
