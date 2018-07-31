@@ -111,6 +111,7 @@ class PolicyAuditCommand extends Command {
 
     // Setup the target.
     $target = TargetRegistry::loadTarget($input->getArgument('target'));
+    $target->setUri($input->getOption('uri'));
 
     $assessment = new Assessment($input->getOption('uri'));
     $result = [];
