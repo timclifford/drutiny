@@ -107,7 +107,7 @@ class Policy extends Policy\PolicyBase {
       $schema->validate($info);
     }
     catch (NodeValidatorException $e) {
-      throw new PolicyValidationException($info, $e);
+      throw new ValidationException($info, $e);
     }
 
     $severity = isset($info['severity']) ? $info['severity'] : self::SEVERITY_NORMAL;
