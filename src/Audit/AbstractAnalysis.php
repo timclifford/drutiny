@@ -6,6 +6,7 @@ use Drutiny\Audit;
 use Drutiny\Sandbox\Sandbox;
 use Drutiny\Annotation\Param;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+use Symfony\Component\ExpressionLanguage\ExpressionFunction;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -34,7 +35,10 @@ abstract class AbstractAnalysis extends Audit {
   final public function audit(Sandbox $sandbox)
   {
     $this->gather($sandbox);
+
     $expressionLanguage = new ExpressionLanguage();
+    $expressionLanguage->addFunction(ExpressionFunction::fromPhp('in_array'));
+
     $variables  = $sandbox->getParameterTokens();
     $sandbox->logger()->info(__CLASS__ . ': ' . Yaml::dump($variables));
 
