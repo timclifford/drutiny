@@ -5,8 +5,7 @@ namespace Drutiny\Audit;
 use Drutiny\Audit;
 use Drutiny\Sandbox\Sandbox;
 use Drutiny\Annotation\Param;
-use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
-use Symfony\Component\ExpressionLanguage\ExpressionFunction;
+use Drutiny\ExpressionLanguage;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -36,21 +35,20 @@ abstract class AbstractAnalysis extends Audit {
   {
     $this->gather($sandbox);
 
-    $expressionLanguage = new ExpressionLanguage();
-    $expressionLanguage->addFunction(ExpressionFunction::fromPhp('in_array'));
+    $expressionLanguage = new ExpressionLanguage($sandbox);
 
     $variables  = $sandbox->getParameterTokens();
     $sandbox->logger()->info(__CLASS__ . ': ' . Yaml::dump($variables));
 
     $expression = $sandbox->getParameter('not_applicable', 'false');
     $sandbox->logger()->info(__CLASS__ . ': ' . $expression);
-    if ($expressionLanguage->evaluate($expression, $variables)) {
+    if (@$expressionLanguage->evaluate($expression, $variables)) {
       return self::NOT_APPLICABLE;
     }
 
     $expression = $sandbox->getParameter('expression', 'true');
     $sandbox->logger()->info(__CLASS__ . ': ' . $expression);
-    return $expressionLanguage->evaluate($expression, $variables);
+    return @$expressionLanguage->evaluate($expression, $variables);
   }
 }
 
