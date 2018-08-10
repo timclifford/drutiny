@@ -9,7 +9,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Drutiny\Registry;
 use Drutiny\Profile\ProfileSource;
 use Drutiny\PolicySource\PolicySource;
+use Drutiny\Container;
+use Drutiny\ExpressionFunction\DrutinyExpressionLanguageProvider;
 use Symfony\Component\Finder\Finder;
+use Doctrine\Common\Annotations\AnnotationReader;
 
 /**
  * Helper for building checks.
@@ -32,7 +35,8 @@ class BuildDocsCommand extends Command {
     $this->clean()
          ->setup()
          ->buildPolicyLibrary($output)
-         ->buildAuditLibrary($output);
+         ->buildAuditLibrary($output)
+         ->buildExpressionLanguageLibrary();
   }
 
   protected function buildAuditLibrary(OutputInterface $output)
@@ -77,57 +81,63 @@ class BuildDocsCommand extends Command {
         $nav_item = 'General';
       }
       $nav[] = [$nav_item => $filepath];
-      file_put_contents("docs/$filepath", implode("\n\n", $list));
-      $output->writeln("Written docs/$filepath.");
+      $this->write($filepath, implode("\n\n", $list));
     }
 
     $mkdocs = Yaml::parse(file_get_contents('mkdocs.yml'));
     $mkdocs['pages'][4] = ['Audit Library' => $nav];
-    file_put_contents('mkdocs.yml', Yaml::dump($mkdocs, 6));
-    $output->writeln("Updated mkdocs.yml");
+    $this->write('../mkdocs.yml', Yaml::dump($mkdocs, 6));
 
     return $this;
   }
 
   protected function buildPolicyLibrary(OutputInterface $output)
   {
-    $policies = PolicySource::loadAll();
+    $source = PolicySource::getSource('localfs');
+    $list = $source->getList();
 
     $toc = [];
     $pages = [];
 
-    foreach ($policies as $policy) {
-      $docs = new PolicyDocsGenerator();
-      $package = $this->findPackage($policy->get('filepath'));
-      $pages[$package][$policy->get('name')] = $docs->buildPolicyDocumentation($policy);
+    foreach ($list as $policy) {
+      try {
+        $policy = $source->load($policy);
+        $docs = new PolicyDocsGenerator();
+        $pages[$policy->get('name')] = $docs->buildPolicyDocumentation($policy);
+      }
+      catch (\ReflectionException $e) {
+        Container::getLogger()->warning($e->getMessage());
+      }
     }
 
-    $nav = [['Overview' => 'policy-library.md']];
-    foreach ($pages as $package => $list) {
-      ksort($list);
-
-      $filepath = 'policies/' . str_replace('/', '-', $package) . '.md';
-      file_put_contents("docs/$filepath", implode("\n\n", $list));
-      $output->writeln("Written docs/$filepath.");
-      $nav[] = [$package => $filepath];
-    }
-
-    $md = ['# Policy Library'];
-    $md[] = '';
-    $md[] = 'Title | Name | Package';
-    $md[] = '-- | -- | --';
-    ksort($toc);
-    foreach ($toc as $item) {
-      $filepath = 'policies/' . str_replace('/', '-', $item['package']) . '.md';
-      $md[] = "[{$item['title']}]($filepath#{$item['link']}) | {$item['name']} | [{$item['package']}](https://github.com/{$item['package']})";
-    }
-    file_put_contents('docs/policy-library.md', implode(PHP_EOL, $md));
-
-    $mkdocs = Yaml::parse(file_get_contents('mkdocs.yml'));
-    $mkdocs['pages'][3] = ['Policy Library' => $nav];
-    file_put_contents('mkdocs.yml', Yaml::dump($mkdocs, 6));
-    $output->writeln("Updated mkdocs.yml");
+    ksort($pages);
+    $this->write('policy-library.md', implode("\n\n", $pages));
     return $this;
+  }
+
+  protected function buildExpressionLanguageLibrary()
+  {
+    $expressions = DrutinyExpressionLanguageProvider::registry();
+    $reader = new AnnotationReader();
+
+    $md = ['# Expression Language Syntax'];
+    $md[] = '';
+    $md[] = 'Drutiny uses Symfony\'s [Expression Language](http://symfony.com/doc/3.4/components/expression_language.html) ';
+    $md[] = 'to enable Policies to provide depenency management and in some cases';
+    $md[] = 'custom analysis (subject to if the Audit supports it).';
+    $md[] = '';
+    $md[] = 'The table below documents syntax Drutiny provides in addition to those';
+    $md[] = 'provided by Symfony.';
+    $md[] = '';
+    $md[] = 'Function | Usage example | Description';
+    $md[] = '-- | -- | --';
+
+    foreach ($expressions as $class) {
+      $reflection = new \ReflectionClass($class);
+      $annotation = $reader->getClassAnnotation($reflection, 'Drutiny\Annotation\ExpressionSyntax');
+      $md[] = implode(' | ', [$annotation->name, '`' . $annotation->usage . '`', $annotation->description]);
+    }
+    $this->write('explang-library.md', implode(PHP_EOL, $md));
   }
 
   protected function clean()
@@ -137,7 +147,8 @@ class BuildDocsCommand extends Command {
       'docs/audits',
       'docs/api',
       'docs/img',
-      'docs/index.md'
+      'docs/index.md',
+      'docs/explang-library.md'
     ], 'file_exists');
 
     foreach ($paths as $path) {
@@ -170,6 +181,18 @@ class BuildDocsCommand extends Command {
       $json = file_get_contents($filepath . '/composer.json');
       $composer = json_decode($json, TRUE);
       return $composer['name'];
+  }
+
+  protected function write($filename, $contents)
+  {
+    $filename = "docs/$filename";
+    if (file_put_contents($filename, $contents)) {
+      $length = strlen($contents);
+      Container::getLogger()->info("Written $filename ($length)");
+      return;
+    }
+    Container::getLogger()->error("Writting $filename failed.");
+    return $this;
   }
 
 }

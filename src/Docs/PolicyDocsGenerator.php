@@ -10,6 +10,8 @@ class PolicyDocsGenerator extends DocsGenerator {
   public function buildPolicyDocumentation(\Drutiny\Policy $policy)
   {
     $filepath = $policy->get('filepath');
+    $root = $this->findRoot($filepath);
+    $relative_path = str_replace($root, '', $filepath);
     $package = $this->findPackage($filepath);
 
     $md = [];
@@ -18,14 +20,7 @@ class PolicyDocsGenerator extends DocsGenerator {
       'name' => $policy->get('name'),
     ]);
 
-    $toc[$policy->get('title')] = [
-      'title' => $policy->get('title'),
-      'name' => $policy->get('name'),
-      'package' => $package,
-      'link' => str_replace(' ', '-', trim(preg_replace('/[^a-z0-9 \-]/', '', strtolower($link)))),
-    ];
-
-    $md[] = "**Name**: `" . $policy->get('name') . "`  ";
+    $md[] = "**Name**: `" . $policy->get('name') . "` [[View Source](https://github.com/" . $package . "/tree/master" . $relative_path . ")]  ";
     $md[] = "**Package**: `$package`  ";
     $md[] = "**Class**: `" . $policy->get('class') . "`";
     $md[] = '';

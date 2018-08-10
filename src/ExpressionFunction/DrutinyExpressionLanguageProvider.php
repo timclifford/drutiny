@@ -18,7 +18,7 @@ class DrutinyExpressionLanguageProvider implements ExpressionFunctionProviderInt
     $this->sandbox = $sandbox;
   }
 
-  public function getFunctions()
+  static public function registry()
   {
     static $registry = [];
     if (empty($registry)) {
@@ -38,10 +38,15 @@ class DrutinyExpressionLanguageProvider implements ExpressionFunctionProviderInt
         $registry[$annotation->name] = $class;
       }
     }
+    return $registry;
+  }
+
+  public function getFunctions()
+  {
 
     $functions = [];
 
-    foreach ($registry as $name => $class) {
+    foreach ($this->registry() as $name => $class) {
       $functions[] = new ExpressionFunction($name,
       // Compile function
       function () use ($class)

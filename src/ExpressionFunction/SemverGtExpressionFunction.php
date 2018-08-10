@@ -7,7 +7,11 @@ use Drutiny\Sandbox\Sandbox;
 use Composer\Semver\Comparator;
 
 /**
- * @ExpressionSyntax(name = "semver_gt")
+ * @ExpressionSyntax(
+ * name = "semver_gt",
+ * usage = "semver_gt('8.1.4', '8.4.x-alpha1')",
+ * description = "Use composer SemVer (semantic versioning) to evaluate if the first argument is greater than (gt) the second argument."
+ * )
  */
 class SemverGtExpressionFunction implements ExpressionFunctionInterface {
   static public function compile(Sandbox $sandbox)

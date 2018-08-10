@@ -8,7 +8,11 @@ use Composer\Semver\Comparator;
 use Doctrine\Common\Annotations\AnnotationReader;
 
 /**
- * @ExpressionSyntax(name = "target")
+ * @ExpressionSyntax(
+ * name = "target",
+ * usage = "target('php_version')",
+ * description = "Obtain a variable from the assessed target. See `target:metadata` for all available variables."
+ * )
  */
 class TargetExpressionFunction implements ExpressionFunctionInterface {
   static public function compile(Sandbox $sandbox)

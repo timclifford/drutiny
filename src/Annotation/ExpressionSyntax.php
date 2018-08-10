@@ -7,4 +7,6 @@ namespace Drutiny\Annotation;
  */
 class ExpressionSyntax {
   public $name;
+  public $usage;
+  public $description;
 }

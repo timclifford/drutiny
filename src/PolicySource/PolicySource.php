@@ -73,9 +73,17 @@ class PolicySource {
    */
   public static function loadAll()
   {
-    $list = [];
+    static $list = [];
+    if (!empty($list)) {
+      return $list;
+    }
     foreach (self::getPolicyList() as $definition) {
-      $list[$definition['name']] = self::loadPolicyByName($definition['name']);
+      try {
+        $list[$definition['name']] = self::loadPolicyByName($definition['name']);
+      }
+      catch (\Exception $e) {
+        Container::getLogger()->warning("[{$definition['name']}] " . $e->getMessage());
+      }
     }
     return $list;
   }

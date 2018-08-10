@@ -2,6 +2,9 @@ site_name: Drutiny
 site_dir: docs_html
 repo_url: 'https://github.com/drutiny/drutiny'
 site_description: 'This is a generic Drupal site auditing and optional remediation tool.'
+markdown_extensions:
+  - toc:
+      baselevel: 2
 theme: material
 google_analytics:
     - UA-116046012-1
@@ -19,7 +22,7 @@ pages:
     -
         Usage:
             -
-                Getting Started: getting-started.md
+                'Getting Started': getting-started.md
             -
                 Reports: reports.md
             -
@@ -43,13 +46,11 @@ pages:
             -
                 'Domain Provider': domains.md
             -
-                'Charts': charts.md
+                Charts: charts.md
+            -
+                'Expression Language Syntax': explang-library.md
     -
-        'Policy Library':
-            -
-                Overview: policy-library.md
-            -
-                drutiny/drutiny: policies/drutiny-drutiny.md
+        'Policy Library': policy-library.md
     -
         'Audit Library':
             -
@@ -64,3 +65,7 @@ pages:
                 Drupal: audits/DrutinyAuditDrupal.md
             -
                 Filesystem: audits/DrutinyAuditFilesystem.md
+            -
+                Template: audits/DrutinyAuditTemplate.md
+            -
+                'Http ': audits/DrutinyHttpAudit.md

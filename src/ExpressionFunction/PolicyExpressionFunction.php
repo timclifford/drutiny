@@ -11,7 +11,11 @@ use Composer\Semver\Comparator;
 use Doctrine\Common\Annotations\AnnotationReader;
 
 /**
- * @ExpressionSyntax(name = "policy")
+ * @ExpressionSyntax(
+ * name = "policy",
+ * usage = "policy('Test:Pass')",
+ * description = "Returns the outcome of a given policy audit."
+ * )
  */
 class PolicyExpressionFunction implements ExpressionFunctionInterface {
   static public function compile(Sandbox $sandbox)

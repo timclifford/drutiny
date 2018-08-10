@@ -2,28 +2,21 @@
 <?php
 
 use Symfony\Component\Console\Application;
-use Composer\Autoload\ClassLoader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 
 
 
+$timezone = 'UTC';
+
 // Set the timezone to the local OS if supported.
 if (file_exists('/etc/localtime')) {
   $systemZoneName = readlink('/etc/localtime');
-  $city = basename($systemZoneName);
-  if ($city == 'UTC') {
-    $systemZoneName = $city;
+  if (strpos($systemZoneName, 'zoneinfo') !== FALSE) {
+    $timezone = substr($systemZoneName, strpos($systemZoneName, 'zoneinfo') + 9);
   }
-  else {
-    $country = basename(dirname($systemZoneName));
-    $systemZoneName = implode('/', [$country, $city]);
-  }
-  date_default_timezone_set($systemZoneName);
 }
-// Fallback to UTC.
-else {
-  date_default_timezone_set('UTC');
-}
+
+date_default_timezone_set($timezone);
 
 
 /**
@@ -31,6 +24,8 @@ else {
  */
 $loader = require 'vendor/autoload.php';
 AnnotationRegistry::registerLoader([$loader, 'loadClass']);
+
+
 
 $application = new Application();
 $application->add(new Drutiny\Docs\BuildDocsCommand());

@@ -2,7 +2,7 @@
 
 A Drutiny `audit` is a PHP class that executes a `policy` defined in YAML.
 Audit classes do the heavy lifting for a policy and are ideally abstract enough
-to support multiple policies. Such an example is the [Module Enabled](https://github.com/drutiny/drutiny/blob/2.x/src/Audit/Drupal/ModuleEnabled.php)
+to support multiple policies. Such an example is the [Module Enabled](https://github.com/drutiny/drutiny/blob/2.3.x/src/Audit/Drupal/ModuleEnabled.php)
 class which checks if a module is enabled. However, the module it checks is set
 by the policy. In this way, may policies can be created using the same audit
 class.

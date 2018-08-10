@@ -10,7 +10,11 @@ use Drutiny\Target\DrushTargetInterface;
 use Drutiny\Driver\DrushRouter;
 
 /**
- * @ExpressionSyntax(name = "drupal_module_enabled")
+ * @ExpressionSyntax(
+ * name = "drupal_module_enabled",
+ * usage = "drupal_module_enabled('page_cache')",
+ * description = "Returns TRUE if the module is enabled. Otherwise FALSE."
+ * )
  */
 class DrupalModuleEnabledExpressionFunction implements ExpressionFunctionInterface {
   static public function compile(Sandbox $sandbox)

@@ -125,7 +125,7 @@ can be registered.
 
 Specify the content displayed in an
 HTML report and the order that it displays in. By default, Drutiny will load in
-the contents from [content.default.yml](https://github.com/drutiny/drutiny/blob/2.2.x/Profiles/content.default.yml).
+the contents from [content.default.yml](https://github.com/drutiny/drutiny/blob/2.3.x/Profiles/content.default.yml).
 
 The content property is an array of sections. Each section specifies a `heading`
 and `body`. Each section will roll up into a Table of Contents in the report.
