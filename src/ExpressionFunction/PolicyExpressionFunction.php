@@ -14,7 +14,7 @@ use Doctrine\Common\Annotations\AnnotationReader;
  * @ExpressionSyntax(
  * name = "policy",
  * usage = "policy('Test:Pass')",
- * description = "Returns the outcome of a given policy audit."
+ * description = "Returns the AuditReponse type of an audited policy."
  * )
  */
 class PolicyExpressionFunction implements ExpressionFunctionInterface {

@@ -124,14 +124,30 @@ tags:
 ```
 
 ### depends
-Policies can depend on other policies meaning that all policies specified in this
-field **must** pass successfully for this policy to pass.
+The depends directive allows policies to only apply if one or more conditions are
+meet such as an enabled module or the value of a target environmental variable (like OS).
+
+Drutiny uses [Symfony Expression Language](https://symfony.com/doc/3.4/components/expression_language.html)
+to evaluate the outcome of each dependency. Drutiny extends this language to provide
+additional functions available in the evaluation process. See more docs [Expression Language](explang-library.md).
 
 ```yaml
 depends:
-  - fs:largeFiles
-  - Drupal:SyslogEnabled
+  - expression: Policy('fs:largeFiles') == 'success'
+    on_fail: 'error'
+  - expression: drupal_module_enabled('syslog') && semver_gt(target('php_version'), '5.5')
 ```
+
+Each depends item must have an associated `expression` key with the expression to evaluate.
+Optionally, an `on_fail` property can be added to indicate the failure behaviour:
+
+#### On fail
+
+Value |  Behaviour |
+----- | ----------
+`fail`  | Omit policy from report
+`error` | Report policy as error
+`report_only` | Report as not applicable
 
 ### severity
 Not all policies are of equal importance. Severity allows you to specify how
@@ -174,26 +190,6 @@ for use in the render.
 
 ```bash
 $ drutiny policy:info fs:largeFiles
- ------------- ----------------------------------------------------------------------------------------------
-  Check         Large public files
- ------------- ----------------------------------------------------------------------------------------------
-  Description   Large static assets should ideally be housed in other services, e.g. Amazon S3
-                (for files) or Youtube (for videos).
- ------------- ----------------------------------------------------------------------------------------------
-  Remediable    No
- ------------- ----------------------------------------------------------------------------------------------
-  Parameters    max_size:integer
-                  Report files larger than this value measured in megabytes.
- ------------- ----------------------------------------------------------------------------------------------
-  Tokens        max_size:integer
-                  Report files larger than this value measured in megabytes.
-                issues:array
-                  A list of files that reach the max file size.
-                plural:string
-                  This variable will contain an 's' if there is more than one issue found.
- ------------- ----------------------------------------------------------------------------------------------
-  Location      /mnt/drutiny/Policy/fsLargeFiles.policy.yml
- ------------- ----------------------------------------------------------------------------------------------
  ```
 
  You can see in the above example output, that `fs:largeFiles` contains three

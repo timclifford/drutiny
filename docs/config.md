@@ -82,6 +82,19 @@ CredentialSchema:
 
 Learn more about the [Credential Manager](creds.md)
 
+## ExpressionFunction
+
+Allow you to extend Drutiny's expression language with additional functions.
+
+```yaml
+ExpressionFunction:
+  - Drutiny\ExpressionFunction\PolicyExpressionFunction
+  - Drutiny\ExpressionFunction\SemverGtExpressionFunction
+  - Drutiny\ExpressionFunction\SemverGteExpressionFunction
+  - Drutiny\ExpressionFunction\TargetExpressionFunction
+  - Drutiny\ExpressionFunction\DrupalModuleEnabledExpressionFunction
+```
+
 ## Driver
 
 The `Driver` directive provides access to a driver directly from the [Sandbox](sandbox.md).
