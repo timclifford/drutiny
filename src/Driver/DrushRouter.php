@@ -31,24 +31,36 @@ class DrushRouter {
   public static function createFromTarget(TargetInterface $target, $options = [])
   {
     try {
-      $binary = trim($target->exec('which drush-launcher || which drush'));
-      $output = $target->exec($binary . ' --version');
-      preg_match('/Drush Version.+: +([0-9\.a-z]+)/', $output, $match);
+      $info = $target->getOptions();
+      $launchers = ['drush-launcher', 'drush.launcher', 'drush'];
+      $binary = 'which ' . implode(' || which', $launchers);
+
+      $info = trim($target->exec('$(' . $binary . ') -r ' . $info['root'] . ' status --format=json'));
+      $info = json_decode($info, TRUE);
+
+      // Hack for Acquia Cloud to use drush9 if drush version reported is v9.
+      if (Comparator::greaterThanOrEqualTo($info['drush-version'], '9.0.0')) {
+        array_unshift($launchers, 'drush9');
+        $binary = 'which ' . implode(' || which', $launchers);
+      }
+
+      $binary = trim($target->exec($binary));
+      $info = trim($target->exec($binary . ' -r ' . $info['root'] . ' status --format=json'));
+      $info = json_decode($info, TRUE);
     }
     catch (ProcessFailedException $e) {
       Container::getLogger()->error($e->getProcess()->getOutput());
       throw $e;
     }
 
+    switch (TRUE) {
+      case Comparator::greaterThanOrEqualTo($info['drush-version'], '9.0.0'):
+        $driver = Drush9Driver::createFromTarget($target, $binary);
+        break;
 
-    // if (Comparator::greaterThanOrEqualTo($match[1], '9.0.0')) {
-    //   // Use Drush 9 Driver
-    //   // $driver = new Drush9Driver($sandbox, $binary);
-    // }
-    // else {
-      $driver = DrushDriver::createFromTarget($target, $binary);
-    // }
-
+      default:
+        $driver = DrushDriver::createFromTarget($target, $binary);
+    }
     $driver->setOptions($options);
     return $driver;
   }

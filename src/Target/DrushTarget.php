@@ -56,14 +56,14 @@ class DrushTarget extends Target implements DrushTargetInterface, DrushExecutabl
   /**
    * {@inheritdoc}
    */
-  public function runDrushCommand($method, array $args, array $options, $pipe = '') {
-    $process = new Exec();
-    return $process->exec('@pipe drush @alias @options @method @args', [
+  public function runDrushCommand($method, array $args, array $options, $pipe = '', $bin = 'drush') {
+    return $this->exec('@pipe @drush @alias @options @method @args', [
       '@method' => $method,
       '@args' => implode(' ', $args),
       '@options' => implode(' ', $options),
       '@alias' => $this->getAlias(),
       '@pipe' => $pipe,
+      '@drush' => $bin,
     ]);
   }
 

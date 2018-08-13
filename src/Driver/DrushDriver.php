@@ -98,7 +98,7 @@ class DrushDriver {
   protected function runCommand($method, $args, $pipe = '') {
     // Hand task off to Target directly if it supports it.
     if ($this->target instanceof DrushExecutableTargetInterface) {
-      return $this->target->runDrushCommand($method, $args, $this->getOptions(), $pipe);
+      return $this->target->runDrushCommand($method, $args, $this->getOptions(), $pipe, $this->drushBin);
     }
     return $this->target->exec('@pipe @bin @alias @options @method @args', [
       '@method' => $method,
