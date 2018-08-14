@@ -36,9 +36,9 @@ class DrushRouter {
       $binary = 'which ' . implode(' || which ', $launchers);
 
       $info = trim($target->exec('$(' . $binary . ') -r ' . $info['root'] . ' status --format=json'));
-      $info = json_decode($info, TRUE);
+      $info = \Drutiny\Utility::jsonDecodeDirty($info, TRUE);
 
-      // Hack for Acquia Cloud to use drush9 if drush version reported is v9.
+      // Hack for Acquia Cloud to force use drush9 if drush version reported is v9.
       if (Comparator::greaterThanOrEqualTo($info['drush-version'], '9.0.0')) {
         array_unshift($launchers, 'drush9');
         $binary = 'which ' . implode(' || which ', $launchers);
