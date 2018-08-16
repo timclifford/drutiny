@@ -42,9 +42,17 @@ class PolicySource {
   public static function getPolicyList($include_invalid = FALSE)
   {
     static $list, $available_list;
-    if (!empty($list)) {
+
+    if ($include_invalid && !empty($list)) {
       return $list;
     }
+
+    if (!empty($available_list)) {
+      return $available_list;
+    }
+
+    $timer = Container::utility()->timer()->start();
+    Container::getLogger()->notice('Loading profile sources');
 
     $lists = [];
     foreach (self::getSources() as $source) {
@@ -53,13 +61,12 @@ class PolicySource {
         $list[$name] = $item;
       }
     }
+    $timer->stop();
+
+    Container::getLogger()->info(sprintf("Loaded policy sources in %ss", $timer->getTime()));
 
     if ($include_invalid) {
       return $list;
-    }
-
-    if (!empty($available_list)) {
-      return $available_list;
     }
 
     $available_list = array_filter($list, function ($listedPolicy) {
