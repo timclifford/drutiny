@@ -126,6 +126,7 @@ class PolicyAuditCommand extends Command {
     }
 
     $progress = new ProgressBar($output, count($policies));
+    $progress->start();
     $assessment->assessTarget($target, $policies, $start, $end, $input->getOption('remediate'));
     $progress->finish();
 

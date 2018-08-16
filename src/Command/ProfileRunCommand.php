@@ -227,7 +227,7 @@ class ProfileRunCommand extends Command {
       $progress->disable();
     }
     // Do not use the progress bar when using a high verbosity logging output.
-    elseif ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+    elseif ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
       $progress->disable();
     }
 
@@ -241,6 +241,8 @@ class ProfileRunCommand extends Command {
     foreach ($policyDefinitions as $policyDefinition) {
       $policies[] = $policyDefinition->getPolicy();
     }
+
+    $progress->start();
 
     foreach ($uris as $uri) {
       try {
