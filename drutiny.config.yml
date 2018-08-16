@@ -20,7 +20,7 @@ Template:
   - src/Report/templates/html
   - src/Report/templates/markdown
 DomainList:
-  YamlFile: Drutiny\DomainList\DomainListYamlFile
+  yaml: Drutiny\DomainList\DomainListYamlFile
 Format:
   html: Drutiny\Report\Format\HTML
   json: Drutiny\Report\Format\JSON
