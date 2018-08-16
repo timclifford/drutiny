@@ -34,8 +34,11 @@ class Exec {
     $process = new Process($command);
     $process->setTimeout(600);
 
-    $watchdog->info($command);
+    $watchdog->info(__CLASS__ . ': ' . $command);
+    $timer = Container::utility()->timer()->start();
     $process->run();
+    $timer->stop();
+    Container::getLogger()->info(sprintf((__CLASS__ . ": Command executed in %ss", $timer->getTime()));
 
     // Executes after the command finishes.
     if (!$process->isSuccessful()) {
