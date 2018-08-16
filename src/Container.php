@@ -31,6 +31,11 @@ class Container {
     return Config::get($bin);
   }
 
+  public static function utility()
+  {
+    return new Utility;
+  }
+
   public static function getLogger()
   {
     if (!(self::setLogger() instanceof LoggerInterface)) {
