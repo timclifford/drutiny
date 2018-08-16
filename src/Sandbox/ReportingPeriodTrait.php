@@ -21,7 +21,7 @@ trait ReportingPeriodTrait {
 
     public function setReportingPeriod(\DateTime $start, \DateTime $end)
     {
-      Container::getLogger()->info(strtr("Reporting period set @start to @end", [
+      Container::getLogger()->debug(strtr("Reporting period set @start to @end", [
         '@start' => $start->format('Y-m-d H:i:s e'),
         '@end' => $end->format('Y-m-d H:i:s e'),
       ]));
