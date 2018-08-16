@@ -23,6 +23,14 @@ date_default_timezone_set($timezone);
 $loader = require 'vendor/autoload.php';
 AnnotationRegistry::registerLoader([$loader, 'loadClass']);
 
-$application = new Application();
+$version_filename = dirname(__DIR__) . '/VERSION';
+if (file_exists($version_filename)) {
+  $version = file_get_contents($version_filename);
+}
+else {
+  $version = exec(sprintf('git -C %s branch', dirname(__DIR__))) . '-dev';
+}
+
+$application = new Application('Drutiny', $version);
 $application->addCommands(CommandDiscovery::findCommands());
 $application->run();
