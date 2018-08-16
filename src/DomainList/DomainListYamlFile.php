@@ -4,7 +4,13 @@ namespace Drutiny\DomainList;
 
 use Symfony\Component\Yaml\Yaml;
 use Drutiny\Target\Target;
-
+use Drutiny\Annotation\Param;
+/**
+ * @Param(
+ *   name = "filepath",
+ *   description = "Filepath to the YAML file containing the domains.",
+ * )
+ */
 class DomainListYamlFile implements DomainListInterface {
 
   protected $filepath;
