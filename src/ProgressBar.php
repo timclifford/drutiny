@@ -45,6 +45,14 @@ Class ProgressBar extends AbstractLogger {
     $this->steps  = $steps;
   }
 
+  public function start()
+  {
+    if ($this->status) {
+      $this->bar()->start();
+    }
+    return $this;
+  }
+
   protected function bar()
   {
     if (empty($this->bar)) {
