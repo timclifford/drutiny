@@ -138,6 +138,10 @@ class DrushDriver {
         }
       }
       else {
+        // Do not render --uri=default.
+        if ($key == 'uri' && $value == 'default') {
+          continue;
+        }
         $option = '--' . $key;
         if (!empty($value)) {
           $option .= '=' . escapeshellarg($value);
