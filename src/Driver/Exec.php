@@ -38,7 +38,7 @@ class Exec {
     $timer = Container::utility()->timer()->start();
     $process->run();
     $timer->stop();
-    Container::getLogger()->info(sprintf((__CLASS__ . ": Command executed in %ss", $timer->getTime()));
+    Container::getLogger()->info(sprintf(__CLASS__ . ": Command executed in %ss", $timer->getTime()));
 
     // Executes after the command finishes.
     if (!$process->isSuccessful()) {
