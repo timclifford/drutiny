@@ -24,4 +24,14 @@ class Drush9Driver extends DrushDriver {
     }
     return $this->__call('userInformation', $params);
   }
+
+  public function stateGet($state)
+  {
+    $args = func_get_args();
+    $data = $this->__call('stateGet', $args);
+    if (is_array($data) && isset($data[$state])) {
+      return $data[$state];
+    }
+    return $data;
+  }
 }
