@@ -38,10 +38,10 @@ abstract class AbstractAnalysis extends Audit {
     $expressionLanguage = new ExpressionLanguage($sandbox);
 
     $variables  = $sandbox->getParameterTokens();
-    $sandbox->logger()->info(__CLASS__ . ': ' . Yaml::dump($variables));
+    $sandbox->logger()->debug(__CLASS__ . ': ' . Yaml::dump($variables));
 
     $expression = $sandbox->getParameter('not_applicable', 'false');
-    $sandbox->logger()->info(__CLASS__ . ': ' . $expression);
+    $sandbox->logger()->debug(__CLASS__ . ': ' . $expression);
     if (@$expressionLanguage->evaluate($expression, $variables)) {
       return self::NOT_APPLICABLE;
     }
