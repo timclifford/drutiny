@@ -126,6 +126,10 @@ class PolicyAuditCommand extends Command {
     }
 
     $progress = new ProgressBar($output, count($policies));
+    // Do not use the progress bar when using a high verbosity logging output.
+    if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+      $progress->disable();
+    }
     $progress->start();
     $assessment->assessTarget($target, $policies, $start, $end, $input->getOption('remediate'));
     $progress->finish();
