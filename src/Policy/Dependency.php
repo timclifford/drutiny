@@ -10,9 +10,14 @@ use Drutiny\Container;
 class Dependency {
 
   /**
-   * On fail behaviour: Omit policy from report.
+   * On fail behaviour: Fail policy in report.
    */
   const ON_FAIL_DEFAULT = 'fail';
+
+  /**
+   * On fail behaviour: Omit policy from report.
+   */
+  const ON_FAIL_OMIT = 'omit';
 
   /**
    * On fail behaviour: Report policy as error.
@@ -27,7 +32,7 @@ class Dependency {
   /**
    * @var string Must be one of ON_FAIL constants.
    */
-  protected $onFail = 'error';
+  protected $onFail = 'fail';
 
   /**
    * @var string Symfony ExpressionLanguage expression.
@@ -50,8 +55,13 @@ class Dependency {
     switch ($this->onFail) {
       case self::ON_FAIL_ERROR:
         return Audit::ERROR;
+        
       case self::ON_FAIL_REPORT_ONLY:
         return Audit::NOT_APPLICABLE;
+
+      case self::ON_FAIL_OMIT:
+        return Audit::IRRELEVANT;
+
       case self::ON_FAIL_DEFAULT;
       default:
         return Audit::FAIL;
@@ -64,6 +74,7 @@ class Dependency {
       case self::ON_FAIL_ERROR:
       case self::ON_FAIL_DEFAULT:
       case self::ON_FAIL_REPORT_ONLY:
+      case self::ON_FAIL_OMIT:
         $this->onFail = $on_fail;
         return $this;
       default:
@@ -71,6 +82,9 @@ class Dependency {
     }
   }
 
+  /**
+   * Evaluate the dependency.
+   */
   public function execute(Sandbox $sandbox)
   {
     $language = new ExpressionLanguage($sandbox);
@@ -78,14 +92,16 @@ class Dependency {
 
     try {
       if ($return = $language->evaluate($this->expression)) {
-        Container::getLogger()->debug("Expression PASSED: $return");
+        Container::getLogger()->debug(__CLASS__ . ": Expression PASSED: $return");
         return $return;
       }
     }
     catch (\Exception $e) {
       Container::getLogger()->warning($e->getMessage());
     }
-    Container::getLogger()->debug("Expression FAILED.");
+    Container::getLogger()->debug(__CLASS__ . ": Expression FAILED.");
+
+    // Execute the on fail behaviour.
     throw new DependencyException($this);
   }
 }

@@ -56,6 +56,11 @@ abstract class Audit implements AuditInterface {
   const NOT_APPLICABLE = -1;
 
   /**
+   * An audit that is irrelevant to the assessment and should be omitted.
+   */
+  const IRRELEVANT = -2;
+
+  /**
    * @param Sandbox $sandbox
    * @return
    */

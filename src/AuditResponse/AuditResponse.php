@@ -18,8 +18,6 @@ class AuditResponse {
 
   protected $remediated = FALSE;
 
-  protected $warning = FALSE;
-
   protected $tokens = [];
 
   /**
@@ -60,6 +58,7 @@ class AuditResponse {
         $state = Audit::NOT_APPLICABLE;
         break;
 
+      case ($state === Audit::IRRELEVANT):
       case ($state === Audit::WARNING):
       case ($state === Audit::WARNING_FAIL):
       case ($state === Audit::NOTICE):
@@ -214,6 +213,11 @@ class AuditResponse {
   public function isNotApplicable()
   {
     return $this->state === Audit::NOT_APPLICABLE;
+  }
+
+  public function isIrrelevant()
+  {
+    return $this->state === Audit::IRRELEVANT;
   }
 
   public function getSeverity()

@@ -117,7 +117,10 @@ class Sandbox {
       $response->set(Audit::ERROR, $this->getParameterTokens());
     }
 
-    $this->getAssessment()->setPolicyResult($response);
+    // Omit irrelevant AuditResponses.
+    if (!$response->isIrrelevant()) {
+      $this->getAssessment()->setPolicyResult($response);
+    }
     return $response;
   }
 

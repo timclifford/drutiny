@@ -77,6 +77,7 @@ Return Value                    | Purpose
 `Drutiny\Audit::WARNING_FAIL`   | An audit returned a **failure** but with a warning.
 `Drutiny\Audit::ERROR`          | An audit did not complete and returned an error.
 `Drutiny\Audit::NOT_APPLICABLE` | An audit was not applicable to the target.
+`Drutiny\Audit::IRRELEVANT`     | An audit was irrelevant to the target and should be omitted from the overall report.
 
 In addition to using Return Values, audits can also return `TRUE`, `FALSE` and
 `NULL` values which correlate to `Drutiny\Audit::SUCCESS`, `Drutiny\Audit::FAILURE`

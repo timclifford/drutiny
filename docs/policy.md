@@ -145,7 +145,8 @@ Optionally, an `on_fail` property can be added to indicate the failure behaviour
 
 Value |  Behaviour |
 ----- | ----------
-`fail`  | Omit policy from report
+`omit`  | Omit policy from report
+`fail`  | Fail policy in report
 `error` | Report policy as error
 `report_only` | Report as not applicable
 
