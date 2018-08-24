@@ -13,12 +13,26 @@ class AuditDocsGenerator extends DocsGenerator {
     $registry = new Registry();
     $metadata = $registry->getAuditMedtadata($audit_class);
     $metadata->source = FALSE;
-    if ($metadata->reflect->hasMethod('audit')) {
-      $method = $metadata->reflect->getMethod('audit');
-      if ($method->getStartLine() != $method->getEndLine()) {
-        $metadata->source = array_slice(file($method->getFilename()), $method->getStartLine() - 1, $method->getEndLine() - $method->getStartLine() + 1);
-        $metadata->source = implode('', $metadata->source);
+
+    $source = '';
+
+    foreach (['gather', 'audit'] as $function) {
+      if (!$metadata->reflect->hasMethod($function)) {
+        continue;
       }
+      $method = $metadata->reflect->getMethod($function);
+
+      if ($method->getStartLine() == $method->getEndLine()) {
+        continue;
+      }
+      $start = $method->getStartLine() - 1;
+      $end = $method->getEndLine() - $method->getStartLine() + 1;
+      $lines = array_slice(file($method->getFilename()), $start, $end);
+      $source .= implode('', $lines);
+    }
+
+    if (!empty($source)) {
+      $metadata->source = $source;
     }
 
     $package = $this->findPackage($metadata->filename);
