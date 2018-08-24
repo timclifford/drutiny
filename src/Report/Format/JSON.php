@@ -39,6 +39,8 @@ class JSON extends Format {
       'total' => 0,
     ];
 
+    $schema['results'] = [];
+
     // Report Title.
     $schema['title'] = $profile->getTitle();
     $schema['profile'] = $profile->getName();
