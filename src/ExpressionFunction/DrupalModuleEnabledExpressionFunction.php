@@ -61,10 +61,6 @@ class DrupalModuleEnabledExpressionFunction implements ExpressionFunctionInterfa
       return FALSE;
     }
 
-    if ($list[$module]['type'] != 'Module') {
-      return FALSE;
-    }
-
     if ($list[$module]['status'] != 'Enabled') {
       return FALSE;
     }
