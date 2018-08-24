@@ -3,6 +3,7 @@
 namespace Drutiny\Target;
 
 use Drutiny\Driver\Exec;
+use Drutiny\Container;
 
 /**
  * @Drutiny\Annotation\Target(
@@ -77,8 +78,9 @@ class DrushTarget extends Target implements DrushTargetInterface, DrushExecutabl
     // to execute the command remotely.
     if (isset($this->options['remote-host'])) {
       $args['%docroot%'] = $this->options['root'];
-
-      $command = base64_encode(strtr($command, $args));
+      $command = strtr($command, $args);
+      Container::getLogger()->info(__CLASS__ . ": base64 encoding command: $command");
+      $command = base64_encode($command);
       $command = "echo $command | base64 --decode | sh";
 
       $defaults = $this->options + [
