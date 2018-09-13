@@ -105,7 +105,14 @@ Class ProgressBar extends AbstractLogger {
     }
     if ($this->status && ($level != LogLevel::DEBUG)) {
       $level = strtoupper($level);
-      $this->bar()->setMessage("[{$this->topic}][$level] " . $message);
+      $message = sprintf("[%s][%s] %s", $this->topic, $level, $message);
+      $max_length = (getenv('COLUMNS') ?: 80) - 5;
+
+      if (strlen($message) > $max_length) {
+        $message = substr($message, 0, $max_length) . '...';
+      }
+
+      $this->bar()->setMessage($message);
       $this->bar()->display();
     }
     return $this;
