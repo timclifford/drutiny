@@ -5,6 +5,21 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
 <script type="text/javascript">
   (function ($, c) {
+    function formatDate(date) {
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var ampm = hours >= 12 ? 'pm' : 'am';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? '0'+minutes : minutes;
+    var strTime = hours + ':' + minutes + ' ' + ampm;
+
+    var yyyy = date.getFullYear(),
+        mm   = ((date.getMonth()+1)+"").padStart(2, '0'),
+        dd   = (date.getDate()+"").padStart(2, '0');
+
+    return yyyy + "-" + mm + "-" + dd + " " + strTime;
+  }
 
     function getPieishConfig(data, series, table) {
       var config = {
@@ -64,7 +79,7 @@
       config.data.labels = $.map($(data.chartLabels, table), function (e) {
         var label = $(e).text();
         if (d = Date.parse(label)) {
-          label = (new Date(d)).toDateString();
+          label = formatDate(new Date(d));
         }
         return label;
       });
@@ -86,11 +101,21 @@
         // value in the set.
         var bgColor = set.length <= data.chartColors.length || series.length > 1 ? data.chartColors[i] : data.chartColors[0];
 
-        return {
+        var label = {
           data: set,
-          label: $(series_labels[i], table).text(),
-          backgroundColor: bgColor
+          label: $(series_labels[i], table).text()
         }
+
+        if (config.type == 'line') {
+          label.borderColor = bgColor;
+          label.backgroundColor = 'rgb(0,0,0,0)';
+          label.pointRadius = 0;
+        }
+        else {
+          label.backgroundColor = bgColor;
+        }
+
+        return label;
       });
 
       // Axis labels and gridlines for bar/line type graphs.
