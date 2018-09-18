@@ -302,9 +302,10 @@ class DrushDriver {
 
     $pipe = implode(';' . PHP_EOL, $execution);
 
-    $execution[] = strtr('drush @alias @options scr $f', [
+    $execution[] = strtr('@bin @alias @options scr $f', [
       '@options' => implode(' ', $this->getOptions()),
       '@alias' => $this->getAlias(),
+      '@bin' => $this->drushBin,
     ]);
     $execution[] = 'rm $f';
 
