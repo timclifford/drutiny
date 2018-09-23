@@ -13,6 +13,7 @@
         "source": "https://github.com/drutiny/drutiny"
     },
     "require": {
+        "ext-bcmath": "*",
         "caseyamcl/toc": "~1.0",
         "composer/semver": "^1.4.2",
         "doctrine/annotations": "^v1.2",
