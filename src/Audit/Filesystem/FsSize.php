@@ -32,17 +32,14 @@ class FsSize extends Audit {
 
     $path = strtr($path, $stat['%paths']);
 
-    $size = $sandbox->exec("du -d 0 $path | awk '{print $1}'");
+    $size = trim($sandbox->exec("du -d 0 -m $path | awk '{print $1}'"));
 
     $max_size = (int) $sandbox->getParameter('max_size', 20);
 
     // Set the size in MB for rendering
-    $sandbox->setParameter('size', ceil($size * 1024 * 1024));
+    $sandbox->setParameter('size', $size);
     // Set the actual path.
     $sandbox->setParameter('path', $path);
-
-    // Convert max_size into bytes.
-    $max_size = $max_size * 1024 * 1024;
 
     return $size < $max_size;
   }
