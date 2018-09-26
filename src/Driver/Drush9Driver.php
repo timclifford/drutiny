@@ -34,4 +34,32 @@ class Drush9Driver extends DrushDriver {
     }
     return $data;
   }
+
+  public function status()
+  {
+    $args = func_get_args();
+    $data = $this->__call('status', $args);
+    if (is_array($data) && !isset($data['%paths'])) {
+      $data['%paths'] = [];
+      if (isset($data['root'])) {
+        $data['%paths']['%root'] = $data['root'];
+      }
+      if (isset($data['site'])) {
+        $data['%paths']['%site'] = $data['site'];
+      }
+      if (isset($data['modules'])) {
+        $data['%paths']['%modules'] = $data['modules'];
+      }
+      if (isset($data['themes'])) {
+        $data['%paths']['%themes'] = $data['themes'];
+      }
+      if (isset($data['files'])) {
+        $data['%paths']['%files'] = $data['files'];
+      }
+      if (isset($data['temp'])) {
+        $data['%paths']['%temp'] = $data['temp'];
+      }
+    }
+    return $data;
+  }
 }
