@@ -18,5 +18,6 @@ class ExpressionLanguage extends BaseExpressionLanguage
         parent::__construct(NULL, $providers);
 
         $this->addFunction(ExpressionFunction::fromPhp('in_array'));
+        $this->addFunction(ExpressionFunction::fromPhp('array_key_exists'));
     }
 }
