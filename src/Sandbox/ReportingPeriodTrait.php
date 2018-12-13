@@ -81,4 +81,49 @@ trait ReportingPeriodTrait {
      return $seconds;
     }
 
+    /**
+     * Get sensible intervals to use for duration grainularity.
+     */
+    protected function _getReportingPeriodIntervals()
+    {
+      return [
+        60, // 1 minute
+        120, // 2 minutes
+        300, // 5 minutes
+        600, // 10 minutes
+        900, // 15 minutes
+        1800, // 30 minutes
+        3600, // 1 hour
+        7200, // 2 hours
+        10800, // 3 hours
+        18000, // 5 hours
+        21600, // 6 hours
+        43200, // 12 hours
+        86400, // 1 day
+        172800, // 2 days
+        432000, // 5 days
+        604800, // 7 days
+      ];
+    }
+
+    public function getReportingPeriodSteps()
+    {
+      $duration = $this->getReportingPeriodDuration();
+
+      $steps = array_map(function ($interval) use ($duration) {
+        return round($duration / $interval);
+      }, $this->_getReportingPeriodIntervals());
+
+      $steps = array_filter($steps, function ($steps) {
+        // 60 < X > 100;
+        return $steps >= 60 && $steps <= 100;
+      });
+
+      if (empty($steps)) {
+        throw new \Exception("Could not find a number of steps suitable for reporting period.");
+      }
+
+      return current($steps);
+    }
+
 }
