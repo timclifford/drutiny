@@ -8,6 +8,8 @@ use Drutiny\Target\TargetInterface;
 use Drutiny\Sandbox\Sandbox;
 
 class Assessment {
+  use \Drutiny\Policy\ContentSeverityTrait;
+
   /**
    * @var string URI
    */
@@ -17,6 +19,10 @@ class Assessment {
    * @var array of AuditResponse objects
    */
   protected $results = [];
+
+  protected $successful = TRUE;
+
+  protected $severity;
 
   public function __construct($uri = 'default')
   {
@@ -81,6 +87,25 @@ class Assessment {
   public function setPolicyResult(AuditResponse $response)
   {
     $this->results[$response->getPolicy()->get('name')] = $response;
+
+    // Set the overall success state of the Assessment. Considered
+    // a success if all policies pass.
+    $this->successful = $this->successful && $response->isSuccessful();
+
+    // If the policy failed its assessment and the severity of the Policy
+    // is higher than the current severity of the assessment, then increase
+    // the severity of the overall assessment.
+    $severity = $response->getPolicy()->getSeverity();
+    if (!$response->isSuccessful() && ($this->severity < $severity)) {
+      $this->setSeverity($severity);
+    }
+  }
+
+  /**
+   * Get the overall outcome of the assessment.
+   */
+  public function isSuccessful() {
+    return $this->successful;
   }
 
   /**
