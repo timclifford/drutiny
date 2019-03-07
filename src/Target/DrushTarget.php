@@ -58,14 +58,21 @@ class DrushTarget extends Target implements DrushTargetInterface, DrushExecutabl
    * {@inheritdoc}
    */
   public function runDrushCommand($method, array $args, array $options, $pipe = '', $bin = 'drush') {
-    return $this->exec('@pipe @drush @alias @options @method @args', [
+    $parameters = [
       '@method' => $method,
       '@args' => implode(' ', $args),
       '@options' => implode(' ', $options),
       '@alias' => $this->getAlias(),
       '@pipe' => $pipe,
       '@drush' => $bin,
-    ]);
+    ];
+
+    // Do not use a locally sourced alias if the command will be executed remotely.
+    if (isset($this->options['remote-host'])) {
+      $parameters['@root'] = $this->options['root'];
+      $this->exec('@pipe @drush -r @root @options @method @args', $parameters);
+    }
+    return $this->exec('@pipe @drush @alias @options @method @args', $parameters);
   }
 
   /**
