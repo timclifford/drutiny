@@ -9,6 +9,8 @@
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
 
+const DRUTINY_LIB = '.';
+
 $loader = require __DIR__ . '/../vendor/autoload.php';
 AnnotationRegistry::registerLoader(array($loader, 'loadClass'));
 return $loader;
