@@ -31,8 +31,7 @@ class AuditListCommand extends Command {
   protected function execute(InputInterface $input, OutputInterface $output) {
     $finder = new Finder();
     $finder->directories()
-      ->in('.')
-      ->exclude('./deploy')
+      ->in(DRUTINY_LIB)
       ->name('Audit');
 
     $files = new Finder();

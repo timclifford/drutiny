@@ -4,9 +4,9 @@ namespace Drutiny\PolicySource;
 
 use Drutiny\Api;
 use Drutiny\Cache;
+use Drutiny\Config;
 use Drutiny\Container;
 use Drutiny\Policy;
-use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
 
 class LocalFs implements PolicySourceInterface {
@@ -28,16 +28,13 @@ class LocalFs implements PolicySourceInterface {
     if ($cache->isHit()) {
       return $cache->get();
     }
-    $directories = array('.', getenv('HOME') . '/.drutiny/');
-    $finder = new Finder();
-    $finder->files()
-      ->in($directories)
-      ->name('*.policy.yml');
+    $finder = Config::getFinder()->name('*.policy.yml');
 
     $list = [];
     foreach ($finder as $file) {
-      $policy = Yaml::parse(file_get_contents($file->getRealPath()));
-      $policy['filepath'] = $file->getRealPath();
+      $filename = $file->getRelativePathname();
+      $policy = Yaml::parse(file_get_contents($filename));
+      $policy['filepath'] = $filename;
       $list[$policy['name']] = $policy;
     }
     Container::cache($this->getName())->save(

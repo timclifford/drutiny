@@ -4,9 +4,9 @@ namespace Drutiny\Profile;
 
 use Drutiny\Api;
 use Drutiny\Cache;
+use Drutiny\Config;
 use Drutiny\Container;
 use Drutiny\Profile;
-use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
 
 class ProfileSourceLocalFs implements ProfileSourceInterface {
@@ -29,17 +29,14 @@ class ProfileSourceLocalFs implements ProfileSourceInterface {
       return $cache->get();
     }
 
-    $directories = array('.', getenv('HOME') . '/.drutiny/');
-    $finder = new Finder();
-    $finder->files()
-      ->in($directories)
-      ->name('*.profile.yml');
+    $finder = Config::getFinder()->name('*.profile.yml');
 
     $list = [];
     foreach ($finder as $file) {
-      $name = str_replace('.profile.yml', '', pathinfo($file->getRealPath(), PATHINFO_BASENAME));
-      $profile = Yaml::parse(file_get_contents($file->getRealPath()));
-      $profile['filepath'] = $file->getRealPath();
+      $filename = $file->getRelativePathname();
+      $name = str_replace('.profile.yml', '', pathinfo($filename, PATHINFO_BASENAME));
+      $profile = Yaml::parse(file_get_contents($filename));
+      $profile['filepath'] = $filename;
       $profile['name'] = $name;
       unset($profile['format']);
       $list[$name] = $profile;

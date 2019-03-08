@@ -4,7 +4,6 @@ namespace Drutiny;
 
 use Symfony\Component\ClassLoader\ClassMapGenerator;
 use Doctrine\Common\Annotations\AnnotationReader;
-use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -50,19 +49,17 @@ class Registry {
     if ($config = self::get('drutiny.config')) {
       return $config;
     }
-    $finder = new Finder();
-    $finder->files()
-      ->in('.')
-      ->name('drutiny.config.yml');
+    $finder = Config::getFinder()->name('drutiny.config.yml');
 
     $config = [];
     foreach ($finder as $file) {
-      $conf = Yaml::parseFile($file->getPathname());
+      $filepath = $file->getRelativePathname();
+      $conf = Yaml::parseFile($filepath);
 
       // Templates are in filepaths which need to be translated into absolute filepaths.
       if (isset($conf['Template'])) {
         foreach ($conf['Template'] as &$directory) {
-          $directory = dirname($file->getRealPath()) . '/' . $directory;
+          $directory = dirname($filepath) . '/' . $directory;
         }
       }
 
@@ -80,19 +77,17 @@ class Registry {
       return (object) $config;
     }
 
-    $finder = new Finder();
-    $finder->files()
-      ->in('.')
-      ->name('drutiny.config.yml');
+    $finder = Config::getFinder()->name('drutiny.config.yml');
 
     $config = [];
     foreach ($finder as $file) {
-      $conf = Yaml::parse(file_get_contents($file->getRealPath()));
+      $filepath = DRUTINY_LIB . '/' . $file->getRelativePathname();
+      $conf = Yaml::parse(file_get_contents($filepath));
 
       // Templates are in filepaths which need to be translated into absolute filepaths.
       if (isset($conf['Template'])) {
         foreach ($conf['Template'] as &$directory) {
-          $directory = dirname($file->getRealPath()) . '/' . $directory;
+          $directory = dirname($filepath) . '/' . $directory;
         }
       }
       $config[] = $conf;
@@ -179,7 +174,7 @@ class Registry {
 
     $finder = new Finder();
     $finder->files()
-      ->in('.')
+      ->in(DRUTINY_LIB)
       ->name('*.policy.yml');
 
     $registry = [];

@@ -2,11 +2,11 @@
 
 namespace Drutiny\Profile;
 
+use Drutiny\Config;
 use Drutiny\Registry as GlobalRegisry;
 use Drutiny\Profile;
 use Drutiny\Container;
 use Drutiny\PolicySource\UnavailablePolicyException;
-use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
 
 
@@ -19,13 +19,10 @@ class Registry extends GlobalRegisry {
       return $filepaths;
     }
 
-    $finder = new Finder();
-    $finder->files();
-    $finder->in('.');
-    $finder->name('*.profile.yml');
+    $finder = Config::getFinder()->name('*.profile.yml');
 
     foreach ($finder as $file) {
-      $filepaths[] = $file->getPathname();
+      $filepaths[] = $file->getRelativePathname();
     }
     self::add('profile.locations', $filepaths);
     return $filepaths;
@@ -33,10 +30,7 @@ class Registry extends GlobalRegisry {
 
   public static function locateProfile($name)
   {
-    $finder = new Finder();
-    $finder->files();
-    $finder->in('.');
-    $finder->name($name . '.profile.yml');
+    $finder = Config::getFinder()->name($name . '.profile.yml');
 
     foreach ($finder as $file) {
       return $file->getRealPath();
