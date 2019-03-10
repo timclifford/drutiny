@@ -20,7 +20,7 @@ class Config {
 
   public static function getFinder()
   {
-    $directories = array_filter('is_dir', [DRUTINY_LIB, getenv('HOME') . '/.drutiny']);
+    $directories = array_filter([DRUTINY_LIB, getenv('HOME') . '/.drutiny'], 'is_dir');
     $finder = new Finder();
     $finder->files()
       ->in($directories);
