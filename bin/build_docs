@@ -4,8 +4,6 @@
 use Symfony\Component\Console\Application;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 
-
-
 $timezone = 'UTC';
 
 // Set the timezone to the local OS if supported.
@@ -18,6 +16,7 @@ if (file_exists('/etc/localtime')) {
 
 date_default_timezone_set($timezone);
 
+const DRUTINY_LIB = '.';
 
 /**
  * @var ClassLoader $loader
