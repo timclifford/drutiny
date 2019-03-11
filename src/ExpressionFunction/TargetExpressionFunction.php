@@ -30,7 +30,7 @@ class TargetExpressionFunction implements ExpressionFunctionInterface {
       $value = call_user_func([$target, $metadata[$parameter]]);
     }
 
-    return $value;
+    return is_string($value) ? $value : $parameter;
   }
 
   static public function evaluate(Sandbox $sandbox)
