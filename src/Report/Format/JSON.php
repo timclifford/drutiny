@@ -163,9 +163,9 @@ class JSON extends Format {
       'sites' => []
     ];
     $resultsByPolicy = [];
-    foreach ($results as $uri => $siteReport) {
+    foreach ($results as $uri => $assessment) {
       $report['sites'][] = $uri;
-      foreach ($siteReport as $response) {
+      foreach ($assessment->getResults() as $response) {
         $policy = [
           'isSuccessful' => $response->isSuccessful(),
           'hasWarning' => $response->hasWarning(),
