@@ -55,7 +55,7 @@ class Dependency {
     switch ($this->onFail) {
       case self::ON_FAIL_ERROR:
         return Audit::ERROR;
-        
+
       case self::ON_FAIL_REPORT_ONLY:
         return Audit::NOT_APPLICABLE;
 
@@ -66,6 +66,13 @@ class Dependency {
       default:
         return Audit::FAIL;
     }
+  }
+
+  public function export() {
+    return [
+      'on_fail' => $this->onFail,
+      'expression' => $this->expression,
+    ];
   }
 
   public function setFailBehaviour($on_fail = self::ON_FAIL_DEFAULT)
@@ -89,7 +96,6 @@ class Dependency {
   {
     $language = new ExpressionLanguage($sandbox);
     Container::getLogger()->info("Evaluating expression: " . $language->compile($this->expression));
-
     try {
       if ($return = $language->evaluate($this->expression)) {
         Container::getLogger()->debug(__CLASS__ . ": Expression PASSED: $return");

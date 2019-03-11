@@ -350,11 +350,16 @@ class Profile {
 
   public function dump()
   {
+    $format = $this->getFormatOption('html');
     $export = [
       'title' => $this->getTitle(),
       'name' => $this->getName(),
       'description' => $this->getDescription(),
       'policies' => $this->dumpPolicyDefinitions(),
+      'excluded_policies' => $this->excludedPolicies,
+      'include' => array_keys($this->getIncludes()),
+      'template' => $format->getTemplate(),
+      'content' => $format->getContent(),
     ];
     return array_filter($export);
   }

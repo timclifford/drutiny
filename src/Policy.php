@@ -75,7 +75,7 @@ class Policy extends Policy\PolicyBase {
 
   public function export()
   {
-    return array_filter([
+    return [
       'title' => $this->title,
       'name' => $this->name,
       'class' => $this->class,
@@ -87,9 +87,11 @@ class Policy extends Policy\PolicyBase {
       'warning' => $this->warning,
       'remediation' => $this->remediation,
       'severity' => $this->severity,
-      'depends' => $this->depends,
+      'depends' => array_map(function (Dependency $d) {
+        return $d->export();
+       }, $this->depends),
       'chart' => $this->chart
-    ]);
+    ];
   }
 
   /**
