@@ -22,8 +22,6 @@ class Assessment {
 
   protected $successful = TRUE;
 
-  protected $severity;
-
   public function __construct($uri = 'default')
   {
     $this->uri = $uri;
