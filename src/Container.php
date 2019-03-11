@@ -31,6 +31,11 @@ class Container {
     return Config::get($bin);
   }
 
+  public static function credentialManager($namespace)
+  {
+    return \Drutiny\Credential\Manager::load($namespace);
+  }
+
   public static function utility()
   {
     return new Utility;
