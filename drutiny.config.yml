@@ -10,6 +10,7 @@ Command:
   - Drutiny\Command\PolicyAuditCommand
   - Drutiny\Command\PolicyInfoCommand
   - Drutiny\Command\PolicyListCommand
+  - Drutiny\Command\PolicySearchCommand
   - Drutiny\Command\ProfileGenerateCommand
   - Drutiny\Command\ProfileInfoCommand
   - Drutiny\Command\ProfileListCommand
