@@ -56,7 +56,9 @@ class PolicySource {
 
     $lists = [];
     foreach (self::getSources() as $source) {
-      foreach ($source->getList() as $name => $item) {
+      $items = $source->getList();
+      Container::getLogger()->notice($source->getName() . " has " . count($items) . " polices.");
+      foreach ($items as $name => $item) {
         $item['source'] = $source->getName();
         $list[$name] = $item;
       }
@@ -126,7 +128,6 @@ class PolicySource {
       }
       return $a->getWeight() > $b->getWeight() ? 1 : -1;
     });
-
 
     Container::cache(__CLASS__)->save(
       $item->set($sources)->expiresAfter(3600)
