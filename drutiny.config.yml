@@ -8,6 +8,7 @@ Command:
   - Drutiny\Command\AuditRunCommand
   - Drutiny\Command\AuthenticateCommand
   - Drutiny\Command\PolicyAuditCommand
+  - Drutiny\Command\PolicyDownloadCommand
   - Drutiny\Command\PolicyInfoCommand
   - Drutiny\Command\PolicyListCommand
   - Drutiny\Command\PolicySearchCommand
