@@ -358,9 +358,11 @@ class Profile {
       'policies' => $this->dumpPolicyDefinitions(),
       'excluded_policies' => $this->excludedPolicies,
       'include' => array_keys($this->getIncludes()),
-      'template' => $format->getTemplate(),
       'content' => $format->getContent(),
     ];
+    if ($template = $format->getTemplate()) {
+      $export['format']['html']['template'] = $template;
+    }
     return array_filter($export);
   }
 
