@@ -156,7 +156,8 @@ abstract class Format {
    */
   public function setOutput($filepath = 'stdout')
   {
-    if ($filepath != 'stdout' && !($filepath instanceof OutputInterface) && !file_exists(dirname($filepath))) {
+    $parent_directory = realpath(dirname($filepath));
+    if ($filepath != 'stdout' && !($filepath instanceof OutputInterface) && !is_dir($parent_directory)) {
       throw new \InvalidArgumentException("Cannot write to $filepath. Parent directory doesn't exist.");
     }
     $this->output = $filepath;
