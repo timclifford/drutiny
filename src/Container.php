@@ -7,12 +7,13 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Psr\Log\LoggerInterface;
 
-define('DRUTINY_CACHE_DIRECTORY', getenv('HOME') . '/.drutiny/cache');
-
 class Container {
   static $verbosity;
 
-  const CACHE_DIRECTORY = DRUTINY_CACHE_DIRECTORY;
+  public static function getCacheDirectory()
+  {
+    return Config::getUserDir() . '/cache';
+  }
 
   public static function cache($bin)
   {
@@ -20,7 +21,7 @@ class Container {
     $cache = new \Symfony\Component\Cache\Adapter\ArrayAdapter();
     if (isset($registry[$bin])) {
       $class = $registry[$bin];
-      $cache = new $registry[$bin]($bin, 0, DRUTINY_CACHE_DIRECTORY);
+      $cache = new $registry[$bin]($bin, 0, self::getCacheDirectory());
     }
     $cache->setLogger(self::getLogger());
     return $cache;

@@ -3,6 +3,8 @@
 namespace Drutiny\Credential;
 
 use Symfony\Component\Yaml\Yaml;
+use Drutiny\Config;
+use Drutiny\Container;
 
 class FileStore {
 
@@ -13,37 +15,100 @@ class FileStore {
   public function __construct($ns)
   {
     $this->namespace = $ns;
+
+    // Upgrade check.
+    if (file_exists($old_location = getenv('HOME') . '/.drutiny_creds.yml')) {
+      $new_location = $this->getCredentialFile('user');
+      if (file_exists($new_location)) {
+        throw new \Exception("Upgrade error. Old and new credential files both exist. Please merge $old_location and $new_location.");
+      }
+      Container::getLogger()->warning("Updating Drutiny credential location from $old_location to $new_location.");
+      rename($old_location, $new_location);
+    }
   }
 
-  public function findCredentialFile()
+  protected function getScopes()
   {
-    $filename = self::filename;
-    $paths = array_map(function ($path) use ($filename) {
-      return $path . '/' . $filename;
-    }, [getenv('HOME'), getenv('PWD')]);
+    $paths = array_filter([
+      'global' => DRUTINY_LIB,
+      'user' => Config::getUserDir(),
+      'local' => getenv('PWD'),
+    ], 'is_dir');
 
-    $files = array_filter($paths, 'file_exists');
+    $paths = array_map('realpath', $paths);
+    if ($paths['global'] == $paths['local']) {
+      unset($paths['global']);
+    }
+    return $paths;
+  }
 
-    if (!empty($files)) {
-      return array_shift($files);
+  /**
+   * Load all credential files.
+   *
+   * If different credentials are present in different files, they will be
+   * recursively be merged in. Credentials from narrow scopes take precedence.
+   */
+  protected function loadCredentials()
+  {
+    static $cache;
+    if ($cache) {
+      return $cache;
     }
 
-    return array_pop($paths);
+    $yaml = array_map(
+      /**
+       * Pull the contents from valid filepaths.
+       */
+      function ($directory) {
+        $filepath = implode(DIRECTORY_SEPARATOR, [$directory, FileStore::filename]);
+
+        if (!file_exists($filepath)) {
+          return FALSE;
+        }
+        $content = file_get_contents($filepath);
+
+        if (empty($content)) {
+          return FALSE;
+        }
+        Container::getLogger()->info("Loading credential file: $filepath.");
+        return YAML::parse($content);
+      }
+    , $this->getScopes());
+
+    $creds = [];
+
+    foreach (array_filter($yaml, 'is_array') as $credentials) {
+      $creds = array_replace_recursive($creds, $credentials);
+    }
+
+    $cache = $creds;
+
+    return $cache;
   }
 
+  /**
+   * Return the path of a credential file.
+   *
+   * @param string $scope
+   *   The scope to generate a filepath for. Options: global, user, local.
+   *
+   * @return string
+   *   The path of an existing credential file or the path of
+   *   of non-existing credential file by preference of $scope.
+   */
+  protected function getCredentialFile($scope = 'user')
+  {
+    $scopes = $this->getScopes();
+    $directory = $scopes[$scope] ?: current($scopes);
+    return implode(DIRECTORY_SEPARATOR, [$directory, self::filename]);
+  }
+
+  /**
+   * Open up the credentials store on file.
+   */
   public function open()
   {
-    $filepath = $this->findCredentialFile();
-
-    if (!file_exists($filepath)) {
-      throw new CredentialsUnavailableException("Cannot find stored credentials for {$this->namespace}. Please run `plugin:setup {$this->namespace}`.");
-    }
-    if (!$content = file_get_contents($filepath)) {
-      throw new CredentialsUnavailableException("Cannot retrieve stored credentials for {$this->namespace} from $filepath. Please run `plugin:setup {$this->namespace}`.");
-    }
-    if (!$creds = Yaml::parse($content)) {
-      throw new CredentialsUnavailableException("Cannot parse stored credentials for {$this->namespace} in $filepath. Please run `plugin:setup {$this->namespace}`.");
-    }
+    $creds = $this->loadCredentials();
 
     if (!isset($creds[$this->namespace])) {
       throw new CredentialsUnavailableException("Cannot find stored credentials for {$this->namespace} in $filepath. Please run `plugin:setup {$this->namespace}`.");
@@ -51,9 +116,15 @@ class FileStore {
     return $creds[$this->namespace];
   }
 
-  public function write($creds)
+  /**
+   * Write credentials to a credential file.
+   *
+   * @param array $creds
+   * @param string $scope
+   */
+  public function write($creds, $scope = 'user')
   {
-    $filepath = $this->findCredentialFile();
+    $filepath = $this->getCredentialFile($scope);
 
     $set = [];
     if (file_exists($filepath)) {

@@ -5,6 +5,7 @@ namespace Drutiny\Command;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
@@ -30,6 +31,13 @@ class AuthenticateCommand extends Command {
         'namespace',
         InputArgument::REQUIRED,
         'The service to authenticate against. Options: ' . implode(', ', $services)
+      )
+      ->addOption(
+        'scope',
+        's',
+        InputOption::VALUE_OPTIONAL,
+        'The scope to write the credential too. Options: user (default), local, global.',
+        'user'
       );
   }
 
@@ -68,7 +76,7 @@ class AuthenticateCommand extends Command {
       $creds[$name] = $helper->ask($input, $output, $question);
     }
 
-    $store->write($creds);
+    $store->write($creds, $input->getOption('scope'));
     $io->success("Credentials for $namespace have been saved.");
   }
 

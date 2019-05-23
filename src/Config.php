@@ -6,6 +6,11 @@ use Symfony\Component\Finder\Finder;
 
 class Config {
 
+  public static function getUserDir()
+  {
+    return getenv('HOME') . '/.drutiny';
+  }
+
   public static function get($name)
   {
     if (!$config = Registry::get('drutiny.config')) {
@@ -20,7 +25,7 @@ class Config {
 
   public static function getFinder()
   {
-    $directories = array_filter([DRUTINY_LIB, getenv('HOME') . '/.drutiny'], 'is_dir');
+    $directories = array_filter([DRUTINY_LIB, self::getUserDir()], 'is_dir');
     $finder = new Finder();
     $finder->files()
       ->in($directories);

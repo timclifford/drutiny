@@ -5,6 +5,7 @@ namespace Drutiny;
 use Symfony\Component\Cache\CacheItem;
 
 /**
+ * @deprecated
  * A static cache handler.
  */
 class Cache {
