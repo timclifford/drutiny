@@ -30,13 +30,12 @@ class FileStore {
   protected function getScopes()
   {
     $paths = array_filter([
-      'global' => DRUTINY_LIB,
+      'global' => realpath(DRUTINY_LIB),
       'user' => Config::getUserDir(),
-      'local' => getenv('PWD'),
+      'local' => realpath(getenv('PWD')),
     ], 'is_dir');
 
-    $paths = array_map('realpath', $paths);
-    if ($paths['global'] == $paths['local']) {
+    if (isset($paths['global'], $paths['local']) && ($paths['global'] == $paths['local'])) {
       unset($paths['global']);
     }
     return $paths;
@@ -111,7 +110,7 @@ class FileStore {
     $creds = $this->loadCredentials();
 
     if (!isset($creds[$this->namespace])) {
-      throw new CredentialsUnavailableException("Cannot find stored credentials for {$this->namespace} in $filepath. Please run `plugin:setup {$this->namespace}`.");
+      throw new CredentialsUnavailableException("Cannot find stored credentials for {$this->namespace}. Please run `plugin:setup {$this->namespace}`.");
     }
     return $creds[$this->namespace];
   }
