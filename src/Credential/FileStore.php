@@ -19,11 +19,13 @@ class FileStore {
     // Upgrade check.
     if (file_exists($old_location = getenv('HOME') . '/.drutiny_creds.yml')) {
       $new_location = $this->getCredentialFile('user');
-      if (file_exists($new_location)) {
+      if (!file_exists($new_location)) {
+        Container::getLogger()->warning("Updating Drutiny credential location from $old_location to $new_location.");
+        rename($old_location, $new_location);
+      }
+      if ($new_location != $old_location) {
         throw new \Exception("Upgrade error. Old and new credential files both exist. Please merge $old_location and $new_location.");
       }
-      Container::getLogger()->warning("Updating Drutiny credential location from $old_location to $new_location.");
-      rename($old_location, $new_location);
     }
   }
 
