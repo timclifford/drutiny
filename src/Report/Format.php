@@ -6,7 +6,9 @@ use Drutiny\Assessment;
 use Drutiny\Profile;
 use Drutiny\Target\Target;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Drutiny\Config;
+use Drutiny\Container;
 
 abstract class Format {
 
@@ -15,13 +17,21 @@ abstract class Format {
    *
    * @var string
    */
-  protected $format;
+  protected $format = 'unknown';
 
-  protected $output = 'stdout';
+  /**
+   * The output object.
+   *
+   * @var Symfony\Component\Console\Output\BufferedOutput
+   */
+  protected $output;
 
-  abstract public function __construct($options);
+  public function __construct($options = [])
+  {
+    $this->output = new BufferedOutput(Container::getVerbosity(), TRUE);
+  }
 
-  public static function create($format, $options)
+  public static function create($format, $options = [])
   {
     $formats = Config::get('Format');
     if (!isset($formats[$format])) {
@@ -60,24 +70,6 @@ abstract class Format {
       $renderedOutput = $this->renderResult($variables);
     }
     else {
-      // Render each result set into its own report.
-      if ($profile->reportPerSite() && !($this->getOutput() instanceof OutputInterface)) {
-        $info = pathinfo($this->getOutput());
-        foreach ($results as $uri => $result) {
-          $variables = $this->preprocessResult($profile, $target, $result);
-
-          $info['uri'] = $uri;
-          $filepath = strtr('dirname/filename/uri.extension', $info);
-
-          // Ensure the directory is available or continue.
-          if (!is_dir(dirname($filepath)) && !mkdir(dirname($filepath))) {
-            continue;
-          }
-
-          file_put_contents($filepath, $this->renderResult($variables));
-          $filepaths[] = $filepath;
-        }
-      }
 
       // @var array
       $variables = $this->preprocessMultiResult($profile, $target, $results);
@@ -86,13 +78,8 @@ abstract class Format {
       $renderedOutput = $this->renderMultiResult($variables);
     }
 
-    if ($this->getOutput() instanceof OutputInterface) {
-      $this->getOutput()->writeln($renderedOutput);
-    }
-    else {
-      file_put_contents($filepaths[] = $this->getOutput(), $renderedOutput);
-    }
-    return $filepaths;
+    $this->getOutput()->write($renderedOutput, FALSE);
+    return $this->getOutput();
   }
 
   abstract protected function preprocessResult(Profile $profile, Target $target, Assessment $assessment);
@@ -149,19 +136,6 @@ abstract class Format {
   public function getOutput()
   {
     return $this->output;
-  }
-
-  /**
-   * Set the title of the profile.
-   */
-  public function setOutput($filepath = 'stdout')
-  {
-    $parent_directory = realpath(dirname($filepath));
-    if ($filepath != 'stdout' && !($filepath instanceof OutputInterface) && !is_dir($parent_directory)) {
-      throw new \InvalidArgumentException("Cannot write to $filepath. Parent directory doesn't exist.");
-    }
-    $this->output = $filepath;
-    return $this;
   }
 }
 

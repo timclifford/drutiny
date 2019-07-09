@@ -6,12 +6,19 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Drutiny\Command\ProfileRunCommand;
+use Drutiny\Command\ProfileInfoCommand;
+use Drutiny\Command\ProfileListCommand;
+use Drutiny\Command\PolicyListCommand;
+use Drutiny\Command\PolicyAuditCommand;
+use Drutiny\Command\PolicyInfoCommand;
+use Drutiny\Command\AuditRunCommand;
 
 class ApplicationTest extends TestCase {
 
   public function testProfileRun()
   {
-    $command = new \Drutiny\Command\ProfileRunCommand();
+    $command = new ProfileRunCommand();
     $input = new ArrayInput([
       'profile' => 'test',
       'target' => '@none'
@@ -24,7 +31,7 @@ class ApplicationTest extends TestCase {
 
   public function testProfileList()
   {
-    $command = new \Drutiny\Command\ProfileListCommand();
+    $command = new ProfileListCommand();
     $input = new ArrayInput([]);
     $return_code = $command->run($input, $output = new BufferedOutput());
 
@@ -34,7 +41,7 @@ class ApplicationTest extends TestCase {
 
   public function testProfileInfo()
   {
-    $command = new \Drutiny\Command\ProfileInfoCommand();
+    $command = new ProfileInfoCommand();
     $input = new ArrayInput([
       'profile' => 'test',
     ]);
@@ -46,7 +53,7 @@ class ApplicationTest extends TestCase {
 
   public function testPolicyList()
   {
-    $command = new \Drutiny\Command\PolicyListCommand();
+    $command = new PolicyListCommand();
     $input = new ArrayInput([]);
     $return_code = $command->run($input, $output = new BufferedOutput());
 
@@ -56,7 +63,7 @@ class ApplicationTest extends TestCase {
 
   public function testPolicyAudit()
   {
-    $command = new \Drutiny\Command\PolicyAuditCommand();
+    $command = new PolicyAuditCommand();
     $input = new ArrayInput([
       'policy' => 'Test:Pass',
       'target' => '@none'
@@ -69,7 +76,7 @@ class ApplicationTest extends TestCase {
 
   public function testPolicyInfo()
   {
-    $command = new \Drutiny\Command\PolicyInfoCommand();
+    $command = new PolicyInfoCommand();
     $input = new ArrayInput([
       'policy' => 'Test:Pass',
     ]);
@@ -81,7 +88,7 @@ class ApplicationTest extends TestCase {
 
   public function testAuditRun()
   {
-    $command = new \Drutiny\Command\AuditRunCommand();
+    $command = new AuditRunCommand();
     $input = new ArrayInput([
       'audit' => 'Drutiny\Audit\AlwaysPass',
       'target' => '@none'

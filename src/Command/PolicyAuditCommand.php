@@ -10,7 +10,6 @@ use Drutiny\ProgressBar;
 use Drutiny\RemediableInterface;
 use Drutiny\Report\Format;
 use Drutiny\Report\ProfileRunReport;
-use Drutiny\Sandbox\Sandbox;
 use Drutiny\Target\Registry as TargetRegistry;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
@@ -24,7 +23,7 @@ use Symfony\Component\Yaml\Yaml;
 /**
  *
  */
-class PolicyAuditCommand extends Command {
+class PolicyAuditCommand extends AbstractReportingCommand {
 
   /**
    * @inheritdoc
@@ -77,6 +76,7 @@ class PolicyAuditCommand extends Command {
         'The end point in time to report to. Can be absolute or relative. Defaults to the current hour.',
         date('Y-m-d H:00:00')
       );
+      parent::configure();
   }
 
   /**
@@ -105,8 +105,7 @@ class PolicyAuditCommand extends Command {
               ])
             )
             ->addFormatOptions(Format::create('terminal', [
-              'content' => Yaml::parseFile(dirname(__DIR__) . '/Report/templates/content/policy.markdown.yml'),
-              'output' => $output,
+              'content' => Yaml::parseFile(dirname(__DIR__) . '/Report/templates/content/policy.markdown.yml')
             ]));
 
     // Setup the target.
@@ -125,17 +124,12 @@ class PolicyAuditCommand extends Command {
       $policies[] = $definition->getPolicy();
     }
 
-    $progress = new ProgressBar($output, count($policies));
-    // Do not use the progress bar when using a high verbosity logging output.
-    if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-      $progress->disable();
-    }
-    $progress->start();
     $assessment->assessTarget($target, $policies, $start, $end, $input->getOption('remediate'));
-    $progress->finish();
 
-    $profile->getFormatOption('markdown')
-            ->render($profile, $target, [$assessment]);
+    if (!$input->getOption('report-filename')) {
+      $input->setOption('report-filename', 'stdout');
+    }
+
+    $this->report($profile, $input, $output, $target, [$assessment]);
   }
-
 }

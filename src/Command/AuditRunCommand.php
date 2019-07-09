@@ -2,14 +2,15 @@
 
 namespace Drutiny\Command;
 
+use Drutiny\Assessment;
 use Drutiny\AuditResponse\AuditResponse;
 use Drutiny\Policy;
 use Drutiny\Profile;
 use Drutiny\RemediableInterface;
 use Drutiny\Report\ProfileRunReport;
-use Drutiny\Sandbox\Sandbox;
 use Drutiny\Target\Registry as TargetRegistry;
 use Drutiny\Target\Target;
+use Drutiny\Report\Format;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputArgument;
@@ -22,7 +23,7 @@ use Symfony\Component\Yaml\Yaml;
 /**
  *
  */
-class AuditRunCommand extends Command {
+class AuditRunCommand extends AbstractReportingCommand {
 
   /**
    * @inheritdoc
@@ -74,6 +75,7 @@ class AuditRunCommand extends Command {
         'The end point in time to report to. Can be absolute or relative. Defaults to the current hour.',
         date('Y-m-d H:00:00')
       );
+      parent::configure();
   }
 
   /**
@@ -104,9 +106,6 @@ class AuditRunCommand extends Command {
     // Setup the target.
     $target = TargetRegistry::loadTarget($input->getArgument('target'));
 
-    $result = new AuditResponse($policy);
-    $result->set(FALSE, $policy->getParameterDefaults());
-
     $start = new \DateTime($input->getOption('reporting-period-start'));
     $end   = new \DateTime($input->getOption('reporting-period-end'));
 
@@ -114,25 +113,25 @@ class AuditRunCommand extends Command {
       $target->setUri($uri);
     }
 
-    // Generate the sandbox to execute the check.
-    $sandbox = new Sandbox($target, $policy);
-    $sandbox->setReportingPeriod($start, $end);
+    $assessment = new Assessment($input->getOption('uri'));
+    $assessment->assessTarget($target, [$policy], $start, $end, $input->getOption('remediate'));
 
-    $response = $sandbox->run();
-
-    // Attempt remeidation.
-    if (!$response->isSuccessful() && $input->getOption('remediate') && ($sandbox->getAuditor() instanceof RemediableInterface)) {
-      $response = $sandbox->remediate();
-    }
-
-    // Generate a profile so we can use the profile reporting tools.
     $profile = new Profile();
     $profile->setTitle('Audit Run')
             ->setName('audit:run')
-            ->setFilepath('/dev/null');
+            ->setFilepath('/dev/null')
+            ->addFormatOptions(Format::create('terminal', [
+              'content' => Yaml::parseFile(dirname(__DIR__) . '/Report/templates/content/policy.markdown.yml')
+            ]));
 
-    $report = new ProfileRunReport($profile, $sandbox->getTarget(), [$response]);
-    $report->render($input, $output);
+    if (!$input->getOption('report-filename')) {
+      $input->setOption('report-filename', 'stdout');
+    }
+    if (!$input->getOption('format')) {
+      $intput->setOption('format', 'terminal');
+    }
+
+    $this->report($profile, $input, $output, $target, [$assessment]);
 
     if ($output->getVerbosity() >= $output::VERBOSITY_VERBOSE) {
       $output->writeln(Yaml::dump($sandbox->getParameterTokens()));

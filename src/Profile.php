@@ -146,9 +146,6 @@ class Profile {
   public function getFormatOption($format, $options = [])
   {
     $format = isset($this->format[$format]) ?  $this->format[$format] : Format::create($format, $options);
-    if (isset($options['output']) && empty($format->getOutput())) {
-      $format->setOutput($options['output']);
-    }
     return $format;
   }
 

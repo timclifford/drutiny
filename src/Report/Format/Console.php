@@ -10,58 +10,20 @@ use Drutiny\Target\Target;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Helper\TableCell;
 use Symfony\Component\Console\Helper\TableSeparator;
-use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 
 class Console extends Format {
 
-  /**
-   * The output location or method.
-   *
-   * @var string
-   */
-  protected $output;
-
-  /**
-   * The output location or method.
-   *
-   * @var string
-   */
-  protected $input;
-
   public function __construct($options) {
+    parent::__construct($options);
     $this->setFormat('console');
-    if (!isset($options['output'])) {
-      throw new InvalidArgumentException("Console format requires a Symfony\Component\Console\Output\OutputInterface.");
-    }
-    if (!($options['output'] instanceof OutputInterface)) {
-      throw new InvalidArgumentException("Console format requires a Symfony\Component\Console\Output\OutputInterface.");
-    }
-    $this->output = $options['output'];
-
-    if (!isset($options['input'])) {
-      throw new InvalidArgumentException("Console format requires a Symfony\Component\Console\Input\InputInterface.");
-    }
-    if (!($options['input'] instanceof InputInterface)) {
-      throw new InvalidArgumentException("Console format requires a Symfony\Component\Console\Input\InputInterface.");
-    }
-    $this->input = $options['input'];
-  }
-
-  /**
-   * Get the profile title.
-   */
-  public function getOutput()
-  {
-    return $this->output;
   }
 
   protected function preprocessResult(Profile $profile, Target $target, Assessment $assessment)
   {
-    $io = new SymfonyStyle($this->input, $this->output);
-    $io->title($profile->getTitle());
 
     $table_rows = [];
     $pass = [];
@@ -103,15 +65,21 @@ class Console extends Format {
     $total_tests = count($assessment->getResults());
     $total_pass = count(array_filter($pass));
     $table_rows[] = ['', "$total_pass/$total_tests passed", ''];
-    $io->table(['', 'Policy', 'Severity', 'Summary'], $table_rows);
-    return [];
+
+    return [
+      'title' => $profile->getTitle(),
+      'table_rows' => $table_rows,
+    ];
   }
 
-  protected function renderResult(array $variables) {}
+  protected function renderResult(array $variables) {
+    $io = new SymfonyStyle(new ArrayInput([]), $this->getOutput());
+    $io->title($variables['title']);
+    $io->table(['', 'Policy', 'Severity', 'Summary'], $variables['table_rows']);
+  }
 
   protected function preprocessMultiResult(Profile $profile, Target $target, array $results)
   {
-    $io = new SymfonyStyle($this->input, $this->output);
 
     // Set results by policy rather than by site.
     $resultsByPolicy = [];
@@ -150,12 +118,17 @@ class Console extends Format {
     // Remove last table seperator
     array_pop($table_rows);
 
-    $io->title($profile->getTitle());
-    $io->table([], $table_rows);
-    return [];
+    return [
+      'title' => $profile->getTitle(),
+      'table_rows' => $table_rows,
+    ];
   }
 
-  protected function renderMultiResult(array $variables) {}
+  protected function renderMultiResult(array $variables) {
+    $io = new SymfonyStyle(new ArrayInput([]), $this->getOutput());
+    $io->title($variables['title']);
+    $io->table(['', 'Policy', 'Severity', 'Summary'], $variables['table_rows']);
+  }
 
   protected function getIcon(AuditResponse $response)
   {

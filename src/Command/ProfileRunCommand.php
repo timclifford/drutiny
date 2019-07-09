@@ -7,14 +7,10 @@ use Drutiny\Config;
 use Drutiny\Container;
 use Drutiny\Profile\ProfileSource;
 use Drutiny\Profile\PolicyDefinition;
-use Drutiny\Report;
-use Drutiny\Sandbox\Sandbox;
 use Drutiny\Target\Registry as TargetRegistry;
 use Drutiny\DomainSource;
 use Drutiny\DomainList\DomainListRegistry;
-use Drutiny\Target\Target;
 use Drutiny\ProgressBar;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -24,13 +20,14 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 /**
  *
  */
-class ProfileRunCommand extends Command {
+class ProfileRunCommand extends AbstractReportingCommand {
   use \Drutiny\Policy\ContentSeverityTrait;
 
   /**
    * @inheritdoc
    */
   protected function configure() {
+    parent::configure();
     $domain_list = array_keys(Config::get('DomainList'));
     $this
       ->setName('profile:run')
@@ -52,13 +49,6 @@ class ProfileRunCommand extends Command {
         'Allow failed policy aduits to remediate themselves if available.'
       )
       ->addOption(
-        'format',
-        'f',
-        InputOption::VALUE_OPTIONAL,
-        'Specify which output format to render the report (console, html, json). Defaults to console.',
-        'console'
-      )
-      ->addOption(
         'uri',
         'l',
         InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
@@ -66,25 +56,11 @@ class ProfileRunCommand extends Command {
         ['default']
       )
       ->addOption(
-        'title',
-        't',
-        InputOption::VALUE_OPTIONAL,
-        'Override the title of the profile with the specified value.',
-        false
-      )
-      ->addOption(
         'exit-on-severity',
         'x',
         InputOption::VALUE_OPTIONAL,
         'Send an exit code to the console if a policy of a given severity fails. Defaults to none (exit code 0). (Options: none, low, normal, high, critical)',
         'none'
-      )
-      ->addOption(
-        'report-filename',
-        'o',
-        InputOption::VALUE_OPTIONAL,
-        'For json and html formats, use this option to write report to file. Drutiny will automate a filepath if the option is omitted. Use "stdout" to print to terminal',
-        false
       )
       ->addOption(
         'exclude-policy',
@@ -113,12 +89,6 @@ class ProfileRunCommand extends Command {
         InputOption::VALUE_OPTIONAL,
         'The end point in time to report to. Can be absolute or relative. Defaults to the current hour.',
         date('Y-m-d H:00:00')
-      )
-      ->addOption(
-        'report-per-site',
-        null,
-        InputOption::VALUE_NONE,
-        'Flag to additionally render a report for each site audited in multisite mode.'
       )
       ->addOption(
         'domain-source',
@@ -161,6 +131,7 @@ class ProfileRunCommand extends Command {
   protected function execute(InputInterface $input, OutputInterface $output) {
     // Ensure Container logger uses the same verbosity.
     Container::setVerbosity($output->getVerbosity());
+    $console = new SymfonyStyle($input, $output);
 
     // Setup the check.
     $profile = ProfileSource::loadProfileByName($input->getArgument('profile'));
@@ -191,10 +162,7 @@ class ProfileRunCommand extends Command {
     }
 
     // Setup the reporting format.
-    $format = $profile->getFormatOption($input->getOption('format'), [
-      'output' => $filepath != 'stdout' ? $filepath : $output,
-      'input' => $input
-    ]);
+    $format = $profile->getFormatOption($input->getOption('format'));
 
     // Allow command line to add policies to the profile.
     $included_policies = $input->getOption('include-policy');
@@ -274,12 +242,9 @@ class ProfileRunCommand extends Command {
       return;
     }
 
-    $files = $format->render($profile, $target, $results);
+    $this->report($profile, $input, $output, $target, $results);
 
-    $console = new SymfonyStyle($input, $output);
-    foreach ($files as $filepath) {
-      $console->success('Report written to ' . $filepath);
-    }
+    $report = $format->render($profile, $target, $results)->fetch();
 
     $this->setSeverity($input->getOption('exit-on-severity'));
 

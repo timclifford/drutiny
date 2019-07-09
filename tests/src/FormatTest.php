@@ -9,7 +9,6 @@ use Drutiny\Sandbox\Sandbox;
 use Drutiny\Target\Registry as TargetRegistry;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
-use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 
@@ -39,59 +38,40 @@ class FormatTest extends TestCase {
     parent::__construct();
   }
 
-  public function testConsoleFormatException()
+  public function testBadFormatException()
   {
-    $this->expectException(InvalidArgumentException::class);
-    $format = $this->profile->getFormatOption('console');
+    $this->expectException(\InvalidArgumentException::class);
+    $format = $this->profile->getFormatOption('doc');
   }
 
   public function testConsoleFormat()
   {
-    $format = $this->profile->getFormatOption('console', [
-      'output' => new BufferedOutput(),
-      'input' => new ArrayInput([])
-    ]);
-    $filepaths = $format->render($this->profile, $this->target, [$this->assessment]);
-    $this->assertEmpty($filepaths);
-    $this->assertTrue(is_array($filepaths));
+    $format = $this->profile->getFormatOption('console');
+    $output = $format->render($this->profile, $this->target, [$this->assessment]);
+    $this->assertNotEmpty($output->fetch());
   }
 
   public function testHtmlFormat()
   {
-    $buffer = new BufferedOutput();
-    $format = $this->profile->getFormatOption('html', [
-      'output' => $buffer,
-    ]);
-    $filepaths = $format->render($this->profile, $this->target, [$this->assessment]);
-    $this->assertEmpty($filepaths);
-
-    $output = $buffer->fetch();
-    $this->assertTrue(strlen($output) > 0);
+    $format = $this->profile->getFormatOption('html');
+    $output = $format->render($this->profile, $this->target, [$this->assessment]);
+    $this->assertNotEmpty($output->fetch());
   }
 
   public function testMarkdownFormat()
   {
-    $buffer = new BufferedOutput();
-    $format = $this->profile->getFormatOption('markdown', [
-      'output' => $buffer,
-    ]);
-    $filepaths = $format->render($this->profile, $this->target, [$this->assessment]);
-    $this->assertEmpty($filepaths);
-
-    $output = $buffer->fetch();
-    $this->assertTrue(strlen($output) > 0);
+    $format = $this->profile->getFormatOption('markdown');
+    $output = $format->render($this->profile, $this->target, [$this->assessment]);
+    $this->assertNotEmpty($output->fetch());
   }
 
   public function testJsonFormat()
   {
-    $buffer = new BufferedOutput();
-    $format = $this->profile->getFormatOption('json', [
-      'output' => $buffer,
-    ]);
-    $filepaths = $format->render($this->profile, $this->target, [$this->assessment]);
-    $this->assertEmpty($filepaths);
+    $format = $this->profile->getFormatOption('json');
+    $output = $format->render($this->profile, $this->target, [$this->assessment]);
+    $this->assertNotEmpty($json = $output->fetch());
 
-    $output = json_decode($buffer->fetch());
-    $this->assertTrue(is_object($output));
+    $object = json_decode($json);
+    $this->assertTrue(is_object($object));
   }
 }

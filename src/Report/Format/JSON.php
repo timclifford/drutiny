@@ -19,10 +19,8 @@ class JSON extends Format {
   protected $output;
 
   public function __construct($options) {
+    parent::__construct($options);
     $this->setFormat('json');
-    if (isset($options['output'])) {
-      $this->setOutput($options['output']);
-    }
   }
 
   protected function preprocessResult(Profile $profile, Target $target, Assessment $assessment)
