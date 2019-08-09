@@ -65,9 +65,9 @@ root:
       _prototype:
         _type: choice
         _choices:
-          2.0:
+          '2.0':
             _type: text
-          2.3:
+          '2.3':
             _type: array
             _children:
               on_fail:

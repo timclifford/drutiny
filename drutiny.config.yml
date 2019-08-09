@@ -42,6 +42,7 @@ ProfileSource:
 Cache:
   exec: Symfony\Component\Cache\Adapter\FilesystemAdapter
   drutiny.github.io.policy: Symfony\Component\Cache\Adapter\FilesystemAdapter
+  http: Symfony\Component\Cache\Adapter\FilesystemAdapter
 ExpressionFunction:
   - Drutiny\ExpressionFunction\PolicyExpressionFunction
   - Drutiny\ExpressionFunction\SemverGtExpressionFunction

@@ -13,25 +13,28 @@
         "source": "https://github.com/drutiny/drutiny"
     },
     "require": {
-        "ext-bcmath": "*",
         "caseyamcl/toc": "~1.0",
         "composer/semver": "^1.4.2",
         "doctrine/annotations": "^v1.2",
-        "drutiny/http": "^2.5",
         "erusev/parsedown": "^1.6.3",
-        "fiasco/symfony-console-style-markdown": "~1.0",
+        "ext-bcmath": "*",
+        "fiasco/symfony-console-style-markdown": "^1.2",
+        "guzzlehttp/guzzle": "~6.0",
+        "kevinrob/guzzle-cache-middleware": "^3.2.1",
         "mustache/mustache": "^2.11",
         "paragonie/random_compat": "^2.0",
-        "symfony/cache": "^3.4",
-        "symfony/class-loader": "^3.1",
-        "symfony/console": "^3.4",
-        "symfony/expression-language": "^3.4",
-        "symfony/finder": "^3.4",
-        "symfony/process": "^3.4",
-        "symfony/validator": "^3.4",
-        "symfony/yaml": "^3.4",
-        "twig/twig": "~1.0",
-        "romaricdrigon/metayaml": "^1.1"
+        "fiasco/metayaml": "^1.3",
+        "symfony/cache": "^4.0",
+        "symfony/console": "^4.0",
+        "symfony/expression-language": "^4.0",
+        "symfony/finder": "^4.0",
+        "symfony/process": "^4.0",
+        "symfony/validator": "^4.0",
+        "symfony/yaml": "^4.0",
+        "twig/twig": "~1.0"
+    },
+    "conflict": {
+      "drutiny/http": "^2.0"
     },
     "autoload": {
         "psr-4": {
@@ -43,7 +46,6 @@
     "require-dev": {
         "phpunit/phpunit": "^5.0",
         "squizlabs/php_codesniffer": "2.*",
-        "drupal/coder": "^8.2.0",
-        "drutiny/content": "master-dev"
+        "drupal/coder": "^8.2.0"
     }
 }

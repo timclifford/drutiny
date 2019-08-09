@@ -2,7 +2,6 @@
 
 namespace Drutiny;
 
-use Symfony\Component\ClassLoader\ClassMapGenerator;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\Yaml\Yaml;
 
