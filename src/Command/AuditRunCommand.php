@@ -132,9 +132,5 @@ class AuditRunCommand extends AbstractReportingCommand {
     }
 
     $this->report($profile, $input, $output, $target, [$assessment]);
-
-    if ($output->getVerbosity() >= $output::VERBOSITY_VERBOSE) {
-      $output->writeln(Yaml::dump($sandbox->getParameterTokens()));
-    }
   }
 }

@@ -20,9 +20,17 @@ class Client extends GuzzleClient {
         $config['handler'] = HandlerStack::create();
     }
 
+    $this->processHandler($config['handler']);
+
+
+    parent::__construct($config);
+  }
+
+  public static function processHandler(HandlerStack &$handler)
+  {
     // Deal with Authorization headers (401 Responses).
-    $config['handler']->push(function (callable $handler) {
-        return new RetryWithAuthMiddleware($handler);
+    $handler->push(function (callable $handle) {
+        return new RetryWithAuthMiddleware($handle);
     });
 
     $message_format = __CLASS__ . " HTTP Request\n\n{req_headers}\n\n{res_headers}";
@@ -35,16 +43,8 @@ class Client extends GuzzleClient {
       Container::getLogger(),
       new MessageFormatter($message_format)
     );
-    $config['handler']->push($logger);
-
-    // Cache HTTP responses. Add to the bottom so other cache
-    // handlers take priority if present.
-    if (!isset($config['cache']) || $config['cache']) {
-      $config['handler']->unshift(cache_middleware(), 'cache');
-    }
-
-
-    parent::__construct($config);
+    $handler->push($logger);
+    $handler->unshift(cache_middleware(), 'cache');
   }
 }
 
