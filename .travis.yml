@@ -10,10 +10,10 @@ before_script:
 install:
 - composer config version `echo $TRAVIS_BRANCH | sed -e's/x/x-dev/g'`
 - travis_retry composer install --no-interaction
-- composer require drush/drush:^8.1.0
+- composer require global drush/drush:^8.1.0
 - composer info -i
 script:
-- export PATH="$PATH:$PWD/vendor/bin"
+- export PATH="$PATH:$PWD/vendor/bin:$HOME/.composer/vendor/bin"
 - "./vendor/bin/phpunit"
 - "./bin/drutiny policy:list"
 - "./bin/drutiny profile:run test @none"
