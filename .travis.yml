@@ -13,7 +13,7 @@ install:
 - composer global require drush/drush:^8.1.0
 - composer info -i
 script:
-- export PATH="$PATH:$PWD/vendor/bin:$HOME/.composer/vendor/bin"
+- export PATH="$PATH:$PWD/vendor/bin:$HOME/.config/composer/vendor/bin"
 - "./vendor/bin/phpunit"
 - "./bin/drutiny policy:list"
 - "./bin/drutiny profile:run test @none"
