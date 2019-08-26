@@ -35,6 +35,9 @@ class JSON extends Format {
       'not_applicable' => 0,
       'remediated' => 0,
       'total' => 0,
+      'date' => date('Y-m-d'),
+      'human_date' => date('F jS, Y'),
+      'time' => date('h:ia')
     ];
 
     $schema['results'] = [];
