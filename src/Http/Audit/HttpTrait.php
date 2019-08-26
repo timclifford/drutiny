@@ -4,6 +4,9 @@ namespace Drutiny\Http\Audit;
 
 use Drutiny\Sandbox\Sandbox;
 use Drutiny\Http\Client;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
+use Psr\Http\Message\RequestInterface;
 
 Trait HttpTrait {
 
@@ -31,10 +34,18 @@ Trait HttpTrait {
 
     $status_code = $sandbox->getParameter('status_code');
 
+    $handler = HandlerStack::create();
+
     // Warm remote caches.
     $client = new Client([
-      'cache' => $sandbox->getParameter('use_cache', TRUE)
+      'cache' => $sandbox->getParameter('use_cache', TRUE),
+      'handler' => $handler,
     ]);
+
+    $handler->before('cache', Middleware::mapRequest(function (RequestInterface $request) use ($sandbox) {
+      $sandbox->setParameter('req_headers', $request->getHeaders());
+      return $request;
+    }));
 
     return $client->request($method, $url, $options);
   }

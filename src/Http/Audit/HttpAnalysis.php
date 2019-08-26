@@ -56,7 +56,11 @@ class HttpAnalysis extends AbstractAnalysis {
 
     $sandbox->setParameter('use_cache', $use_cache);
     $response = $this->getHttpResponse($sandbox);
+
+    // Maintain for backwards compatibility.
     $sandbox->setParameter('headers', $this->gatherHeaders($response));
+
+    $sandbox->setParameter('res_headers', $response->getHeaders());
   }
 
   protected function gatherHeaders(ResponseInterface $response)
