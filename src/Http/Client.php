@@ -43,8 +43,13 @@ class Client extends GuzzleClient {
 
     // Provide a default User-Agent.
     $handler->push(Middleware::mapRequest(function (RequestInterface $request) {
-      $http = Container::credentialManager('http');
-      $agent = $http['user_agent'] ?? 'Drutiny';
+      try {
+        $http = Container::credentialManager('http');
+      }
+      catch (\Drutiny\Credential\CredentialsUnavailableException $e) {
+        $http = ['user_agent' => 'Drutiny'];
+      }
+      $agent = $http['user_agent'];
 
       return $request->withHeader('User-Agent', $agent);
     }), 'user_agent');
