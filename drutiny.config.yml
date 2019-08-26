@@ -49,3 +49,8 @@ ExpressionFunction:
   - Drutiny\ExpressionFunction\SemverGteExpressionFunction
   - Drutiny\ExpressionFunction\TargetExpressionFunction
   - Drutiny\ExpressionFunction\DrupalModuleEnabledExpressionFunction
+CredentialSchema:
+  http:
+    user_agent:
+      type: string
+      description: Customize Drutiny requests to send a defined User Agent on all HTTP requests.

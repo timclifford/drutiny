@@ -8,6 +8,7 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\MessageFormatter;
 use GuzzleHttp\Middleware;
 use Kevinrob\GuzzleCache\CacheMiddleware;
+use Psr\Http\Message\RequestInterface;
 use Kevinrob\GuzzleCache\Storage\Psr6CacheStorage;
 use Kevinrob\GuzzleCache\Strategy\PrivateCacheStrategy;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter as Cache;
@@ -29,9 +30,26 @@ class Client extends GuzzleClient {
   public static function processHandler(HandlerStack &$handler)
   {
     // Deal with Authorization headers (401 Responses).
-    $handler->push(function (callable $handle) {
-        return new RetryWithAuthMiddleware($handle);
-    });
+    $handler->push(Middleware::mapRequest(function (RequestInterface $request) {
+      $uri = (string) $request->getUri();
+      $host = parse_url($uri, PHP_URL_HOST);
+      $creds = Container::credentialManager('http_auth');
+      if (isset($creds[$host])) {
+        $credential = $creds[$host]['username'] . ':' . $creds[$host]['password'];
+        return $request->withHeader('Authorization', 'Basic ' . base64_encode($credential));
+      }
+      return $request;
+    }), 'authorization');
+
+    // Provide a default User-Agent.
+    $handler->push(Middleware::mapRequest(function (RequestInterface $request) {
+      $http = Container::credentialManager('http');
+      $agent = $http['user_agent'] ?? 'Drutiny';
+
+      return $request->withHeader('User-Agent', $agent);
+    }), 'user_agent');
+
+    $handler->unshift(cache_middleware(), 'cache');
 
     $message_format = __CLASS__ . " HTTP Request\n\n{req_headers}\n\n{res_headers}";
     if (Container::getVerbosity() <= OutputInterface::VERBOSITY_VERY_VERBOSE) {
@@ -43,8 +61,8 @@ class Client extends GuzzleClient {
       Container::getLogger(),
       new MessageFormatter($message_format)
     );
-    $handler->push($logger);
-    $handler->unshift(cache_middleware(), 'cache');
+
+    $handler->after('cache', $logger, 'logger');
   }
 }
 
