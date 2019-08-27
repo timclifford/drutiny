@@ -24,6 +24,7 @@ class DrutinyGitHubIO implements PolicySourceInterface {
     $api = new Api();
     $list = [];
     foreach ($api->getPolicyList() as $listedPolicy) {
+      $listedPolicy['filepath'] = Api::BaseUrl . $listedPolicy['_links']['self']['href'];
       $list[$listedPolicy['name']] = $listedPolicy;
     }
     return $list;

@@ -32,9 +32,8 @@ class LocalFs implements PolicySourceInterface {
 
     $list = [];
     foreach ($finder as $file) {
-      $filename = $file->getRelativePathname();
-      $policy = Yaml::parse(file_get_contents($filename));
-      $policy['filepath'] = $filename;
+      $policy = Yaml::parse($file->getContents());
+      $policy['filepath'] = $file->getPathname();
       $list[$policy['name']] = $policy;
     }
     Container::cache($this->getName())->save(

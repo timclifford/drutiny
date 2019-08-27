@@ -10,6 +10,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Yaml\Yaml;
 use Drutiny\PolicySource\PolicySource;
 use Drutiny\Profile;
+use Drutiny\Config;
 
 /**
  *
@@ -40,11 +41,17 @@ class PolicyDownloadCommand extends Command {
    */
   protected function execute(InputInterface $input, OutputInterface $output) {
     $render = new SymfonyStyle($input, $output);
-
     $policy = PolicySource::loadPolicyByName($name = $input->getArgument('policy'));
 
+    $name = str_replace(':', '-', $name);
+    $filename = Config::getUserDir() . "/$name.policy.yml";
+    if (file_exists($filename)) {
+      $render->error("$filename already exists. Please delete this file if you wish to download it from its source.");
+      return;
+    }
+
     $output = Yaml::dump($policy->export(), 6, 4, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
-    $filename = "$name.policy.yml";
+
     file_put_contents($filename, $output);
     $render->success("$filename written.");
   }

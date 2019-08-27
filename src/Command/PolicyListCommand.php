@@ -29,6 +29,12 @@ class PolicyListCommand extends Command {
         't',
         InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
         'Filter list by tag'
+      )
+      ->addOption(
+        'source',
+        's',
+        InputOption::VALUE_OPTIONAL,
+        'Filter by source'
       );
   }
 
@@ -38,13 +44,23 @@ class PolicyListCommand extends Command {
   protected function execute(InputInterface $input, OutputInterface $output) {
     $list = PolicySource::getPolicyList();
 
+    if ($source_filter = $input->getOption('source')) {
+      $list = array_filter($list, function ($policy) use ($source_filter) {
+        return $source_filter == $policy['source'];
+      });
+    }
+
     $rows = array();
     foreach ($list as $listedPolicy) {
-      $rows[] = array(
+      $row = array(
         'description' => '<options=bold>' . wordwrap($listedPolicy['title'], 50) . '</>',
         'name' => $listedPolicy['name'],
         'source' => $listedPolicy['source'],
       );
+      if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+        $row['filename'] = $listedPolicy['filepath'];
+      }
+      $rows[] = $row;
     }
 
     usort($rows, function ($a, $b) {
@@ -55,7 +71,11 @@ class PolicyListCommand extends Command {
     });
 
     $io = new SymfonyStyle($input, $output);
-    $io->table(['Title', 'Name', 'Source'], $rows);
+    $headers = ['Title', 'Name', 'Source'];
+    if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+      $headers[] = 'URI';
+    }
+    $io->table($headers, $rows);
   }
 
   /**
