@@ -43,7 +43,7 @@ class PolicyDownloadCommand extends Command {
 
     $policy = PolicySource::loadPolicyByName($name = $input->getArgument('policy'));
 
-    $output = Yaml::dump($policy->export());
+    $output = Yaml::dump($policy->export(), 6, 4, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
     $filename = "$name.policy.yml";
     file_put_contents($filename, $output);
     $render->success("$filename written.");

@@ -63,7 +63,7 @@ trait ContentSeverityTrait {
       case $this->severity === PolicyBase::SEVERITY_NORMAL:
       case $this->severity === 'normal':
       case $this->severity === 'medium':
-        return 'medium';
+        return 'normal';
 
       case $this->severity === PolicyBase::SEVERITY_HIGH:
       case $this->severity === 'high':
