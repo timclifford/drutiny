@@ -13,6 +13,7 @@ use Kevinrob\GuzzleCache\Storage\Psr6CacheStorage;
 use Kevinrob\GuzzleCache\Strategy\PrivateCacheStrategy;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter as Cache;
 use Symfony\Component\Console\Output\OutputInterface;
+use Drutiny\Credential\CredentialsUnavailableException;
 
 class Client extends GuzzleClient {
   public function __construct(array $config = [])
@@ -33,11 +34,19 @@ class Client extends GuzzleClient {
     $handler->push(Middleware::mapRequest(function (RequestInterface $request) {
       $uri = (string) $request->getUri();
       $host = parse_url($uri, PHP_URL_HOST);
-      $creds = Container::credentialManager('http_auth');
+
+      try {
+        $creds = Container::credentialManager('http_auth');
+      }
+      catch (CredentialsUnavailableException $e) {
+        return $request;
+      }
+
       if (isset($creds[$host])) {
         $credential = $creds[$host]['username'] . ':' . $creds[$host]['password'];
         return $request->withHeader('Authorization', 'Basic ' . base64_encode($credential));
       }
+
       return $request;
     }), 'authorization');
 
@@ -46,12 +55,11 @@ class Client extends GuzzleClient {
       try {
         $http = Container::credentialManager('http');
       }
-      catch (\Drutiny\Credential\CredentialsUnavailableException $e) {
-        $http = ['user_agent' => 'Drutiny'];
+      catch (CredentialsUnavailableException $e) {
+        return $request;
       }
-      $agent = $http['user_agent'];
 
-      return $request->withHeader('User-Agent', $agent);
+      return $request->withHeader('User-Agent', $http['user_agent']);
     }), 'user_agent');
 
     $handler->unshift(cache_middleware(), 'cache');
