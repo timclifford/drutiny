@@ -8,6 +8,7 @@ use Drutiny\Policy\ValidationException;
 use Drutiny\PolicySource\PolicySource;
 use RomaricDrigon\MetaYaml\Exception\NodeValidatorException;
 use RomaricDrigon\MetaYaml\MetaYaml;
+use Fiasco\MetaYaml\SchemaElement;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
@@ -203,5 +204,11 @@ class Policy extends Policy\PolicyBase {
       }, $this->chart);
 
       return $defaults;
+  }
+
+  public static function getSchema()
+  {
+    $schema = Yaml::parseFile(__DIR__ . '/policy.schema.yml');
+    return new SchemaElement($schema['root']);
   }
 }

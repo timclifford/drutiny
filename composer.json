@@ -18,7 +18,7 @@
         "doctrine/annotations": "^v1.2",
         "erusev/parsedown": "^1.6.3",
         "ext-bcmath": "*",
-        "fiasco/metayaml": "^1.3",
+        "fiasco/metayaml": "^1.5",
         "fiasco/symfony-console-style-markdown": "^1.2",
         "guzzlehttp/guzzle": "~6.0",
         "kevinrob/guzzle-cache-middleware": "^3.2.1",
