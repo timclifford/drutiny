@@ -61,9 +61,9 @@ class JSON extends Format {
     $schema['stats'] = [
       'critical' => $outcomes,
       'high' => $outcomes,
-      'medium' => $outcomes,
+      'normal' => $outcomes,
       'low' => $outcomes,
-      'none' => $outcomes,
+      'none' => $outcomes
     ];
 
     foreach ($assessment->getResults() as $response) {

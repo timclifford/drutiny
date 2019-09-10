@@ -78,7 +78,7 @@ class DrushDriver {
       $output = $this->runCommand($method, $args);
     }
     catch (ProcessFailedException $e) {
-      Container::getLogger()->error($e->getProcess()->getOutput());
+      // Container::getLogger()->error($e->getProcess()->getOutput());
       throw new DrushFormatException("Drush command failed: $method", $e->getProcess()->getOutput());
     }
 
