@@ -19,7 +19,7 @@ trait ReportingPeriodTrait {
      */
     protected $reportingPeriodEnd;
 
-    public function setReportingPeriod(\DateTime $start, \DateTime $end)
+    public function setReportingPeriod(\DateTimeInterface $start, \DateTimeInterface $end)
     {
       Container::getLogger()->debug(strtr("Reporting period set @start to @end", [
         '@start' => $start->format('Y-m-d H:i:s e'),
@@ -29,13 +29,13 @@ trait ReportingPeriodTrait {
                   ->setReportingPeriodEnd($end);
     }
 
-    public function setReportingPeriodStart(\DateTime $start)
+    public function setReportingPeriodStart(\DateTimeInterface $start)
     {
       $this->reportingPeriodStart = $start;
       return $this;
     }
 
-    public function setReportingPeriodEnd(\DateTime $end)
+    public function setReportingPeriodEnd(\DateTimeInterface $end)
     {
       $this->reportingPeriodEnd = $end;
       return $this;
@@ -106,24 +106,31 @@ trait ReportingPeriodTrait {
       ];
     }
 
+    /**
+     * Get the step interval in seconds.
+     *
+     * @return int Number of seconds in each step.
+     */
     public function getReportingPeriodSteps()
     {
       $duration = $this->getReportingPeriodDuration();
 
       $steps = array_map(function ($interval) use ($duration) {
-        return round($duration / $interval);
+        return (int) round($duration / $interval);
       }, $this->_getReportingPeriodIntervals());
 
-      $steps = array_filter($steps, function ($steps) {
+      $steps = array_combine($this->_getReportingPeriodIntervals(), $steps);
+
+      $steps = array_filter($steps, function ($step) {
         // 60 < X > 100;
-        return $steps >= 60 && $steps <= 100;
+        return $step >= 60 && $step <= 100;
       });
 
       if (empty($steps)) {
         throw new \Exception("Could not find a number of steps suitable for reporting period.");
       }
 
-      return current($steps);
+      return key($steps);
     }
 
 }
