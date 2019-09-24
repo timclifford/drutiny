@@ -87,6 +87,7 @@ trait ReportingPeriodTrait {
     protected function _getReportingPeriodIntervals()
     {
       return [
+        30, // 30 seconds
         60, // 1 minute
         120, // 2 minutes
         300, // 5 minutes
@@ -127,6 +128,11 @@ trait ReportingPeriodTrait {
       });
 
       if (empty($steps)) {
+        // If the duration is less than 30mins, then set the stepping period
+        // to 30 seconds.
+        if ($duration < 1800) {
+          return 30;
+        }
         throw new \Exception("Could not find a number of steps suitable for reporting period.");
       }
 

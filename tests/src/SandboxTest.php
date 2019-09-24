@@ -24,9 +24,20 @@ class SandboxTest extends TestCase {
 
   public function testReportingPeriod()
   {
-
     $start = new \DateTimeImmutable('01-02-2000');
     $this->assertEquals($start->format('d-m-Y'), '01-02-2000');
+
+    // Reporting period of 15 minute.
+    $this->sandbox->setReportingPeriod($start, $start->add(new \DateInterval('PT15M')));
+    $this->assertEquals($this->sandbox->getReportingPeriodInterval()->format('%i'), 15);
+    $this->assertEquals($this->sandbox->getReportingPeriodDuration(), 900);
+    $this->assertEquals($this->sandbox->getReportingPeriodSteps(), 30);
+
+    // Reporting period of 1 hour.
+    $this->sandbox->setReportingPeriod($start, $start->add(new \DateInterval('PT1H')));
+    $this->assertEquals($this->sandbox->getReportingPeriodInterval()->format('%h'), 1);
+    $this->assertEquals($this->sandbox->getReportingPeriodDuration(), 3600);
+    $this->assertEquals($this->sandbox->getReportingPeriodSteps(), 60);
 
     // Reporting period of 6 hours.
     $this->sandbox->setReportingPeriod($start, $start->add(new \DateInterval('PT6H')));
