@@ -355,10 +355,13 @@ class Profile {
       'policies' => $this->dumpPolicyDefinitions(),
       'excluded_policies' => $this->excludedPolicies,
       'include' => array_keys($this->getIncludes()),
-      'content' => $format->getContent(),
+    //  'content' => $format->getContent(),
     ];
     if ($template = $format->getTemplate()) {
       $export['format']['html']['template'] = $template;
+    }
+    if ($html = $format->getContent()) {
+      $export['format']['html']['content'] = $html;
     }
     return array_filter($export);
   }
