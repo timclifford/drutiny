@@ -6,6 +6,7 @@ use Drutiny\Sandbox\Sandbox;
 use Drutiny\Annotation\Param;
 use Drutiny\Annotation\Token;
 use GuzzleHttp\Exception\RequestException;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  *
@@ -19,6 +20,11 @@ use GuzzleHttp\Exception\RequestException;
  *  description = "The value to check against.",
  *  type = "string"
  * )
+ * @Token(
+ *  name = "request_error",
+ *  description = "If the request failed, this token will contain the error message.",
+ *  type = "string"
+ * )
  */
 class HttpHeaderExists extends Http {
 
@@ -29,16 +35,17 @@ class HttpHeaderExists extends Http {
   {
     try {
       $res = $this->getHttpResponse($sandbox);
+      if ($has_header = $res->hasHeader($sandbox->getParameter('header'))) {
+          $headers = $res->getHeader($sandbox->getParameter('header'));
+          $sandbox->setParameter('header_value', $headers[0]);
+      }
+      return $has_header;
     }
     catch (RequestException $e) {
-      $res = $e->getResponse();
       $sandbox->logger()->error($e->getMessage());
+      $sandbox->setParameter('request_error', $e->getMessage());
     }
-    if ($has_header = $res->hasHeader($sandbox->getParameter('header'))) {
-        $headers = $res->getHeader($sandbox->getParameter('header'));
-        $sandbox->setParameter('header_value', $headers[0]);
-    }
-    return $has_header;
+    return FALSE;
   }
 }
 
