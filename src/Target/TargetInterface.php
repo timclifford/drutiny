@@ -1,6 +1,7 @@
 <?php
 
 namespace Drutiny\Target;
+use Drutiny\Annotation\Metadata;
 
 /**
  * Definition of a Target.
@@ -34,4 +35,16 @@ interface TargetInterface {
    * Execute a shell command against the target.
    */
   public function exec($command, $args = []);
+
+  /**
+   * Target URI
+   * @Metadata(name = "uri")
+   */
+  public function metadataUri();
+
+  /**
+   * Target Domain
+   * @Metadata(name = "domain")
+   */
+  public function metadataDomain();
 }

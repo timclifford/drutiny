@@ -82,6 +82,22 @@ abstract class Target implements TargetInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function metadataUri()
+  {
+    return $this->uri();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function metadataDomain()
+  {
+    return parse_url($this->uri(), PHP_URL_HOST);
+  }
+
+  /**
    * Pull metadata from Drutiny\Target\Metadata interfaces.
    *
    * @return array of metatdata keyed by metadata name.
