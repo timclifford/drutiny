@@ -11,6 +11,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Drutiny\Registry;
 use Drutiny\Config;
 use Drutiny\PolicySource\PolicySource;
+use Drutiny\ProgressBar;
 
 /**
  *
@@ -42,7 +43,11 @@ class PolicyListCommand extends Command {
    * @inheritdoc
    */
   protected function execute(InputInterface $input, OutputInterface $output) {
+    $progress = new ProgressBar($output, 2);
+    $progress->setTopic("Loading policy data");
+    $progress->start();
     $list = PolicySource::getPolicyList();
+    $progress->advance();
 
     if ($source_filter = $input->getOption('source')) {
       $list = array_filter($list, function ($policy) use ($source_filter) {
@@ -75,6 +80,7 @@ class PolicyListCommand extends Command {
     if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
       $headers[] = 'URI';
     }
+    $progress->finish();
     $io->table($headers, $rows);
   }
 
