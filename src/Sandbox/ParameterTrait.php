@@ -64,6 +64,7 @@ trait ParameterTrait {
     foreach ($this->params as $key => $value) {
       $tokens[$key] = $value;
     }
+    $tokens['_uri'] = $this->getTarget()->uri();
     return $tokens;
   }
 
