@@ -71,6 +71,14 @@ Class ProgressBar extends AbstractLogger {
     return $this->bar;
   }
 
+  public function resetSteps($steps = 1)
+  {
+    $this->steps = $steps;
+    $this->bar = NULL;
+    $this->start();
+    return $this;
+  }
+
   /**
    * Prevent the ProgressBar from continuing to function.
    */
@@ -137,7 +145,7 @@ Class ProgressBar extends AbstractLogger {
     if ($this->status) {
       $this->bar()->setMessage("Done");
       $this->disable();
-      echo '';
+      echo "\n";
     }
     return $this;
   }
