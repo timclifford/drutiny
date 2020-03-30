@@ -34,6 +34,6 @@ if (file_exists($version_filename)) {
   $version = file_get_contents($version_filename);
 }
 
-$application = new Application('Drutiny for Acquia CS', $version);
+$application = new Application('Drutiny', $version);
 $application->addCommands(CommandDiscovery::findCommands());
 $application->run();
