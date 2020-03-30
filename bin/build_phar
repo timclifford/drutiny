@@ -1,0 +1,106 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * @file
+ * Build a phar of this repository.
+ */
+
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Console\Logger\ConsoleLogger;
+use Symfony\Component\Yaml\Yaml;
+
+const BUILD_DIRECTORY = __DIR__ . '/.build';
+
+require 'vendor/autoload.php';
+
+$console = new ConsoleLogger(new ConsoleOutput(ConsoleOutput::VERBOSITY_DEBUG));
+
+$fs = new Filesystem();
+
+if ($fs->exists(BUILD_DIRECTORY)) {
+  $console->log('notice', 'Removing build directory: ' . BUILD_DIRECTORY);
+  $fs->remove(BUILD_DIRECTORY);
+}
+
+$console->log('info', 'Creating build directory: ' . BUILD_DIRECTORY);
+$fs->mkdir(BUILD_DIRECTORY);
+
+$files = ['composer.json', 'drutiny.config.yml', 'stub.php'];
+foreach ($files as $filename) {
+  $console->log('info', 'Copying ' . $filename);
+  $fs->copy($filename, BUILD_DIRECTORY . '/' . $filename);
+}
+
+// Append the self-update command to the phar file.
+$console->log('info', 'Adding self updating command.');
+$config_file = BUILD_DIRECTORY . '/drutiny.config.yml';
+$config = Yaml::parseFile($config_file);
+$config['Command'][] = 'Drutiny\Command\SelfUpdateCommand';
+file_put_contents($config_file, Yaml::dump($config));
+
+$dirs = [
+  'src',
+  'vendor'
+];
+
+foreach ($dirs as $dir) {
+  $console->log('info', 'Copying directory: ' . $dir);
+  $fs->mirror($dir, BUILD_DIRECTORY . '/' . $dir);
+}
+
+// Remove any source control from the build.
+$repos = new Finder();
+// Find all files in the current directory.
+$repos->directories()
+  ->in(BUILD_DIRECTORY)
+  ->ignoreDotFiles(FALSE)
+  ->ignoreVCS(FALSE)
+  ->name('.git');
+$console->log('info', 'Removing source control repositories in ' . BUILD_DIRECTORY);
+
+foreach ($repos as $repo) {
+  $console->log('info', 'Removing ' . $repo->getRealPath());
+}
+
+$fs->remove($repos);
+
+// Determine the version of the phar by either argument (Provided by Travis CI)
+// of by pulling the current branch name (if not built by travis).
+if (isset($argv[1])) {
+  $version = $argv[1];
+}
+else {
+  $git_log = exec('git log --format="%D, %h" -1');
+  $git_log = str_replace('HEAD -> ', '', $git_log);
+  $version = current(array_filter(explode(', ', $git_log)));
+}
+
+$stage = '';
+if (isset($argv[2])) {
+  $stage = '-' . $argv[2];
+}
+
+$version .= $stage;
+$console->log('info', "Setting version as: $version.");
+file_put_contents(BUILD_DIRECTORY . '/VERSION', $version);
+
+$phar_file = 'drutiny' . $version . '.phar';
+
+// Remove any old build.
+if ($fs->exists($phar_file)) {
+  $console->log('warning', $phar_file . ' already exists. Removing..');
+  $fs->remove($phar_file);
+}
+
+$console->log('info', 'Building phar...');
+// Build Phar.
+$phar = new Phar($phar_file, 0, $phar_file);
+// Add all files in the project.
+$phar->buildFromDirectory(BUILD_DIRECTORY);
+$phar->setStub("#!/usr/bin/php \n" . $phar->createDefaultStub('stub.php'));
+$phar->stopBuffering();
+$fs->chmod($phar_file, 0766);
+$console->log('notice', 'Build complete: ' . $phar_file);
