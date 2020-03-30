@@ -12,7 +12,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Yaml\Yaml;
 
-const BUILD_DIRECTORY = __DIR__ . '/.build';
+define('BUILD_DIRECTORY', getcwd() . '/.build');
 
 require 'vendor/autoload.php';
 
