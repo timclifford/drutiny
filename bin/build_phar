@@ -84,6 +84,7 @@ if (isset($argv[2])) {
 }
 
 $version .= $stage;
+$version .= '-php' . phpversion();
 $console->log('info', "Setting version as: $version.");
 file_put_contents(BUILD_DIRECTORY . '/VERSION', $version);
 

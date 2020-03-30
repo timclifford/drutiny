@@ -2,6 +2,7 @@
 vendor
 *.iml
 .build
+*.phar
 # Allow users to create custom domains files that are not tracked here.
 domains.yml
 domains-*.yml

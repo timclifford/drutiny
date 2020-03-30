@@ -45,7 +45,6 @@ deploy:
   on:
     repo: drutiny/drutiny
     tags: true
-    php: 7.3
 notifications:
   email:
     on_success: never
