@@ -9,7 +9,7 @@ before_script:
 - sudo ln -s /usr/share/zoneinfo/UTC /etc/localtime
 install:
 - composer config version `echo $TRAVIS_BRANCH | sed -e's/x/x-dev/g'`
-- travis_retry composer install --no-interaction --no-dev
+- travis_retry composer install --no-interaction
 - composer global require drush/drush:^8.1.0
 - composer info -i
 script:
@@ -21,6 +21,7 @@ script:
   -o multisite.test"
 - "./bin/drutiny policy:audit Test:Pass @none"
 - ./bin/drutiny audit:run "Drutiny\Audit\AlwaysPass" @none
+- travis_retry composer install --no-interaction --no-dev
 - "./bin/build_phar $TRAVIS_BRANCH"
 deploy:
 - provider: script
