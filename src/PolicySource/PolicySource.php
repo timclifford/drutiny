@@ -56,11 +56,19 @@ class PolicySource {
 
     $lists = [];
     foreach (self::getSources() as $source) {
-      $items = $source->getList();
-      Container::getLogger()->notice($source->getName() . " has " . count($items) . " polices.");
-      foreach ($items as $name => $item) {
-        $item['source'] = $source->getName();
-        $list[$name] = $item;
+      try {
+        $items = $source->getList();
+        Container::getLogger()->notice($source->getName() . " has " . count($items) . " polices.");
+        foreach ($items as $name => $item) {
+          $item['source'] = $source->getName();
+          $list[$name] = $item;
+        }
+      }
+      catch (\GuzzleHttp\Exception\ClientException $e) {
+        Container::getLogger()->info(strtr("Failed to load policies from source: @name: @error", [
+          '@name' => $source->getName(),
+          '@error' => $e->getMessage(),
+        ]));
       }
     }
     $timer->stop();
