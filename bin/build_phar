@@ -101,7 +101,7 @@ $console->log('info', 'Building phar...');
 $phar = new Phar($phar_file, 0, $phar_file);
 // Add all files in the project.
 $phar->buildFromDirectory(BUILD_DIRECTORY);
-$phar->setStub("#!/usr/bin/php \n" . $phar->createDefaultStub('stub.php'));
+$phar->setStub("#!/usr/bin/env php \n" . $phar->createDefaultStub('stub.php'));
 $phar->stopBuffering();
 $fs->chmod($phar_file, 0766);
 $console->log('notice', 'Build complete: ' . $phar_file);
