@@ -3,6 +3,7 @@
 namespace Drutiny\Profile;
 
 use Drutiny\Policy;
+use Drutiny\PolicySource\UnavailablePolicyException;
 
 class PolicyDefinition {
   use \Drutiny\Policy\ContentSeverityTrait;
@@ -51,8 +52,13 @@ class PolicyDefinition {
       $policyDefinition->setParameters($definition['parameters']);
     }
 
-    // Load a policy to get defaults.
-    $policy = Policy::load($name);
+    try {
+      // Load a policy to get defaults.
+      $policy = Policy::load($name);
+    }
+    catch (UnavailablePolicyException $e) {
+      return FALSE;
+    }
 
     if (isset($definition['severity'])) {
       $policyDefinition->setSeverity($definition['severity']);

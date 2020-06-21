@@ -11,6 +11,7 @@ use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Drutiny\Registry;
+use Drutiny\Container;
 use Drutiny\Credential\FileStore;
 use Drutiny\Credential\CredentialsUnavailableException;
 
@@ -77,6 +78,10 @@ class AuthenticateCommand extends Command {
     }
 
     $store->write($creds, $input->getOption('scope'));
+    foreach (array_keys(Container::config('Cache')) as $bin) {
+      $cache = Container::cache($bin);
+      $cache->clear();
+    }
     $io->success("Credentials for $namespace have been saved.");
   }
 

@@ -3,6 +3,7 @@
 namespace Drutiny\Command;
 
 use Drutiny\Registry;
+use Drutiny\PolicySource\PolicySource;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -13,15 +14,15 @@ use Symfony\Component\Finder\Finder;
 /**
  *
  */
-class AuditListCommand extends Command {
+class AuditUsageCommand extends Command {
 
   /**
    * @inheritdoc
    */
   protected function configure() {
     $this
-      ->setName('audit:list')
-      ->setDescription('Show all php audit classes available.')
+      ->setName('audit:usage')
+      ->setDescription('Report on the number of policies using each availble audit.')
       ;
   }
 
@@ -29,22 +30,23 @@ class AuditListCommand extends Command {
    * @inheritdoc
    */
   protected function execute(InputInterface $input, OutputInterface $output) {
+
+    foreach (PolicySource::getPolicyList() as $policy_info) {
+      var_dump($policy_info);die;
+    }
+
     $finder = new Finder();
     $finder->directories()
       ->in(DRUTINY_LIB)
       ->name('Audit');
 
     $files = new Finder();
-    $files->name('*.php');
+    $files->files()->name('*.php');
     foreach ($finder as $dir) {
-      echo $dir->getRealPath() . PHP_EOL;
-      if (strpos($dir->getRelativePathname(), '/tests/') !== FALSE) {
+      if (strpos($dir->getRealPath(), '/tests/') !== FALSE) {
         continue;
       }
-      if (empty($dir->getRelativePathname())) {
-        continue;
-      }
-      $files->in(DRUTINY_LIB . '/' . $dir->getRelativePathname());
+      $files->in($dir->getRealPath());
     }
 
     $list = [];

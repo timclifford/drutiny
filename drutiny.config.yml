@@ -6,6 +6,7 @@ Command:
   - Drutiny\Command\AuditInfoCommand
   - Drutiny\Command\AuditListCommand
   - Drutiny\Command\AuditRunCommand
+  - Drutiny\Command\AuditUsageCommand
   - Drutiny\Command\AuthenticateCommand
   - Drutiny\Command\PluginListCommand
   - Drutiny\Command\PolicyAuditCommand
