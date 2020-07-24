@@ -34,9 +34,8 @@
         "symfony/validator": "^4.0",
         "symfony/yaml": "^4.0",
         "twig/twig": "~1.0",
-        "bomoko/algm_drutiny_profile": "^1.0",
         "bomoko/lagoon-formatter": "^1.0",
-        "timclifford/drutiny-clamav-plugin": "^1.0"
+        "timclifford/drutiny-clamav-plugin": "^1.7"
     },
     "conflict": {
       "drutiny/http": "^2.0"
