@@ -45,6 +45,13 @@ jobs:
       - name: Install Drush
         run: composer require drush/drush:dev-master
 
+      - name: Create release folder test
+        run: rsync -arv --exclude='.git/' --exclude='.github/' --exclude='.gitignore' --exclude='docs/' --exclude='assets' . ./release
+      - name: Switch to Release Folder
+        run: |
+          cd release
+          ls -la
+
       - name: Build Drutiny PHAR
         run: ./bin/build-phar
 
