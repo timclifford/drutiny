@@ -60,7 +60,7 @@ jobs:
         run: echo ::set-output name=version::${GITHUB_REF#refs/tags/}
 
       - name: Test PHAR
-        run: ./drutinyalgm_release-php7.4.8.phar -V
+        run: ./drutinyHEAD-php7.4.8.phar -V
 
       - name: Bump version and create release
         uses: ncipollo/release-action@v1
@@ -70,5 +70,5 @@ jobs:
           tag: ${{ steps.get-version.outputs.version }}
           body: 'Next stable release.'
           allowUpdates: true
-          artifacts: drutinyalgm_release-php7.4.8.phar
+          artifacts: drutinyHEAD-php7.4.8.phar
           artifactContentType: application/x-php
