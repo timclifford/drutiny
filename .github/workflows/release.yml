@@ -51,10 +51,9 @@ jobs:
         run: |
           cd release
           ls -la
-          ls -la ./bin
 
       - name: Build Drutiny PHAR
-        run: ./bin/build-phar
+        run: ./bin/build_phar
 
       - name: Get tag
         id: get-version
